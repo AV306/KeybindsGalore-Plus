@@ -145,6 +145,7 @@ public class KeybindSelectorScreen extends Screen
 
         float startAngle = 0;
         int vertices = CIRCLE_VERTICES / numberOfSectors; // FP truncation here
+        if ( vertices < 1 ) vertices = 1; // Make sure there's always at least 2 vertices for a visible trapezium
         for ( var sectorIndex = 0; sectorIndex < numberOfSectors; sectorIndex++ )
         {
             float outerRadius = calculateRadius( delta, numberOfSectors, sectorIndex );
