@@ -1,5 +1,6 @@
 {
   "category.keybindsgaloreplus.keybinds": "KeybindsGalore Plus",
   "key.keybindsgaloreplus.reloadconfigs": "Reload config file",
-  "text.keybindsgaloreplus.configreloaded": "Configs reloaded!"
+  "text.keybindsgaloreplus.configreloaded": "Configs reloaded!",
+  "text.keybindsgaloreplus.configreloadfail": "Failed to reload configs!"
 }
