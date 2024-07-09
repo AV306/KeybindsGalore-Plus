@@ -1,10 +1,5 @@
 # KeybindsGalore Plus
 
-> [!WARNING]<br>
-> Currently (20 June), this mod requires **JAVA 21** to run, because I accidentally compiled it with JDK21.<br>
-> See the messages above and below [this one in the FabricMC discord](https://discord.com/channels/507304429255393322/507982463449169932/1253163544669720720) for more info.<Br>
-> I'm fixing this right now, but it'll take a while :(
-
 > [!NOTE]<br>
 > This project is a fork of KeybindsGalore, originally by Cael and updated to 1.20 by HVB007.
 > <br>[HVB007's project is here](https://github.com/HVB007og/KeybindsGalore_HVB007_1.20.x), and Cael's [original project is here](https://github.com/CaelTheColher/KeybindsGalore).
@@ -13,41 +8,23 @@
 
 This mod opens a pie menu when a key bound to multiple actions is pressed! No more weird behaviour on conflicting keys :D
 
-<p align="center">
-  <img src="https://github.com/AV306/MultiBind/blob/346c3698d849e3c044e2d02d8c012f0339a0e449/images/IMG_2907.jpeg" width="70%" />
-</p>
+Supports 1.21!
+
+<div style="display: flex; justify-content: center; align-items: center;">
+  <img src="https://github.com/AV306/MultiBind/blob/6d65ebe0942862e86e7fc73cd2a60b860edccd15/images/pie_menu_1.gif?raw=true" />
+</div>
 
 <br>
 
 ## Modifications to Original
 
-- Reduced the list of keys which will never open a pie menu (more details [here](docs.md))
+- Reduced the list of keys which will never open a pie menu (more details [here](https://github.com/AV306/MultiBind/blob/master/docs.md))
 - Slightly optimised conflict searching and rendering
-- Keybind labels now show their category along with their name, for easier identification ([example](docs.md))
+- Keybind labels now show their category along with their name, for easier identification ([example](https://github.com/AV306/MultiBind/blob/master/docs.md))
 - Added a small region (deadzone) at the centre of the pie menu that will not activate any binding
 - Label texts no longer run off the screen
+- Made pie menu size, color, etc. configurable (config file automatically created in `.minecraft/config/multibind_config.properties`)
   
-<br>
-
-## Coming soon
-
-- Configuration system for pie menu radius, transparency, animation and color
-
-<br>
-
-## Big Thanks to
-
-Racoocoo (on the FabricMC discord) for telling me about the Java 21 issue and pointing out that GitHub issues were disabled!
-
-<br>
-
-## Gallery
-
-[TODO: GIF of pie menu opening, a sector being selected, and the action triggering]
-
-[TODO: GIF of pie menu opening, cursor moving out of and back into the deadzone, and the pie menu closing without any action happening]
-
-[TODO: GIF of pie menu opening, cursor moving through each sector in a clockwise manner, selecting one and closing the menu]
 
 <br>
 <br>
