@@ -37,7 +37,6 @@ public class ConfigManager
      * @param configFileName: Name of the config file (with extension, e.g. "app_config.properties") (this will be used both to name the newly created one, and to find the embedded default one)
      * @param configurableClass: {java.lang.Class} object that holds the configurable fields (use NameOfClass.class or classInstance.getClass())
      * @param configurableClassInstance: Instance of the previous configurable object, if instance fields are used. Pass NULL here if static fields are used
-     * @throws IOException, if any occurred while checking or reading the config file
      */
     public ConfigManager(
         String name, Path configFilePath, String configFileName,
@@ -57,7 +56,6 @@ public class ConfigManager
 
     /**
      * Check for the existence of a config file, and copy the one on the classpath over if needed
-     * @throws IOException, if one was thrown while copying the default config file
      */
     private void checkConfigFile() throws IOException
     {
@@ -93,8 +91,6 @@ public class ConfigManager
      * Read configs from the config file.
      * 
      * NOTE: entries in the config file MUST match field names EXACTLY
-     * 
-     * @throws IOException, if one was thrown while reading from the file
      */
     public void readConfigFile() throws IOException
     {
