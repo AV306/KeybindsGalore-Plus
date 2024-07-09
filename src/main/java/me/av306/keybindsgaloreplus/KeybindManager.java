@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class KeybindManager
 {
-//    private static final Logger LOGGER = LogManager.getLogger();
+    // FIXME: only trigger these when exiting the keybinds screen
 
     // To HBV007og:
     // I can't thank you enough for all the comments in the code,

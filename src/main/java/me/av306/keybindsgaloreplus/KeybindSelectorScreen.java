@@ -127,21 +127,21 @@ public class KeybindSelectorScreen extends Screen
         if ( mouseDistanceFromCentre <= this.cancelZoneRadius )
             this.selectedSector = -1;
         
-        this.renderPieMenu( delta, numberOfSectors, sectorAngle );
+        this.renderPieMenu( context, delta, numberOfSectors, sectorAngle );
         this.renderLabelTexts( context, delta, numberOfSectors, sectorAngle );
     }
 
 
-    private void renderPieMenu( float delta, int numberOfSectors, float sectorAngle )
+    private void renderPieMenu( DrawContext context, float delta, int numberOfSectors, float sectorAngle )
     {
         // Setup rendering stuff
         Tessellator tess = Tessellator.getInstance();
-        BufferBuilder buf = tess.getBuffer();
+    
         RenderSystem.disableCull();
         RenderSystem.enableBlend();
         RenderSystem.setShader( GameRenderer::getPositionColorProgram );
 
-        buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR );
+        BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR );
 
         float startAngle = 0;
         int vertices = CIRCLE_VERTICES / numberOfSectors; // FP truncation here
@@ -171,7 +171,9 @@ public class KeybindSelectorScreen extends Screen
             startAngle += sectorAngle;
         }
 
-        tess.draw();
+        BufferRenderer.drawWithGlobalProgram( buf.end() );
+        RenderSystem.enableCull();
+        RenderSystem.disableCull();
     }
 
     private void drawSector( BufferBuilder buf, float startAngle, float sectorAngle, int vertices, float innerRadius, float outerRadius, short innerColor, short outerColor )
@@ -182,14 +184,12 @@ public class KeybindSelectorScreen extends Screen
 
             // Inner vertex
             // FIXME: is the compiler smart enough to optimise the trigo?
-            buf.vertex( this.centreX + MathHelper.cos( angle ) * innerRadius, this.centreY + MathHelper.sin( angle ) * innerRadius, 0 )
-                    .color( innerColor, innerColor, innerColor, PIE_MENU_ALPHA )
-                    .next();
+            buf.vertex( this.centreX + MathHelper.cos( angle ) * innerRadius, this.centreY + MathHelper.sin( angle ) * innerRadius, 0 );
+            buf.color( innerColor, innerColor, innerColor, PIE_MENU_ALPHA );
 
             // Outer vertex
-            buf.vertex( this.centreX + MathHelper.cos( angle ) * outerRadius, this.centreY + MathHelper.sin( angle ) * outerRadius, 0 )
-                    .color( outerColor, outerColor, outerColor, PIE_MENU_ALPHA )
-                    .next();
+            buf.vertex( this.centreX + MathHelper.cos( angle ) * outerRadius, this.centreY + MathHelper.sin( angle ) * outerRadius, 0 );
+            buf.color( outerColor, outerColor, outerColor, PIE_MENU_ALPHA );
         }
     }
 
