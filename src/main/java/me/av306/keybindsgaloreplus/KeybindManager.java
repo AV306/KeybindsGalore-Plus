@@ -1,14 +1,12 @@
 package me.av306.keybindsgaloreplus;
 
 import com.google.common.collect.Maps;
+import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class KeybindManager
@@ -40,15 +38,16 @@ public class KeybindManager
     /**
      * Maps keys to a list of bindings they can trigger
      */
-    private static final Map<InputUtil.Key, List<KeyBinding>> conflictingKeys = Maps.newHashMap();
+    private static final Map<InputUtil.Key, List<KeyBinding>> conflictingKeyLists = Maps.newHashMap();
 
     /**
      * Check if a given key has any binding conflicts, and adds any bindings to its list
      * @param key: The key to check
      * @return If any conflicts were found
      */
-    public static boolean handleConflict( InputUtil.Key key )
+    public static boolean checkForConflicts( InputUtil.Key key )
     {
+        KeybindsGalorePlus.LOGGER.info( "Searching for conflicts..." );
         // Stop if the key is invalid; invalid keys should never end up in the map
         /*for ( InputUtil.Key illegalKey : illegalKeys )
             if ( key.equals( illegalKey ) ) return false;*/
@@ -66,7 +65,7 @@ public class KeybindManager
         if ( matches.size() > 1 )
         {
             // Register the key in our map of conflicting keys
-            conflictingKeys.put( key, matches );
+            conflictingKeyLists.put( key, matches );
             //LOGGER.info("Conflicting key: " + key);
 
             return true;
@@ -75,9 +74,35 @@ public class KeybindManager
         {
             // No conflicts, not worth handling
             // Remove it if it's present (means it used to be valid, but has been changed)
-            conflictingKeys.remove( key );
+            conflictingKeyLists.remove( key );
             return false;
         }
+    }
+
+    /**
+     * Get all conflicts on all keys
+     */
+    public static void getAllConflicts()
+    {
+        KeybindsGalorePlus.LOGGER.info( "Performing lazy conflict check" );
+        MinecraftClient client = MinecraftClient.getInstance();
+
+        // Clear map
+        conflictingKeyLists.clear();
+
+        for ( KeyBinding keybinding : client.options.allKeys )
+        {
+            // Add the keybind to the lsit of its bound key
+            conflictingKeyLists.computeIfAbsent( ((KeyBindingAccessor) keybinding).getBoundKey(), (key) -> new ArrayList<>() );
+            conflictingKeyLists.get( ((KeyBindingAccessor) keybinding).getBoundKey() ).add( keybinding );
+        }
+
+        // Prune the hashmap using a copy of its keyset (ensures item removal doesn't affect the list we're iterating over)
+        new HashSet<>( conflictingKeyLists.keySet() ).forEach( ( key) ->
+        {
+            if ( conflictingKeyLists.get( key ).size() < 2 )
+                conflictingKeyLists.remove( key );
+        } );
     }
 
     /**
@@ -86,7 +111,7 @@ public class KeybindManager
      */
     public static boolean hasConflicts( InputUtil.Key key )
     {
-        return conflictingKeys.containsKey( key );
+        return conflictingKeyLists.containsKey( key );
     }
 
     /**
@@ -103,6 +128,6 @@ public class KeybindManager
      */
     public static List<KeyBinding> getConflicts( InputUtil.Key key )
     {
-        return conflictingKeys.get( key );
+        return conflictingKeyLists.get( key );
     }
 }

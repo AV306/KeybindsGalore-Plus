@@ -28,6 +28,11 @@ public class KeybindSelectorScreen extends Screen
 {
     // Configurable variables
 
+    // Well, this is mildly awkward -- liteconfig only supports configs in one class, so this has to exist here
+    // although it pertains to KeyBindingMixin
+    // FIXME
+    public static boolean LAZY_CONFLICT_CHECK = true;
+
     public static float EXPANSION_FACTOR_WHEN_SELECTED = 1.1f;
     public static int PIE_MENU_MARGIN = 20;
     public static float PIE_MENU_SCALE = 0.6f;

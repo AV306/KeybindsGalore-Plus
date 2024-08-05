@@ -1,9 +1,8 @@
 package me.av306.keybindsgaloreplus.mixin;
 
-import net.minecraft.client.MinecraftClient;
+import me.av306.keybindsgaloreplus.KeybindSelectorScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,8 +20,9 @@ public abstract class KeyBindingMixin
     @Inject( method = "setKeyPressed", at = @At( "HEAD" ), cancellable = true )
     private static void setKeyPressed( InputUtil.Key key, boolean pressed, CallbackInfo ci ) throws Exception
     {
-        if ( pressed && KeybindManager.handleConflict( key ) )
-            ci.cancel();
+        // Logik
+        if ( pressed && (KeybindManager.hasConflicts( key ) || !KeybindSelectorScreen.LAZY_CONFLICT_CHECK && KeybindManager.checkForConflicts( key )))
+                ci.cancel();
     }
 
     @Inject( method = "onKeyPressed", at = @At( "HEAD" ), cancellable = true )
