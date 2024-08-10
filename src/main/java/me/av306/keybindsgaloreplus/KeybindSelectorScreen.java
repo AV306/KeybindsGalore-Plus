@@ -12,6 +12,8 @@ package me.av306.keybindsgaloreplus;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import me.av306.keybindsgaloreplus.customdata.DataManager;
+import me.av306.keybindsgaloreplus.customdata.KeybindData;
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -28,12 +30,12 @@ public class KeybindSelectorScreen extends Screen
 {
     // Configurable variables
 
-    // Well, this is mildly awkward -- liteconfig only supports configs in one class, so this has to exist here
+    // Well, this is mildly awkward -- liteconfig only supports configs in one class, so this has to exist here,
     // although it pertains to KeyBindingMixin
     // FIXME
     public static boolean LAZY_CONFLICT_CHECK = true;
 
-    public static float EXPANSION_FACTOR_WHEN_SELECTED = 1.1f;
+    public static float EXPANSION_FACTOR_WHEN_SELECTED = 1.15f;
     public static int PIE_MENU_MARGIN = 20;
     public static float PIE_MENU_SCALE = 0.6f;
     public static float CANCEL_ZONE_SCALE = 0.3f;
@@ -41,12 +43,17 @@ public class KeybindSelectorScreen extends Screen
     public static int CIRCLE_VERTICES = 64;
 
     public static short PIE_MENU_COLOR = 0x40;
+    //public static short PIE_MENU_COLOR_RED = 0x40;
+    //public static short PIE_MENU_COLOR_GREEN = 0x40;
+    //public static short PIE_MENU_COLOR_BLUE = 0x40;
     public static short PIE_MENU_HIGHLIGHT_COLOR = 0xFF;
     public static short PIE_MENU_COLOR_LIGHTEN_FACTOR = 0x19;
-    public static short PIE_MENU_ALPHA = 0x66;
+    public static short PIE_MENU_ALPHA = 0x60;
     public static boolean SECTOR_GRADATION = true;
 
     public static int LABEL_TEXT_INSET = 4;
+
+    public static boolean ANIMATE_PIE_MENU = true;
 
     public static boolean DARKENED_BACKGROUND = true;
 
@@ -181,7 +188,8 @@ public class KeybindSelectorScreen extends Screen
         RenderSystem.disableCull();
     }
 
-    private void drawSector( BufferBuilder buf, float startAngle, float sectorAngle, int vertices, float innerRadius, float outerRadius, short innerColor, short outerColor )
+    private void drawSector( BufferBuilder buf, float startAngle, float sectorAngle, int vertices, float innerRadius, float outerRadius,
+                             short innerColor, short outerColor )
     {
         for ( var i = 0; i <= vertices; i++ )
         {
@@ -200,7 +208,9 @@ public class KeybindSelectorScreen extends Screen
 
     private float calculateRadius( float delta, int numberOfSectors, int sectorIndex )
     {
-        float radius = Math.max( 0F, Math.min( (this.ticksInScreen + delta - sectorIndex * 6F / numberOfSectors) * 40F, this.maxRadius ) );
+        float radius = ANIMATE_PIE_MENU ?
+                Math.max( 0F, Math.min( (this.ticksInScreen + delta - sectorIndex * 6F / numberOfSectors) * 40F, this.maxRadius ) ) :
+                this.maxRadius;
 
         // Expand the sector if selected
         if ( this.selectedSector == sectorIndex ) radius *= EXPANSION_FACTOR_WHEN_SELECTED;
@@ -228,9 +238,19 @@ public class KeybindSelectorScreen extends Screen
 
             // The biggest nagging bug for me
             // Tells you which control category the action goes in
-            String actionName =
-                    Text.translatable( action.getCategory() ).getString() + ": " +
-                    Text.translatable( action.getTranslationKey() ).getString();
+
+            String id = action.getTranslationKey();
+            String actionName = Text.translatable( action.getCategory() ).getString() + ": " +
+                Text.translatable( action.getTranslationKey() ).getString();
+            try
+            {
+                //KeybindsGalorePlus.LOGGER.info( "Keybind ID: {}", id );
+                actionName = KeybindsGalorePlus.customDataManager.customData.get( id ).getDisplayName();
+            }
+            catch ( NullPointerException npe )
+            {
+                
+            }
 
             int textWidth = this.textRenderer.getWidth( actionName );
 
@@ -275,7 +295,6 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
-    // Wait for input to press selected key onc
     public void tick()
     {
         super.tick();
