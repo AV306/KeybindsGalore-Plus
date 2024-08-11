@@ -247,9 +247,9 @@ public class KeybindSelectorScreen extends Screen
                 //KeybindsGalorePlus.LOGGER.info( "Keybind ID: {}", id );
                 actionName = KeybindsGalorePlus.customDataManager.customData.get( id ).getDisplayName();
             }
-            catch ( NullPointerException npe )
+            catch ( NullPointerException ignored )
             {
-                
+                // Ignore NPE caused by missing data entry
             }
 
             int textWidth = this.textRenderer.getWidth( actionName );

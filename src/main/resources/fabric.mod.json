@@ -10,6 +10,12 @@
 		"HVB007",
 		"Cael"
 	],
+	"contributors": [
+		"PoopooRacoocoo -- flagging the Java incompatibility issue",
+		"Mo9713 -- editable keybind description",
+		"customjack -- editable keybind description",
+		"GabanKillasta -- compatibility with zoom mods"
+	],
 	"license": "GNU Lesser General Public License v3.0",
 	"icon": "assets/keybindsgaloreplus/icon.png",
 

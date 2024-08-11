@@ -23,7 +23,8 @@ public abstract class KeybindsScreenMixin extends GameOptionsScreen
     public void close()
     {
         super.close();
-        // Check for conflicting keybinds
+
+        // Check for conflicting keybinds on screen close
         KeybindManager.getAllConflicts();
     }
 }
