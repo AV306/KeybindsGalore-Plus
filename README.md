@@ -19,9 +19,10 @@ Supports 1.21!
 ## Modifications to Original
 
 - Reduced the list of keys which will never open a pie menu (more details [here](https://github.com/AV306/MultiBind/blob/master/docs.md))
-- Slightly optimised conflict searching and rendering
+- Optimised conflict searching and rendering
 - Keybind labels now show their category along with their name, for easier identification ([example](https://github.com/AV306/MultiBind/blob/master/docs.md))
-- Added a small region (deadzone) at the centre of the pie menu that will not activate any binding
+- Keybind labels can be customised! (see [this issue](https://github.com/AV306/KeybindsGalore-Plus/issues/3))
+- Added a small "cancel zone" at the centre of the pie menu that will not activate any binding
 - Label texts no longer run off the screen
 - Made pie menu size, color, etc. configurable (config file automatically created in `.minecraft/config/multibind_config.properties`)
   
