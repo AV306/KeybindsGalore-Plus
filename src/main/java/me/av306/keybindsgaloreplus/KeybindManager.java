@@ -98,9 +98,9 @@ public class KeybindManager
         }
 
         // Prune the hashmap using a copy of its keyset (ensures item removal doesn't affect the list we're iterating over)
-        new HashSet<>( conflictingKeyLists.keySet() ).forEach( ( key) ->
+        new HashSet<>( conflictingKeyLists.keySet() ).forEach( (key) ->
         {
-            if ( conflictingKeyLists.get( key ).size() < 2 )
+            if ( conflictingKeyLists.get( key ).size() < 2 || ILLEGAL_KEYS.contains( key ) )
                 conflictingKeyLists.remove( key );
         } );
     }
