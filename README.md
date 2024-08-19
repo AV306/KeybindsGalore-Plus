@@ -6,7 +6,7 @@
 
 <br>
 
-This mod opens a pie menu when a key bound to multiple actions is pressed! No more weird behaviour on conflicting keys :D
+This mod opens a pie menu (aka pizza menu, circle selector), letting you choose the desired action when a key with multiple bindings is pressed! No more weird behaviour on conflicting keys :D
 
 Supports 1.21!
 
@@ -19,7 +19,7 @@ Supports 1.21!
 ## Modifications to Original
 
 - Reduced the list of keys which will never open a pie menu (more details [here](https://github.com/AV306/MultiBind/blob/master/docs.md))
-- Optimised conflict searching and rendering
+- Optimised conflict searching and rendering (only checks for conflicts when the keybind setting menu is closed)
 - Keybind labels now show their category along with their name, for easier identification ([example](https://github.com/AV306/MultiBind/blob/master/docs.md))
 - Keybind labels can be customised! (see [this issue](https://github.com/AV306/KeybindsGalore-Plus/issues/3))
 - Added a small "cancel zone" at the centre of the pie menu that will not activate any binding
