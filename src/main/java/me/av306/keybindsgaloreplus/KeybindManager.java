@@ -8,6 +8,8 @@ import net.minecraft.client.util.InputUtil;
 
 import java.util.*;
 
+import org.lwjgl.glfw.GLFW;
+
 
 public class KeybindManager
 {
@@ -22,7 +24,7 @@ public class KeybindManager
 
     // Array of keys that cannot be multi-bound
     // TODO: make this configurable
-    private static final List<InputUtil.Key> ILLEGAL_KEYS = Arrays.asList(
+    /*private static final List<InputUtil.Key> ILLEGAL_KEYS = Arrays.asList(
                     InputUtil.fromTranslationKey( "key.keyboard.tab" ),
                     //InputUtil.fromTranslationKey( "key.keyboard.caps.lock" ),
                     InputUtil.fromTranslationKey( "key.keyboard.left.shift" ),
@@ -33,7 +35,7 @@ public class KeybindManager
                     InputUtil.fromTranslationKey( "key.keyboard.a" ),
                     InputUtil.fromTranslationKey( "key.keyboard.s" ),
                     InputUtil.fromTranslationKey( "key.keyboard.d" )
-    );
+    );*/
 
     /**
      * Maps keys to a list of bindings they can trigger
@@ -51,7 +53,8 @@ public class KeybindManager
         // Stop if the key is invalid; invalid keys should never end up in the map
         /*for ( InputUtil.Key illegalKey : illegalKeys )
             if ( key.equals( illegalKey ) ) return false;*/
-        if ( ILLEGAL_KEYS.contains( key ) ) return false;
+        //if ( ILLEGAL_KEYS.contains( key ) ) return false;
+        //if ( isSkippedKey( key ) ) return false;
 
         List<KeyBinding> matches = new ArrayList<>();
 
@@ -84,7 +87,7 @@ public class KeybindManager
      */
     public static void getAllConflicts()
     {
-        KeybindsGalorePlus.LOGGER.info( "Performing lazy conflict check" );
+        //KeybindsGalorePlus.LOGGER.info( "Performing lazy conflict check" );
         MinecraftClient client = MinecraftClient.getInstance();
 
         // Clear map
@@ -100,9 +103,14 @@ public class KeybindManager
         // Prune the hashmap using a copy of its keyset (ensures item removal doesn't affect the list we're iterating over)
         new HashSet<>( conflictingKeyLists.keySet() ).forEach( (key) ->
         {
-            if ( conflictingKeyLists.get( key ).size() < 2 || ILLEGAL_KEYS.contains( key ) )
+            if ( conflictingKeyLists.get( key ).size() < 2 /*|| isSkippedKey( key )*/ )
                 conflictingKeyLists.remove( key );
         } );
+    }
+
+    public static boolean isSkippedKey( InputUtil.Key key )
+    {
+        return KeybindSelectorScreen.SKIPPED_KEYS.contains( key.getCode() );
     }
 
     /**

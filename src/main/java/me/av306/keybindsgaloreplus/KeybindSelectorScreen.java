@@ -25,6 +25,9 @@ import net.minecraft.client.util.NarratorManager;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.List;
 
 public class KeybindSelectorScreen extends Screen
 {
@@ -34,6 +37,17 @@ public class KeybindSelectorScreen extends Screen
     // although it pertains to KeyBindingMixin
     // FIXME
     public static boolean LAZY_CONFLICT_CHECK = true;
+
+    // Impl as list of ints to make config easier
+    public static List<Integer> SKIPPED_KEYS = java.util.Arrays.asList(
+            GLFW.GLFW_KEY_W,
+            GLFW.GLFW_KEY_A,
+            GLFW.GLFW_KEY_S,
+            GLFW.GLFW_KEY_D,
+            GLFW.GLFW_KEY_SPACE
+    );
+
+    public static boolean USE_KEYBIND_FIX = true;
 
     public static float EXPANSION_FACTOR_WHEN_SELECTED = 1.15f;
     public static int PIE_MENU_MARGIN = 20;
@@ -153,7 +167,9 @@ public class KeybindSelectorScreen extends Screen
         RenderSystem.enableBlend();
         RenderSystem.setShader( GameRenderer::getPositionColorProgram );
 
-        BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR );
+        //BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR );
+        BufferBuilder buf = tess.getBuffer();
+        buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR );
 
         float startAngle = 0;
         int vertices = CIRCLE_VERTICES / numberOfSectors; // FP truncation here
@@ -183,9 +199,10 @@ public class KeybindSelectorScreen extends Screen
             startAngle += sectorAngle;
         }
 
-        BufferRenderer.drawWithGlobalProgram( buf.end() );
+        //BufferRenderer.drawWithGlobalProgram( buf.end() );
+        tess.draw();
         RenderSystem.enableCull();
-        RenderSystem.disableCull();
+        RenderSystem.disableBlend();
     }
 
     private void drawSector( BufferBuilder buf, float startAngle, float sectorAngle, int vertices, float innerRadius, float outerRadius,
@@ -199,10 +216,12 @@ public class KeybindSelectorScreen extends Screen
             // FIXME: is the compiler smart enough to optimise the trigo?
             buf.vertex( this.centreX + MathHelper.cos( angle ) * innerRadius, this.centreY + MathHelper.sin( angle ) * innerRadius, 0 );
             buf.color( innerColor, innerColor, innerColor, PIE_MENU_ALPHA );
+            buf.next();
 
             // Outer vertex
             buf.vertex( this.centreX + MathHelper.cos( angle ) * outerRadius, this.centreY + MathHelper.sin( angle ) * outerRadius, 0 );
             buf.color( outerColor, outerColor, outerColor, PIE_MENU_ALPHA );
+            buf.next();
         }
     }
 
