@@ -21,6 +21,8 @@ public abstract class KeyBindingMixin
     @Shadow
     private String translationKey;
 
+    @Shadow private boolean pressed;
+
     /*
      * 
      */
@@ -31,27 +33,45 @@ public abstract class KeyBindingMixin
         // I have no idea how this works anymore
         //if ( pressed && (KeybindManager.hasConflicts( key ) || !KeybindSelectorScreen.LAZY_CONFLICT_CHECK && KeybindManager.checkForConflicts( key )))
         KeybindsGalorePlus.LOGGER.info( "setKeyPressed called for {} with value {}", key.getTranslationKey(), pressed );
-        if ( pressed && KeybindManager.hasConflicts( key ) )
-                ci.cancel();
+        if ( KeybindManager.hasConflicts( key ) )
+        {
+            if ( !KeybindManager.isSkippedKey( key ) )
+            {
+                if ( pressed )
+                {
+                    // Don't skip, open menu
+                    KeybindManager.openConflictMenu( key );
+                    ci.cancel();
+                }
+            }
+            else if ( KeybindSelectorScreen.USE_KEYBIND_FIX )
+            {
+                // If the key has no conflicts, ...
+                // Activate all relevant bindings
+                KeybindManager.getConflicts( key ).forEach( binding ->
+                {
+                    binding.setPressed( pressed );
+                    ((KeyBindingAccessor) binding).setTimesPressed( 1 );
+                } );
+            }
+        }
     }
 
+    // Normally this handles incrementining times pressed
+    // Only called when key first goes down
     @Inject( method = "onKeyPressed", at = @At( "HEAD" ), cancellable = true )
     private static void onKeyPressed( InputUtil.Key key, CallbackInfo ci )
     {
         KeybindsGalorePlus.LOGGER.info( "onKeyPressed called for {}", key.getTranslationKey() );
-        if ( !KeybindManager.isSkippedKey( key ) && KeybindManager.hasConflicts( key ) )
-        {
-            ci.cancel();
-            KeybindManager.openConflictMenu( key );
-        }
-
-        if ( KeybindSelectorScreen.USE_KEYBIND_FIX )
-        {
-            // Activate all relevant bindings
-
-        }
+        /*if ( KeybindManager.hasConflicts( key ) && !KeybindManager.isSkippedKey( key ) )
+            {
+                ci.cancel();
+                KeybindManager.openConflictMenu( key );
+            }
+        }*/
     }
 
+    // seems to not be called
     @Inject( method = "setPressed", at = @At("HEAD"), cancellable = true )
     private void setPressed( boolean pressed, CallbackInfo ci )
     {

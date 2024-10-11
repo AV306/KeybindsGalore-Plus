@@ -13,8 +13,6 @@ import org.lwjgl.glfw.GLFW;
 
 public class KeybindManager
 {
-    // FIXME: only trigger these when exiting the keybinds screen
-
     // To HBV007og:
     // I can't thank you enough for all the comments in the code,
     // I was worried I'd have to actually understand every line in every file
@@ -22,31 +20,18 @@ public class KeybindManager
     // I hope you have fun on your modding/programming travels! :D
     // - Blender (AV306)
 
-    // Array of keys that cannot be multi-bound
-    // TODO: make this configurable
-    /*private static final List<InputUtil.Key> ILLEGAL_KEYS = Arrays.asList(
-                    InputUtil.fromTranslationKey( "key.keyboard.tab" ),
-                    //InputUtil.fromTranslationKey( "key.keyboard.caps.lock" ),
-                    InputUtil.fromTranslationKey( "key.keyboard.left.shift" ),
-                    InputUtil.fromTranslationKey( "key.keyboard.left.control" ),
-                    InputUtil.fromTranslationKey( "key.keyboard.space" ),
-                    //InputUtil.fromTranslationKey( "key.keyboard.left.alt" ),
-                    InputUtil.fromTranslationKey( "key.keyboard.w" ),
-                    InputUtil.fromTranslationKey( "key.keyboard.a" ),
-                    InputUtil.fromTranslationKey( "key.keyboard.s" ),
-                    InputUtil.fromTranslationKey( "key.keyboard.d" )
-    );*/
 
     /**
-     * Maps keys to a list of bindings they can trigger
+     * Maps physical keys to a list of bindings they can trigger
      */
-    private static final Map<InputUtil.Key, List<KeyBinding>> conflictingKeyLists = Maps.newHashMap();
+    private static final Hashtable<InputUtil.Key, List<KeyBinding>> bindingsToKeys = new Hashtable<>();
 
     /**
      * Check if a given key has any binding conflicts, and adds any bindings to its list
      * @param key: The key to check
      * @return If any conflicts were found
      */
+    @Deprecated
     public static boolean checkForConflicts( InputUtil.Key key )
     {
         KeybindsGalorePlus.LOGGER.info( "Searching for conflicts..." );
@@ -68,7 +53,7 @@ public class KeybindManager
         if ( matches.size() > 1 )
         {
             // Register the key in our map of conflicting keys
-            conflictingKeyLists.put( key, matches );
+            bindingsToKeys.put( key, matches );
             //LOGGER.info("Conflicting key: " + key);
 
             return true;
@@ -77,7 +62,7 @@ public class KeybindManager
         {
             // No conflicts, not worth handling
             // Remove it if it's present (means it used to be valid, but has been changed)
-            conflictingKeyLists.remove( key );
+            bindingsToKeys.remove( key );
             return false;
         }
     }
@@ -87,25 +72,32 @@ public class KeybindManager
      */
     public static void getAllConflicts()
     {
-        //KeybindsGalorePlus.LOGGER.info( "Performing lazy conflict check" );
+        KeybindsGalorePlus.LOGGER.info( "Performing lazy conflict check" );
         MinecraftClient client = MinecraftClient.getInstance();
 
         // Clear map
-        conflictingKeyLists.clear();
+        bindingsToKeys.clear();
 
+        // Iterate over all bindings, adding them to the list under its assigned physical key
         for ( KeyBinding keybinding : client.options.allKeys )
         {
-            // Add the keybind to the lsit of its bound key
-            conflictingKeyLists.computeIfAbsent( ((KeyBindingAccessor) keybinding).getBoundKey(), (key) -> new ArrayList<>() );
-            conflictingKeyLists.get( ((KeyBindingAccessor) keybinding).getBoundKey() ).add( keybinding );
+            InputUtil.Key physicalKey = ((KeyBindingAccessor) keybinding).getBoundKey();
+            //KeybindsGalorePlus.LOGGER.info( "Adding {} to list for physical key {}", keybinding.getTranslationKey(), physicalKey.getTranslationKey() );
+
+            // Create a new list if the key doesn't have one
+            bindingsToKeys.computeIfAbsent( physicalKey, key -> new ArrayList<>() );
+
+            bindingsToKeys.get( physicalKey ).add( keybinding );
         }
 
         // Prune the hashmap using a copy of its keyset (ensures item removal doesn't affect the list we're iterating over)
-        new HashSet<>( conflictingKeyLists.keySet() ).forEach( (key) ->
+        new HashSet<>( bindingsToKeys.keySet() ).forEach( key ->
         {
-            if ( conflictingKeyLists.get( key ).size() < 2 /*|| isSkippedKey( key )*/ )
-                conflictingKeyLists.remove( key );
+            if ( bindingsToKeys.get( key ).size() < 2 )
+                bindingsToKeys.remove( key );
         } );
+
+        bindingsToKeys.values().forEach( list -> list.forEach( binding -> KeybindsGalorePlus.LOGGER.info( "{} bound to physical key {}", binding.getTranslationKey(), ((KeyBindingAccessor) binding).getBoundKey() ) ) );
     }
 
     public static boolean isSkippedKey( InputUtil.Key key )
@@ -119,7 +111,7 @@ public class KeybindManager
      */
     public static boolean hasConflicts( InputUtil.Key key )
     {
-        return conflictingKeyLists.containsKey( key );
+        return bindingsToKeys.containsKey( key );
     }
 
     /**
@@ -136,6 +128,6 @@ public class KeybindManager
      */
     public static List<KeyBinding> getConflicts( InputUtil.Key key )
     {
-        return conflictingKeyLists.get( key );
+        return bindingsToKeys.get( key );
     }
 }
