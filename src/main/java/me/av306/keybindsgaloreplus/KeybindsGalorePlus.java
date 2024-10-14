@@ -1,5 +1,6 @@
 package me.av306.keybindsgaloreplus;
 
+import me.av306.keybindsgaloreplus.configmanager.ConfigManager;
 import me.av306.keybindsgaloreplus.customdata.DataManager;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -41,6 +42,8 @@ public class KeybindsGalorePlus implements ClientModInitializer
                 null
             );
 
+            LOGGER.info( KeybindSelectorScreen.SKIPPED_KEYS.getClass().getName() );
+
             // Read custom data
             customDataManager = new DataManager(
                     FabricLoader.getInstance().getConfigDir(),
@@ -81,7 +84,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
             ioe.printStackTrace();
         }
 
-        // Find conflicts
+        // Find conflicts on first world join
         ClientPlayConnectionEvents.JOIN.register( (handler, sender, client) ->
         {
             KeybindManager.getAllConflicts();

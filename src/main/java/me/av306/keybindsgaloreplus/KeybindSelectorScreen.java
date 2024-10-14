@@ -12,6 +12,7 @@ package me.av306.keybindsgaloreplus;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import me.av306.keybindsgaloreplus.configmanager.IntArrayList;
 import me.av306.keybindsgaloreplus.customdata.DataManager;
 import me.av306.keybindsgaloreplus.customdata.KeybindData;
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
@@ -27,7 +28,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class KeybindSelectorScreen extends Screen
 {
@@ -39,13 +40,14 @@ public class KeybindSelectorScreen extends Screen
     public static boolean LAZY_CONFLICT_CHECK = true;
 
     // Impl as list of ints to make config easier
-    public static List<Integer> SKIPPED_KEYS = java.util.Arrays.asList(
-            GLFW.GLFW_KEY_W,
+    public static ArrayList<Integer> SKIPPED_KEYS = new ArrayList<>( java.util.Arrays.asList(
+            /*GLFW.GLFW_KEY_W,
             GLFW.GLFW_KEY_A,
             GLFW.GLFW_KEY_S,
             GLFW.GLFW_KEY_D,
-            GLFW.GLFW_KEY_SPACE
-    );
+            GLFW.GLFW_KEY_SPACE*/
+            -1
+    ) );
 
     public static boolean USE_KEYBIND_FIX = true;
 

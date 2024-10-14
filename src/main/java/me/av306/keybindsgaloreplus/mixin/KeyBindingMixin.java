@@ -46,8 +46,8 @@ public abstract class KeyBindingMixin
             }
             else if ( KeybindSelectorScreen.USE_KEYBIND_FIX )
             {
-                // If the key has no conflicts, ...
-                // Activate all relevant bindings
+                // If the key has no conflicts, and we want to use the keybind conflict fix...
+                // update all relevant bindings with the key state
                 KeybindManager.getConflicts( key ).forEach( binding ->
                 {
                     binding.setPressed( pressed );
@@ -59,17 +59,22 @@ public abstract class KeyBindingMixin
 
     // Normally this handles incrementining times pressed
     // Only called when key first goes down
-    @Inject( method = "onKeyPressed", at = @At( "HEAD" ), cancellable = true )
+    // Note: `setKeyPressed` is NOT called again when the binding is triggered
+    // from the pie menu -- the binding's instance `setPressed` method is called,
+    // which does NOT trigget the static `setKeyPressed`
+    // This method may have been used to prevent the double-trigger,
+    // but now it's not necessary anymore (I think)
+    /*@Inject( method = "onKeyPressed", at = @At( "HEAD" ), cancellable = true )
     private static void onKeyPressed( InputUtil.Key key, CallbackInfo ci )
     {
         KeybindsGalorePlus.LOGGER.info( "onKeyPressed called for {}", key.getTranslationKey() );
-        /*if ( KeybindManager.hasConflicts( key ) && !KeybindManager.isSkippedKey( key ) )
+        if ( KeybindManager.hasConflicts( key ) && !KeybindManager.isSkippedKey( key ) )
             {
                 ci.cancel();
                 KeybindManager.openConflictMenu( key );
             }
-        }*/
-    }
+        }
+    }*/
 
     // seems to not be called
     @Inject( method = "setPressed", at = @At("HEAD"), cancellable = true )

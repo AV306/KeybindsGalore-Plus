@@ -28,13 +28,16 @@ public class KeybindManager
 
     /**
      * Check if a given key has any binding conflicts, and adds any bindings to its list
+     * 
+     * NOTE: deprecated, bugs will not be fixed
+     * 
      * @param key: The key to check
      * @return If any conflicts were found
      */
     @Deprecated
     public static boolean checkForConflicts( InputUtil.Key key )
     {
-        KeybindsGalorePlus.LOGGER.info( "Searching for conflicts..." );
+        //KeybindsGalorePlus.LOGGER.info( "Searching for conflicts..." );
         // Stop if the key is invalid; invalid keys should never end up in the map
         /*for ( InputUtil.Key illegalKey : illegalKeys )
             if ( key.equals( illegalKey ) ) return false;*/
@@ -68,11 +71,12 @@ public class KeybindManager
     }
 
     /**
-     * Get all conflicts on all keys
+     * FInd all conflicts on all keys
      */
     public static void getAllConflicts()
     {
         KeybindsGalorePlus.LOGGER.info( "Performing lazy conflict check" );
+
         MinecraftClient client = MinecraftClient.getInstance();
 
         // Clear map
@@ -82,24 +86,35 @@ public class KeybindManager
         for ( KeyBinding keybinding : client.options.allKeys )
         {
             InputUtil.Key physicalKey = ((KeyBindingAccessor) keybinding).getBoundKey();
+
+            // Skip unbound keys
+            // (if you can make your keyboard trigger the unknown key, please tell me)
+            if ( physicalKey.getCode() == GLFW.GLFW_KEY_UNKNOWN ) continue;
+
             //KeybindsGalorePlus.LOGGER.info( "Adding {} to list for physical key {}", keybinding.getTranslationKey(), physicalKey.getTranslationKey() );
 
             // Create a new list if the key doesn't have one
             bindingsToKeys.computeIfAbsent( physicalKey, key -> new ArrayList<>() );
 
+            // Add the binding to the list held by the physical key
             bindingsToKeys.get( physicalKey ).add( keybinding );
         }
 
-        // Prune the hashmap using a copy of its keyset (ensures item removal doesn't affect the list we're iterating over)
+        // Prune the hashtable, copying its keys before pruning
         new HashSet<>( bindingsToKeys.keySet() ).forEach( key ->
         {
+            // Remove all entries for physical keys with less than 2 bindings (they don't have conflicts)
             if ( bindingsToKeys.get( key ).size() < 2 )
                 bindingsToKeys.remove( key );
         } );
 
-        bindingsToKeys.values().forEach( list -> list.forEach( binding -> KeybindsGalorePlus.LOGGER.info( "{} bound to physical key {}", binding.getTranslationKey(), ((KeyBindingAccessor) binding).getBoundKey() ) ) );
+        // Debug -- prints the resulting hashtable
+        //bindingsToKeys.values().forEach( list -> list.forEach( binding -> KeybindsGalorePlus.LOGGER.info( "{} bound to physical key {}", binding.getTranslationKey(), ((KeyBindingAccessor) binding).getBoundKey() ) ) );
     }
 
+    /**
+     * Does a given key NOT open a pie menu?
+     */
     public static boolean isSkippedKey( InputUtil.Key key )
     {
         return KeybindSelectorScreen.SKIPPED_KEYS.contains( key.getCode() );

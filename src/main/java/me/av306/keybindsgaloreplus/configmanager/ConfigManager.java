@@ -2,7 +2,7 @@
  * Copied from LiteConfig (MIT license)
  */
 
-package me.av306.keybindsgaloreplus;
+package me.av306.keybindsgaloreplus.configmanager;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -13,9 +13,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
+
+import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 
 /**
  * Configuration manager. Handles reading/saving config file, and setting fields in confugurable class.
@@ -73,18 +80,18 @@ public class ConfigManager
             {
                 this.configFile.createNewFile();
                 
-                System.err.printf( "%s config file not found, copying default config file%n", this.name );
+                KeybindsGalorePlus.LOGGER.error( "{} config file not found, copying default config file", this.name );
                 defaultConfigFileInputStream.transferTo( fos );
             }
             catch ( IOException ioe ) 
             {
-                System.err.println( "IOException while copying default config file!" );
+                KeybindsGalorePlus.LOGGER.error( "IOException while copying default config file!" );
                 ioe.printStackTrace();
                 throw ioe; // Re-throw for user app to handle exception
             }
         }
 
-        System.out.println( "Finished checking config file!" );
+        KeybindsGalorePlus.LOGGER.info( "Finished checking config file!" );
     }
 
     /**
@@ -112,10 +119,11 @@ public class ConfigManager
                 // Set fields in configurable class
                 try
                 {
-                    Field f = this.configurableClass.getDeclaredField( entry[0].toUpperCase( Locale.UK ) );
+                    Field f = this.configurableClass.getDeclaredField( entry[0].toUpperCase( Locale.getDefault() ) );
+                    Class<?> fieldTypeClass = f.getType();
                     
                     //System.out.println( f.getType().getName() );
-                    if ( f.getType().isAssignableFrom( short.class ) )
+                    if ( fieldTypeClass.isAssignableFrom( short.class ) )
                     {
                         // Short value (0x??)
                         f.setShort( this.configurableClassInstance, Short.parseShort(
@@ -123,7 +131,7 @@ public class ConfigManager
                                 16 )
                         );
                     }
-                    else if ( f.getType().isAssignableFrom( int.class ) )
+                    else if ( fieldTypeClass.isAssignableFrom( int.class ) )
                     {
                         // Integer value
                         f.setInt(
@@ -131,36 +139,84 @@ public class ConfigManager
                             Integer.parseInt( entry[1] )
                         );
                     }
-                    else if ( f.getType().isAssignableFrom( float.class ) )
+                    else if ( fieldTypeClass.isAssignableFrom( float.class ) )
                     {
                         f.setFloat(
                             this.configurableClassInstance,
                             Float.parseFloat( entry[1] )
                         );
                     }
-                    else if ( f.getType().isAssignableFrom( boolean.class ) )
+                    else if ( fieldTypeClass.isAssignableFrom( boolean.class ) )
                     {
                         f.setBoolean(
                             this.configurableClassInstance,
                             Boolean.parseBoolean( entry[1] )
                         );
                     }
+                    else if ( fieldTypeClass.isAssignableFrom( ArrayList.class ) )
+                    {
+                        // I HATE TYPE ERASURE GRRR
+                        // Fck this i'm kicking the can down the road
+                        // only supports int lists
+                        // FIXME: someone help me with the stupid type thing
+
+                        // Remove opening square brackets and commas
+                        ArrayList<Integer> list = new ArrayList<>();
+                                
+                        for ( String e : entry[1].replaceAll( "[\\[\\],]*", "" ).split( " " ) )
+                            list.add( Integer.parseInt( e ) );
+                        
+                        list.forEach( e -> KeybindsGalorePlus.LOGGER.info( "{}",e ) );
+
+                        f.set( this.configurableClassInstance, list );
+
+                        //String typeParamName = ((Class<?>) ((ParameterizedType) fieldTypeClass.getGenericSuperclass()).getActualTypeArguments()[0]).getName();
+                        //KeybindsGalorePlus.LOGGER.info( "FOund ArrayList of type {}", typeParamName );
+                        /*switch( typeParamName )
+                        {
+                            case "java.lang.Integer" ->
+                            {
+                                // Remove opening square brackets and commas
+                                ArrayList<Integer> list = new ArrayList<>();
+                                
+                                for ( String e : entry[1].replaceAll( "[],", "" ).split( " " ) )
+                                    list.add( Integer.parseInt( e ) );
+                                
+                                KeybindsGalorePlus.LOGGER.info( list.toString() );
+
+                                f.set( this.configurableClassInstance, list );
+                            }
+
+                            case "java.lang.String" ->
+                            {
+                                f.set(
+                                    this.configurableClassInstance,
+                                    new ArrayList<>( Arrays.asList( entry[1].replaceAll( "[],", "" ).split( " " ) ) )
+                                );
+                            }
+
+                            default ->
+                            {
+                                KeybindsGalorePlus.LOGGER.error( "Unsupported array type {} for config entry {}", typeParamName, line );
+                            }
+                        }*/
+                    }
                     else
                     {
-                        System.err.printf( "Unrecognised data type for config entry %s%n", line );
+                        KeybindsGalorePlus.LOGGER.error( "Unrecognised data type for config entry {}", line );
                     }
                 }
                 catch ( ArrayIndexOutOfBoundsException | NumberFormatException e )
                 {
-                    System.err.printf( "Malformed config entry: %s%n", line );
+                    KeybindsGalorePlus.LOGGER.error( "Malformed config entry: {}", line );
                 }
                 catch ( NoSuchFieldException nsfe )
                 {
-                    System.err.printf( "No matching field found for config entry: %s%n", entry[0] );
+                    KeybindsGalorePlus.LOGGER.error( "No matching field found for config entry: {}", entry[0] );
                 }
                 catch ( IllegalAccessException illegal )
                 {
-                    System.err.printf( "Could not set field involved in: %s%m", line );
+                    KeybindsGalorePlus.LOGGER.error( "Could not set field involved in: {}", line );
                     illegal.printStackTrace();
                 }
 
@@ -169,11 +225,11 @@ public class ConfigManager
         }
         catch ( IOException ioe )
         {
-            System.err.printf( "IOException while reading config file: %s%n", ioe.getMessage() );
+            KeybindsGalorePlus.LOGGER.error( "IOException while reading config file: {}", ioe.getMessage() );
             throw ioe;
         }
 
-        System.out.println( "Finished reading config file!" );
+        KeybindsGalorePlus.LOGGER.info( "Finished reading config file!" );
     }
 
     /**
