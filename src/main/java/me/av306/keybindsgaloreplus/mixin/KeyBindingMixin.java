@@ -32,7 +32,7 @@ public abstract class KeyBindingMixin
         // Logik
         // I have no idea how this works anymore
         //if ( pressed && (KeybindManager.hasConflicts( key ) || !KeybindSelectorScreen.LAZY_CONFLICT_CHECK && KeybindManager.checkForConflicts( key )))
-        KeybindsGalorePlus.LOGGER.info( "setKeyPressed called for {} with value {}", key.getTranslationKey(), pressed );
+        //KeybindsGalorePlus.LOGGER.info( "setKeyPressed called for {} with value {}", key.getTranslationKey(), pressed );
         if ( KeybindManager.hasConflicts( key ) )
         {
             if ( !KeybindManager.isSkippedKey( key ) )
@@ -57,7 +57,7 @@ public abstract class KeyBindingMixin
         }
     }
 
-    // Normally this handles incrementining times pressed
+    // Normally this handles incrementing times pressed
     // Only called when key first goes down
     // Note: `setKeyPressed` is NOT called again when the binding is triggered
     // from the pie menu -- the binding's instance `setPressed` method is called,
@@ -80,7 +80,7 @@ public abstract class KeyBindingMixin
     @Inject( method = "setPressed", at = @At("HEAD"), cancellable = true )
     private void setPressed( boolean pressed, CallbackInfo ci )
     {
-        KeybindsGalorePlus.LOGGER.info( "setPressed called for keybind {} on physical key {} with value {}", this.translationKey, this.boundKey.getTranslationKey(), pressed );
+        //KeybindsGalorePlus.LOGGER.info( "setPressed called for keybind {} on physical key {} with value {}", this.translationKey, this.boundKey.getTranslationKey(), pressed );
         if ( KeybindManager.hasConflicts( this.boundKey ) )
             ci.cancel();
     }

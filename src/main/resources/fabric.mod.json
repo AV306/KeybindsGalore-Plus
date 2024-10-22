@@ -12,10 +12,10 @@
 	],
 	"contributors": [
 		"PoopooRacoocoo -- flagging the Java incompatibility issue",
-		"Mo9713 -- editable keybind description",
-		"customjack -- editable keybind description",
+		"Mo9713 & customjack -- editable keybind description",
 		"GabanKillasta -- compatibility with zoom mods",
-		"GhostIsBeHere -- "
+		"GhostIsBeHere -- key blacklist",
+		"Alwis2000 -- flagging yet another Java incompatibility mistake"
 	],
 	"license": "GNU Lesser General Public License v3.0",
 	"icon": "assets/keybindsgaloreplus/icon.png",
@@ -29,6 +29,6 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.14.8",
-		"minecraft": "1.21.x"
+		"minecraft": "1.20.x"
 	}
 }

@@ -168,9 +168,9 @@ public class KeybindSelectorScreen extends Screen
         RenderSystem.enableBlend();
         RenderSystem.setShader( GameRenderer::getPositionColorProgram );
 
-        BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR );
-        //BufferBuilder buf = tess.getBuffer();
-        //buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR );
+        //BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR );
+        BufferBuilder buf = tess.getBuffer();
+        buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR );
 
         float startAngle = 0;
         int vertices = CIRCLE_VERTICES / numberOfSectors; // FP truncation here
@@ -200,8 +200,8 @@ public class KeybindSelectorScreen extends Screen
             startAngle += sectorAngle;
         }
 
-        BufferRenderer.drawWithGlobalProgram( buf.end() );
-        //tess.draw();
+        //BufferRenderer.drawWithGlobalProgram( buf.end() );
+        tess.draw();
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
     }
@@ -217,12 +217,12 @@ public class KeybindSelectorScreen extends Screen
             // FIXME: is the compiler smart enough to optimise the trigo?
             buf.vertex( this.centreX + MathHelper.cos( angle ) * innerRadius, this.centreY + MathHelper.sin( angle ) * innerRadius, 0 );
             buf.color( innerColor, innerColor, innerColor, PIE_MENU_ALPHA );
-            //buf.next();
+            buf.next();
 
             // Outer vertex
             buf.vertex( this.centreX + MathHelper.cos( angle ) * outerRadius, this.centreY + MathHelper.sin( angle ) * outerRadius, 0 );
             buf.color( outerColor, outerColor, outerColor, PIE_MENU_ALPHA );
-            //buf.next();
+            buf.next();
         }
     }
 
