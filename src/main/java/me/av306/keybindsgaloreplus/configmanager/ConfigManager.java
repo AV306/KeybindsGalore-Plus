@@ -163,10 +163,10 @@ public class ConfigManager
                         // Remove opening square brackets and commas
                         ArrayList<Integer> list = new ArrayList<>();
                                 
-                        for ( String e : entry[1].replaceAll( "[\\[\\],]*", "" ).split( " " ) )
+                        for ( String e : entry[1].replaceAll( "[\\[\\]\\s]+", "" ).split( "," ) )
                             list.add( Integer.parseInt( e ) );
                         
-                        list.forEach( e -> KeybindsGalorePlus.LOGGER.info( "{}",e ) );
+                        //list.forEach( e -> KeybindsGalorePlus.LOGGER.info( "{}",e ) );
 
                         f.set( this.configurableClassInstance, list );
 
