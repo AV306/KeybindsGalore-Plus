@@ -1,11 +1,9 @@
 # KeybindsGalore Plus
 
 > [!WARNING]<br>
-> The UnsupportedClassVersionError is back again (my bad 😔); you need **Java 21** to use the 1.20.x versions.
+> If you ever get a UnsupportedClassVersionError crash, you should try using **Java 21**.
 >
 > See [this issue](https://github.com/AV306/KeybindsGalore-Plus/issues/6) for more details.
->
-> I'll get it fixed in a few days, sorry :(
 
 > [!NOTE]<br>
 > This project is a fork of KeybindsGalore, originally by Cael and updated to 1.20 by HVB007.
