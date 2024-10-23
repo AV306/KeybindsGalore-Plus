@@ -30,7 +30,8 @@ Supports 1.21!
 - Added a small "cancel zone" at the centre of the pie menu that will not activate any binding
 - Label texts no longer run off the screen
 - Made pie menu size, color, etc. configurable (config file automatically created in `.minecraft/config/multibind_config.properties`)
-  
+- Added config to choose which keys should open a pie menu
+- Added config to use "fixed" behaviour (activates all bindings, not just whichever one happened to be chosen) on keys that do not open pie menus
 
 <br>
 <br>
