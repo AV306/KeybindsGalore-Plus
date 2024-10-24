@@ -11,7 +11,9 @@
 
 <br>
 
-This mod opens a pie menu (aka pizza menu, circle selector), letting you choose the desired action when a key with multiple bindings is pressed! No more weird behaviour on conflicting keys :D
+This Fabric mod gives keys attached to multiple keybindings a **pie menu** (aka pizza menu, circle selector, etc) that lets you choose the *desired action* when the key is pressed!
+
+It also corrects the default keybind conflict behaviour for keys that you choose to not open a pie menu, so they will activate **all** bindings when pressed (and not just whichever one happened to be attached to the key last), similar to [Keybinds Fix].
 
 Supports 1.21!
 
