@@ -16,8 +16,10 @@ import me.av306.keybindsgaloreplus.customdata.DataManager;
 import me.av306.keybindsgaloreplus.customdata.KeybindData;
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.InputUtil;
@@ -166,11 +168,12 @@ public class KeybindSelectorScreen extends Screen
     
         RenderSystem.disableCull();
         RenderSystem.enableBlend();
-        RenderSystem.setShader( GameRenderer::getPositionColorProgram );
+        //RenderSystem.setShader( GameRenderer::getPositionColorProgram ); // pre-1.21.2
+        RenderSystem.setShader( ShaderProgramKeys.POSITION_COLOR ); // Post-1.21.2
 
-        //BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR );
-        BufferBuilder buf = tess.getBuffer();
-        buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR );
+        BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); // 1.21+
+        //BufferBuilder buf = tess.getBuffer(); // 1.20.6
+        //buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); // 1.20.6
 
         float startAngle = 0;
         int vertices = CIRCLE_VERTICES / numberOfSectors; // FP truncation here
@@ -200,8 +203,8 @@ public class KeybindSelectorScreen extends Screen
             startAngle += sectorAngle;
         }
 
-        //BufferRenderer.drawWithGlobalProgram( buf.end() );
-        tess.draw();
+        BufferRenderer.drawWithGlobalProgram( buf.end() );
+        //tess.draw(); // 1.20.6
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
     }
@@ -217,12 +220,12 @@ public class KeybindSelectorScreen extends Screen
             // FIXME: is the compiler smart enough to optimise the trigo?
             buf.vertex( this.centreX + MathHelper.cos( angle ) * innerRadius, this.centreY + MathHelper.sin( angle ) * innerRadius, 0 );
             buf.color( innerColor, innerColor, innerColor, PIE_MENU_ALPHA );
-            buf.next();
+            //buf.next(); // 1.20.6
 
             // Outer vertex
             buf.vertex( this.centreX + MathHelper.cos( angle ) * outerRadius, this.centreY + MathHelper.sin( angle ) * outerRadius, 0 );
             buf.color( outerColor, outerColor, outerColor, PIE_MENU_ALPHA );
-            buf.next();
+            //buf.next(); // 1.20.6
         }
     }
 
@@ -328,8 +331,9 @@ public class KeybindSelectorScreen extends Screen
             this.mc.setScreen( null );
             if ( this.selectedSector != -1 )
             {
-                KeyBinding bind = KeybindManager.getConflicts( conflictedKey )
-                        .get( this.selectedSector );
+                KeyBinding bind = KeybindManager.getConflicts( conflictedKey ).get( this.selectedSector );
+
+                //KeybindsGalorePlus.LOGGER.info( bind.getTranslationKey() );
 
                 ((KeyBindingAccessor) bind).setPressed( true );
                 ((KeyBindingAccessor) bind).setTimesPressed( 1 );

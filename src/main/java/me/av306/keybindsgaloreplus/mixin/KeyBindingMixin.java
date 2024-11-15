@@ -29,10 +29,6 @@ public abstract class KeyBindingMixin
     @Inject( method = "setKeyPressed", at = @At( "HEAD" ), cancellable = true )
     private static void setKeyPressed( InputUtil.Key key, boolean pressed, CallbackInfo ci ) throws Exception
     {
-        // Logik
-        // I have no idea how this works anymore
-        //if ( pressed && (KeybindManager.hasConflicts( key ) || !KeybindSelectorScreen.LAZY_CONFLICT_CHECK && KeybindManager.checkForConflicts( key )))
-        //KeybindsGalorePlus.LOGGER.info( "setKeyPressed called for {} with value {}", key.getTranslationKey(), pressed );
         if ( KeybindManager.hasConflicts( key ) )
         {
             if ( !KeybindManager.isSkippedKey( key ) )

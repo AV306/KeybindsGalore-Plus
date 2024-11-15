@@ -69,11 +69,14 @@ public class KeybindsGalorePlus implements ClientModInitializer
                     }
                     catch ( IOException ioe )
                     {
-                        client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloadfail" ) );
+                        //client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloadfail" ) );
+                        client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloadfail" ), false );
                         return;
                     }
 
-                    client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloaded" ) );
+                    //client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloaded" ) );
+                    client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloaded" ), false );
+
                 }
 
             } );
