@@ -31,22 +31,26 @@ public abstract class KeyBindingMixin
         //throw new RuntimeException();
         if ( KeybindManager.hasConflicts( key ) )
         {
+            ci.cancel(); // Cancel to prevent any state change not done by us
+
             if ( !KeybindManager.isSkippedKey( key ) )
             {
                 if ( pressed )
                 {
-                    // Don't skip, open menu
+                    // Open menu
+                    // Fun fact: changing Screens (which this method does) resets all bindings to "unpressed",
+                    // so zoom mods work absolutely fine with us :)
                     KeybindManager.openConflictMenu( key );
-                    ci.cancel();
                 }
+                // If released, do nothing
             }
             else if ( KeybindSelectorScreen.USE_KEYBIND_FIX )
             {
-                // If the key has no conflicts, and we want to use the keybind conflict fix...
-                // update all relevant bindings with the key state
+                // If the key has no conflicts, and we want to use the keybind conflict fix,
+                // transfer the key state to all bindings
                 KeybindManager.getConflicts( key ).forEach( binding ->
                 {
-                    binding.setPressed( pressed );
+                    ((KeyBindingAccessor) binding).setPressed( pressed );
                     ((KeyBindingAccessor) binding).setTimesPressed( 1 );
                 } );
             }
@@ -60,11 +64,11 @@ public abstract class KeyBindingMixin
     private static void onKeyPressed( InputUtil.Key key, CallbackInfo ci )
     {
         //KeybindsGalorePlus.LOGGER.info( "onKeyPressed called for {}", key.getTranslationKey() );
-        if ( KeybindManager.hasConflicts( key ) && !KeybindManager.isSkippedKey( key ) )
+        if ( KeybindManager.hasConflicts( key ) /*&& !KeybindManager.isSkippedKey( key )*/ )
             ci.cancel(); // Cancel, because we've sorted out the sub-tick presses (by forcing it to 1)
     }
 
-    // seems to not be called. yet, "open inventory" is still able to consume it...
+    // seems to not be called, somehow
     @Inject( method = "setPressed", at = @At("HEAD"), cancellable = true )
     private void setPressed( boolean pressed, CallbackInfo ci )
     {
