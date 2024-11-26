@@ -326,6 +326,7 @@ public class KeybindSelectorScreen extends Screen
             {
                 KeyBinding bind = KeybindManager.getConflicts( conflictedKey ).get( this.selectedSector );
 
+                //KeybindsGalorePlus.LOGGER.info( bind.getTranslationKey() );
 
                 ((KeyBindingAccessor) bind).setPressed( true );
                 ((KeyBindingAccessor) bind).setTimesPressed( 1 );

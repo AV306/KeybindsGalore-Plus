@@ -2,7 +2,6 @@ package me.av306.keybindsgaloreplus.mixin;
 
 import me.av306.keybindsgaloreplus.KeybindSelectorScreen;
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
-import net.minecraft.client.Keyboard;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,10 +30,9 @@ public abstract class KeyBindingMixin
         //throw new RuntimeException();
         if ( KeybindManager.hasConflicts( key ) )
         {
-            ci.cancel(); // Cancel to prevent any state change not done by us
-
             if ( !KeybindManager.isSkippedKey( key ) )
             {
+                ci.cancel();
                 if ( pressed )
                 {
                     // Open menu
@@ -46,15 +44,22 @@ public abstract class KeyBindingMixin
             }
             else if ( KeybindSelectorScreen.USE_KEYBIND_FIX )
             {
+                ci.cancel();
+
                 // If the key has no conflicts, and we want to use the keybind conflict fix,
                 // transfer the key state to all bindings
                 KeybindManager.getConflicts( key ).forEach( binding ->
                 {
+                    //KeybindsGalorePlus.LOGGER.info( binding.getTranslationKey() );
                     ((KeyBindingAccessor) binding).setPressed( pressed );
                     ((KeyBindingAccessor) binding).setTimesPressed( 1 );
                 } );
             }
+            //else {}
+            // Otherwise, proceed as per vanilla
         }
+        // else {}
+        // No conflicts -- proceed as per vanilla
     }
 
     // Normally this handles incrementing times pressed
