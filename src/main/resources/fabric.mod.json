@@ -11,11 +11,12 @@
 		"Cael"
 	],
 	"contributors": [
-		"PoopooRacoocoo -- flagging the Java incompatibility issue",
+		"PoopooRacoocoo -- Java incompatibility issue",
 		"Mo9713 & customjack -- editable keybind description",
 		"GabanKillasta -- compatibility with zoom mods",
 		"GhostIsBeHere -- key blacklist",
-		"Alwis2000 -- flagging yet another Java incompatibility mistake"
+		"Alwis2000 -- flagging yet another Java incompatibility mistake",
+		"GuardedHoney53 -- managing to trigger the setPressed method I thought never happened"
 	],
 	"license": "GNU Lesser General Public License v3.0",
 	"icon": "assets/keybindsgaloreplus/icon.png",

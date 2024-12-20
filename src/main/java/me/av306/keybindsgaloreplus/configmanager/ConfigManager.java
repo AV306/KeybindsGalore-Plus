@@ -60,7 +60,7 @@ public class ConfigManager
     /**
      * Check for the existence of a config file, and copy the one on the classpath over if needed
      */
-    private void checkConfigFile() throws IOException
+    public void checkConfigFile() throws IOException
     {
         // TODO: I'm not too sure about how to handle closing all the streams, any help from more experienced devs would be much appreciated
         // https://stackoverflow.com/questions/38698182/close-java-8-stream about closing streams?

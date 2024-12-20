@@ -12,14 +12,11 @@ package me.av306.keybindsgaloreplus;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import me.av306.keybindsgaloreplus.customdata.DataManager;
-import me.av306.keybindsgaloreplus.customdata.KeybindData;
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import net.minecraft.client.MinecraftClient;
 //import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.InputUtil;
@@ -27,13 +24,14 @@ import net.minecraft.client.util.NarratorManager;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 
 public class KeybindSelectorScreen extends Screen
 {
     // Configurable variables
+
+    public static boolean DEBUG = false;
 
     // Well, this is mildly awkward -- liteconfig only supports configs in one class, so this has to exist here,
     // although it pertains to KeyBindingMixin
@@ -330,6 +328,7 @@ public class KeybindSelectorScreen extends Screen
 
                 ((KeyBindingAccessor) bind).setPressed( true );
                 ((KeyBindingAccessor) bind).setTimesPressed( 1 );
+                ((KeyBindingAccessor) bind).invokeSetPressed( true );
             }
         }
 
