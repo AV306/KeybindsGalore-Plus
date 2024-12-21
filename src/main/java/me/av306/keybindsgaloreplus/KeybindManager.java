@@ -1,6 +1,5 @@
 package me.av306.keybindsgaloreplus;
 
-import com.google.common.collect.Maps;
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -115,7 +114,7 @@ public class KeybindManager
     /**
      * Does a given key NOT open a pie menu?
      */
-    public static boolean isSkippedKey( InputUtil.Key key )
+    public static boolean isIgnoredKey( InputUtil.Key key )
     {
         return KeybindSelectorScreen.SKIPPED_KEYS.contains( key.getCode() );
     }
