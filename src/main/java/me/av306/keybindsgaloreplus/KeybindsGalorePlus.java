@@ -78,7 +78,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
                     catch ( IOException ioe )
                     {
                         //client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloadfail" ) );
-                        client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloadfail" ) );
+                        client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloadfail" ), false );
 
                         // Try creating new config file and reading again
                         try
@@ -90,7 +90,8 @@ public class KeybindsGalorePlus implements ClientModInitializer
                         {
                             client.player.sendMessage(
                                     Text.translatable( "text.keybindsgaloreplus.configreloadfailagain" )
-                                            .append( createHyperlinkText( "https://github.com/AV306/KeybindsGalore-Plus/blob/master/src/main/resources/keybindsgaloreplus_config.properties" ) )
+                                            .append( createHyperlinkText( "https://github.com/AV306/KeybindsGalore-Plus/blob/master/src/main/resources/keybindsgaloreplus_config.properties" ) ),
+                                    false
                             );
 
                             return;
@@ -98,7 +99,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
                     }
 
                     //client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloaded" ) );
-                    client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloaded" ) );
+                    client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloaded" ), false );
 
                 }
 

@@ -65,8 +65,8 @@ public abstract class KeyBindingMixin
         KeybindsGalorePlus.LOGGER.warn( "setPressed called for keybind {} on physical key {} with value {}", this.translationKey, this.boundKey.getTranslationKey(), pressed );
         MinecraftClient.getInstance().player.sendMessage(
                 Text.translatable( "text.keybindsgaloreplus.setpressedhappened" )
-                        .append( KeybindsGalorePlus.createHyperlinkText( "https://github.com/AV306/KeybindsGalore-Plus/isues" ) )
-
+                        .append( KeybindsGalorePlus.createHyperlinkText( "https://github.com/AV306/KeybindsGalore-Plus/isues" ) ),
+                false
         );
 
         // 4 years of Java and I don't actually know how to get a stack trace normally
