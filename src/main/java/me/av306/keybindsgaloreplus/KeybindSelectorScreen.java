@@ -329,7 +329,7 @@ public class KeybindSelectorScreen extends Screen
 
                 ((KeyBindingAccessor) bind).setPressed( true );
                 ((KeyBindingAccessor) bind).setTimesPressed( 1 );
-                ((KeyBindingAccessor) bind).invokeSetPressed( true );
+                //((KeyBindingAccessor) bind).invokeSetPressed( true );
             }
             else if ( KeybindSelectorScreen.DEBUG )
                 KeybindsGalorePlus.LOGGER.info( "Pie menu closed with no selection" );
