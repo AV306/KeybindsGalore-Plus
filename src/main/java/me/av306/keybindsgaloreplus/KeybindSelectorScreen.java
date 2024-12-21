@@ -324,12 +324,15 @@ public class KeybindSelectorScreen extends Screen
             {
                 KeyBinding bind = KeybindManager.getConflicts( conflictedKey ).get( this.selectedSector );
 
-                //KeybindsGalorePlus.LOGGER.info( bind.getTranslationKey() );
+                if ( KeybindSelectorScreen.DEBUG )
+                    KeybindsGalorePlus.LOGGER.info( "Activated {} from pie menu", bind.getTranslationKey() );
 
                 ((KeyBindingAccessor) bind).setPressed( true );
                 ((KeyBindingAccessor) bind).setTimesPressed( 1 );
                 ((KeyBindingAccessor) bind).invokeSetPressed( true );
             }
+            else if ( KeybindSelectorScreen.DEBUG )
+                KeybindsGalorePlus.LOGGER.info( "Pie menu closed with no selection" );
         }
 
         this.ticksInScreen++;

@@ -1,18 +1,13 @@
 package me.av306.keybindsgaloreplus.mixin;
 
-import me.av306.keybindsgaloreplus.KeybindSelectorScreen;
 import static me.av306.keybindsgaloreplus.KeybindSelectorScreen.DEBUG;
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.LOGGER;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.ScreenshotRecorder;
-import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,44 +38,7 @@ public abstract class KeyBindingMixin
         if ( DEBUG )
             LOGGER.info( "setKeyPressed called for key {} with pressed state {}", key.getTranslationKey(), pressed );
 
-        if ( KeybindManager.hasConflicts( key ) )
-        {
-            if ( !KeybindManager.isSkippedKey( key ) )
-            {
-                ci.cancel();
-                if ( pressed )
-                {
-                    // Open menu
-                    // Fun fact: changing Screens (which this method does) resets all bindings to "unpressed",
-                    // so zoom mods work absolutely fine with us :)
-                    if ( KeybindSelectorScreen.DEBUG )
-                        LOGGER.info( "\tOpened pie menu" );
-
-                    KeybindManager.openConflictMenu( key );
-                }
-                // If released, do nothing
-            }
-            else if ( KeybindSelectorScreen.USE_KEYBIND_FIX )
-            {
-                ci.cancel();
-
-                // If the key has no conflicts, and we want to use the keybind conflict fix,
-                // transfer the key state to all bindings
-                KeybindManager.getConflicts( key ).forEach( binding ->
-                {
-                    if ( KeybindSelectorScreen.DEBUG )
-                        KeybindsGalorePlus.LOGGER.info( "\tVanilla fix, enabling key {}", binding.getTranslationKey() );
-
-
-                    ((KeyBindingAccessor) binding).setPressed( pressed );
-                    ((KeyBindingAccessor) binding).setTimesPressed( 1 );
-                } );
-            }
-            //else {}
-            // Otherwise, proceed as per vanilla
-        }
-        // else {}
-        // No conflicts -- proceed as per vanilla
+        KeybindsGalorePlus.handleKeyPress( key, pressed, ci );
     }
 
     // Normally this handles incrementing times pressed
@@ -106,18 +64,29 @@ public abstract class KeyBindingMixin
     {
         KeybindsGalorePlus.LOGGER.warn( "setPressed called for keybind {} on physical key {} with value {}", this.translationKey, this.boundKey.getTranslationKey(), pressed );
         MinecraftClient.getInstance().player.sendMessage(
-                Text.translatable( "text.keybindsgaloreplus.setpressedhappened" ).append( Text.literal( "https://github.com/AV306/KeybindsGalore-Plus" )
-                        .formatted( Formatting.AQUA )
-                        .styled( style -> style.withClickEvent( new ClickEvent( ClickEvent.Action.OPEN_URL, "https://github.com/AV306/KeybindsGalore-Plus" ) ) )
-                )
+                Text.translatable( "text.keybindsgaloreplus.setpressedhappened" )
+                        .append( KeybindsGalorePlus.createHyperlinkText( "https://github.com/AV306/KeybindsGalore-Plus/isues" ) )
 
         );
 
+        // 4 years of Java and I don't actually know how to get a stack trace normally
+        //new Exception().printStackTrace();
+        // Never mind, I learnt
+        //Thread.dumpStack();
+        // Wait, that method literally just does what I did just now-
 
-        if ( KeybindManager.hasConflicts( this.boundKey ) )
+        // ^ Leaving that there because it's funny
+        // Drop stack trace so we can find out how this happens
+        new Exception().printStackTrace();
+
+
+        /*if ( KeybindManager.hasConflicts( this.boundKey ) )
         {
             if ( DEBUG ) LOGGER.info( "\tCancelled" );
             ci.cancel();
-        }
+        }*/
+
+        // Should fix https://github.com/AV306/KeybindsGalore-Plus/issues/10
+        KeybindsGalorePlus.handleKeyPress( this.boundKey, pressed, ci );
     }
 }
