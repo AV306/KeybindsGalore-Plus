@@ -2,7 +2,6 @@ package me.av306.keybindsgaloreplus;
 
 import me.av306.keybindsgaloreplus.configmanager.ConfigManager;
 import me.av306.keybindsgaloreplus.customdata.DataManager;
-import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -20,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 public class KeybindsGalorePlus implements ClientModInitializer
 {
@@ -37,26 +35,36 @@ public class KeybindsGalorePlus implements ClientModInitializer
 
         try
         {
-            // Read configs
+            // Initialise ConfigManager and load config file
             configManager = new ConfigManager(
                 "KeybindsGalorePlus",    
                 FabricLoader.getInstance().getConfigDir(),
                 "keybindsgaloreplus_config.properties",
-                KeybindSelectorScreen.class,
+                Configurations.class,
                 null
             );
 
             // There's no good, easy way to enable DEBUG level so I'm just gonna
             // cram a bunch of if statements around
-            LOGGER.info( "Debug mode: {}", KeybindSelectorScreen.DEBUG );
+            LOGGER.info( "Debug mode: {}", Configurations.DEBUG );
 
-            //LOGGER.info( KeybindSelectorScreen.SKIPPED_KEYS.getClass().getName() );
+            if ( Configurations.DEBUG )
+            {
+                LOGGER.info( "Dumping configs" );
+                // Print all config fields
+                for ( var f : Configurations.class.getDeclaredFields() )
+                {
+                    try { LOGGER.info( "\t{}: {}", f.getName(), f.get( null ) ); }
+                    catch ( IllegalAccessException | NullPointerException ignored ) {}
+                }
+            }
 
-            // Read custom data
+            // Initialise custom data manager and read data file
             customDataManager = new DataManager(
                     FabricLoader.getInstance().getConfigDir(),
                     "keybindsgaloreplus_customdata.data"
             );
+
 
             // Set config reload key
             configreloadKeybind = KeyBindingHelper.registerKeyBinding( new KeyBinding(
@@ -66,6 +74,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
                     "category.keybindsgaloreplus.keybinds"
             ) );
 
+            // Bind action to config reload key
             ClientTickEvents.END_CLIENT_TICK.register( client ->
             {
                 while ( configreloadKeybind.wasPressed() )
@@ -75,47 +84,49 @@ public class KeybindsGalorePlus implements ClientModInitializer
                         configManager.readConfigFile();
                         customDataManager.readDataFile();
                     }
-                    catch ( IOException ioe )
+                    catch ( IOException firstIoe )
                     {
-                        //client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloadfail" ) );
-                        client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloadfail" ), false );
+                        client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloadfail", firstIoe.getMessage() ), false );
 
-                        // Try creating new config file and reading again
-                        try
-                        {
-                            configManager.checkConfigFile();
-                            configManager.readConfigFile();
-                        }
-                        catch ( IOException ioe2 )
-                        {
-                            client.player.sendMessage(
-                                    Text.translatable( "text.keybindsgaloreplus.configreloadfailagain" )
-                                            .append( createHyperlinkText( "https://github.com/AV306/KeybindsGalore-Plus/blob/master/src/main/resources/keybindsgaloreplus_config.properties" ) ),
-                                    false
-                            );
-
-                            return;
-                        }
+                        return;
                     }
 
-                    //client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloaded" ) );
+                    if ( configManager.errorFlag ) client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configerrors" ).formatted( Formatting.RED ), false );
+                    if ( customDataManager.hasCustomData) client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.customdatafound" ), false );
+
                     client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloaded" ), false );
 
+                    if ( Configurations.DEBUG )
+                    {
+                        // Print all config fields
+                        LOGGER.info( "Dumping configs" );
+                        for ( var f : Configurations.class.getDeclaredFields() )
+                        {
+                            try { LOGGER.info( "\t{}: {}", f.getName(), f.get( null ) ); }
+                            catch ( IllegalAccessException | NullPointerException ignored ) {}
+                        }
+                    }
                 }
-
             } );
         }
         catch ( IOException ioe )
         {
-            LOGGER.error( "IOException while reading config file!" );
+            LOGGER.error( "IOException while reading config file on init!" );
             ioe.printStackTrace();
         }
 
         // Find conflicts on first world join
-        ClientPlayConnectionEvents.JOIN.register( (handler, sender, client) ->
-        {
-            KeybindManager.getAllConflicts();
-        } );
+        ClientPlayConnectionEvents.JOIN.register( (handler, sender, client) -> KeybindManager.getAllConflicts() );
+    }
+
+    public static void debugLog( String message )
+    {
+        if ( Configurations.DEBUG ) LOGGER.info( message );
+    }
+
+    public static void debugLog( String message, Object... objects )
+    {
+        if ( Configurations.DEBUG ) LOGGER.info( message, objects );
     }
 
     public static Text createHyperlinkText( String url )
@@ -123,50 +134,5 @@ public class KeybindsGalorePlus implements ClientModInitializer
         return Text.literal( url )
                 .formatted( Formatting.YELLOW )
                 .styled( style -> style.withClickEvent( new ClickEvent( ClickEvent.Action.OPEN_URL, url ) ) );
-    }
-
-
-    public static void handleKeyPress( InputUtil.Key key, boolean pressed, CallbackInfo ci )
-    {
-        if ( KeybindManager.hasConflicts( key ) )
-        {
-            if ( !KeybindManager.isIgnoredKey( key ) )
-            {
-                // Conflicts and not ignored
-                ci.cancel();
-
-                if ( pressed )
-                {
-                    // Pressed -- open menu
-                    // Changing Screens (which this method does) resets all bindings to "unpressed",
-                    // so zoom mods should work absolutely fine with us :)
-                    if ( KeybindSelectorScreen.DEBUG )
-                        LOGGER.info( "\tOpened pie menu" );
-
-                    KeybindManager.openConflictMenu( key );
-                }
-                // Released -- do nothing
-            }
-            else if ( KeybindSelectorScreen.USE_KEYBIND_FIX )
-            {
-                // Skipped key and use vanilla fix
-                ci.cancel();
-
-                // Transfer key state to all bindings
-                KeybindManager.getConflicts( key ).forEach( binding ->
-                {
-                    if ( KeybindSelectorScreen.DEBUG )
-                        KeybindsGalorePlus.LOGGER.info( "\tVanilla fix, enabling key {}", binding.getTranslationKey() );
-
-
-                    ((KeyBindingAccessor) binding).setPressed( pressed );
-                    ((KeyBindingAccessor) binding).setTimesPressed( 1 );
-                } );
-            }
-            //else {}
-            // Skipped and no vanilla fix -- proceed as per vanilla
-        }
-        // else {}
-        // No conflicts -- proceed as per vanilla
     }
 }

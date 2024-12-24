@@ -26,45 +26,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.ArrayList;
-
 public class KeybindSelectorScreen extends Screen
 {
     // Configurable variables
-
-    public static boolean DEBUG = false;
-
-    // Well, this is mildly awkward -- liteconfig only supports configs in one class, so this has to exist here,
-    // although it pertains to KeyBindingMixin
-    // FIXME
-    public static boolean LAZY_CONFLICT_CHECK = true;
-
-    // Impl as list of ints to make config easier
-    public static ArrayList<Integer> SKIPPED_KEYS = new ArrayList<>();
-
-    public static boolean USE_KEYBIND_FIX = true;
-
-    public static float EXPANSION_FACTOR_WHEN_SELECTED = 1.15f;
-    public static int PIE_MENU_MARGIN = 20;
-    public static float PIE_MENU_SCALE = 0.6f;
-    public static float CANCEL_ZONE_SCALE = 0.3f;
-
-    public static int CIRCLE_VERTICES = 64;
-
-    public static short PIE_MENU_COLOR = 0x40;
-    //public static short PIE_MENU_COLOR_RED = 0x40;
-    //public static short PIE_MENU_COLOR_GREEN = 0x40;
-    //public static short PIE_MENU_COLOR_BLUE = 0x40;
-    public static short PIE_MENU_HIGHLIGHT_COLOR = 0xFF;
-    public static short PIE_MENU_COLOR_LIGHTEN_FACTOR = 0x19;
-    public static short PIE_MENU_ALPHA = 0x60;
-    public static boolean SECTOR_GRADATION = true;
-
-    public static int LABEL_TEXT_INSET = 4;
-
-    public static boolean ANIMATE_PIE_MENU = true;
-
-    public static boolean DARKENED_BACKGROUND = true;
 
     // Instance variables
     private int ticksInScreen = 0;
@@ -123,8 +87,8 @@ public class KeybindSelectorScreen extends Screen
             this.centreX = this.width / 2;
             this.centreY = this.height / 2;
 
-            this.maxRadius = Math.min( (this.centreX * PIE_MENU_SCALE) - PIE_MENU_MARGIN, (this.centreY * PIE_MENU_SCALE) - PIE_MENU_MARGIN );
-            this.cancelZoneRadius = maxRadius * CANCEL_ZONE_SCALE;
+            this.maxRadius = Math.min( (this.centreX * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN, (this.centreY * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN );
+            this.cancelZoneRadius = maxRadius * Configurations.CANCEL_ZONE_SCALE;
 
             this.isFirstFrame = false;
         }
@@ -168,27 +132,27 @@ public class KeybindSelectorScreen extends Screen
         //buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); // 1.20.6
 
         float startAngle = 0;
-        int vertices = CIRCLE_VERTICES / numberOfSectors; // FP truncation here
+        int vertices = Configurations.CIRCLE_VERTICES / numberOfSectors; // FP truncation here
         if ( vertices < 1 ) vertices = 1; // Make sure there's always at least 2 vertices for a visible trapezium
         for ( var sectorIndex = 0; sectorIndex < numberOfSectors; sectorIndex++ )
         {
             float outerRadius = calculateRadius( delta, numberOfSectors, sectorIndex );
             float innerRadius = this.cancelZoneRadius;
-            short innerColor = PIE_MENU_COLOR;
-            short outerColor = PIE_MENU_COLOR;
+            short innerColor = Configurations.PIE_MENU_COLOR;
+            short outerColor = Configurations.PIE_MENU_COLOR;
 
             // Lighten every other sector
             // Hardcoding lightening the inner color for a distinct visual identity or something
-            if ( sectorIndex % 2 == 0 ) innerColor = outerColor += PIE_MENU_COLOR_LIGHTEN_FACTOR;
+            if ( sectorIndex % 2 == 0 ) innerColor = outerColor += Configurations.PIE_MENU_COLOR_LIGHTEN_FACTOR;
 
             if ( this.selectedSector == sectorIndex )
             {
                 //outerRadius *= EXPANSION_FACTOR_WHEN_SELECTED;
-                innerRadius *= EXPANSION_FACTOR_WHEN_SELECTED;
-                outerColor = PIE_MENU_HIGHLIGHT_COLOR;
+                innerRadius *= Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
+                outerColor = Configurations.PIE_MENU_HIGHLIGHT_COLOR;
             }
 
-            if ( !SECTOR_GRADATION ) innerColor = outerColor;
+            if ( !Configurations.SECTOR_GRADATION ) innerColor = outerColor;
 
             this.drawSector( buf, startAngle, sectorAngle, vertices, innerRadius, outerRadius, innerColor, outerColor );
 
@@ -211,24 +175,24 @@ public class KeybindSelectorScreen extends Screen
             // Inner vertex
             // FIXME: is the compiler smart enough to optimise the trigo?
             buf.vertex( this.centreX + MathHelper.cos( angle ) * innerRadius, this.centreY + MathHelper.sin( angle ) * innerRadius, 0 );
-            buf.color( innerColor, innerColor, innerColor, PIE_MENU_ALPHA );
+            buf.color( innerColor, innerColor, innerColor, Configurations.PIE_MENU_ALPHA );
             //buf.next(); // 1.20.6
 
             // Outer vertex
             buf.vertex( this.centreX + MathHelper.cos( angle ) * outerRadius, this.centreY + MathHelper.sin( angle ) * outerRadius, 0 );
-            buf.color( outerColor, outerColor, outerColor, PIE_MENU_ALPHA );
+            buf.color( outerColor, outerColor, outerColor, Configurations.PIE_MENU_ALPHA );
             //buf.next(); // 1.20.6
         }
     }
 
     private float calculateRadius( float delta, int numberOfSectors, int sectorIndex )
     {
-        float radius = ANIMATE_PIE_MENU ?
+        float radius = Configurations.ANIMATE_PIE_MENU ?
                 Math.max( 0F, Math.min( (this.ticksInScreen + delta - sectorIndex * 6F / numberOfSectors) * 40F, this.maxRadius ) ) :
                 this.maxRadius;
 
         // Expand the sector if selected
-        if ( this.selectedSector == sectorIndex ) radius *= EXPANSION_FACTOR_WHEN_SELECTED;
+        if ( this.selectedSector == sectorIndex ) radius *= Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
 
         return radius;
     }
@@ -257,39 +221,44 @@ public class KeybindSelectorScreen extends Screen
             String id = action.getTranslationKey();
             String actionName = Text.translatable( action.getCategory() ).getString() + ": " +
                 Text.translatable( action.getTranslationKey() ).getString();
-            try
+
+            // Read custom data for this keybind, if present
+            if ( KeybindsGalorePlus.customDataManager.hasCustomData )
             {
-                //KeybindsGalorePlus.LOGGER.info( "Keybind ID: {}", id );
-                actionName = KeybindsGalorePlus.customDataManager.customData.get( id ).getDisplayName();
-            }
-            catch ( NullPointerException ignored )
-            {
-                // Ignore NPE caused by missing data entry
+                try
+                {
+                    //KeybindsGalorePlus.LOGGER.info( "Keybind ID: {}", id );
+                    actionName = KeybindsGalorePlus.customDataManager.customData.get( id ).getDisplayName();
+                }
+                catch ( NullPointerException ignored )
+                {
+                    // Ignore NPE caused by missing data entry
+                }
             }
 
             int textWidth = this.textRenderer.getWidth( actionName );
 
             // Which side of the screen are we on?
-            if ( xPos > this.centreX )
+            if ( xPos > this.centreX ) // Right side
             {
-                // Right side
-                xPos -= LABEL_TEXT_INSET;
+
+                xPos -= Configurations.LABEL_TEXT_INSET;
 
                 // Check text going off-screen
                 if ( this.width - xPos < textWidth )
                     xPos -= textWidth - this.width + xPos;
             }
-            else
+            else // Left side
             {
-                // Left side
-                xPos -= textWidth - LABEL_TEXT_INSET;
+
+                xPos -= textWidth - Configurations.LABEL_TEXT_INSET;
 
                 // Check text going off-screen
-                if ( xPos < 0 ) xPos = LABEL_TEXT_INSET;
+                if ( xPos < 0 ) xPos = Configurations.LABEL_TEXT_INSET;
             }
 
-            // Move it closer to the centre of the circle
-            yPos -= LABEL_TEXT_INSET;
+            // Move the text closer to the centre of the circle
+            yPos -= Configurations.LABEL_TEXT_INSET;
 
             actionName = (this.selectedSector == sectorIndex ? Formatting.UNDERLINE : Formatting.RESET) + actionName;
 
@@ -320,20 +289,21 @@ public class KeybindSelectorScreen extends Screen
             )
         )
         {
+            // Hide the screen when the key is no longer pressed
             this.mc.setScreen( null );
+
+            // Activate the selected binding
             if ( this.selectedSector != -1 )
             {
                 KeyBinding bind = KeybindManager.getConflicts( conflictedKey ).get( this.selectedSector );
 
-                if ( KeybindSelectorScreen.DEBUG )
-                    KeybindsGalorePlus.LOGGER.info( "Activated {} from pie menu", bind.getTranslationKey() );
+                KeybindsGalorePlus.debugLog( "Activated {} from pie menu", bind.getTranslationKey() );
 
                 ((KeyBindingAccessor) bind).setPressed( true );
                 ((KeyBindingAccessor) bind).setTimesPressed( 1 );
                 //((KeyBindingAccessor) bind).invokeSetPressed( true );
             }
-            else if ( KeybindSelectorScreen.DEBUG )
-                KeybindsGalorePlus.LOGGER.info( "Pie menu closed with no selection" );
+            else KeybindsGalorePlus.debugLog( "Pie menu closed with no selection" );
         }
 
         this.ticksInScreen++;
@@ -352,6 +322,6 @@ public class KeybindSelectorScreen extends Screen
     public void renderBackground( DrawContext context, int mouseX, int mouseY, float delta )
     {
         // Remove the darkened background
-        if ( DARKENED_BACKGROUND ) super.renderBackground( context, mouseX, mouseY, delta );
+        if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context, mouseX, mouseY, delta );
     }
 }

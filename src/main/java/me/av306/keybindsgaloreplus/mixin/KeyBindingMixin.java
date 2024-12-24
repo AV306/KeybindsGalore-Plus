@@ -1,6 +1,7 @@
 package me.av306.keybindsgaloreplus.mixin;
 
-import static me.av306.keybindsgaloreplus.KeybindSelectorScreen.DEBUG;
+import static me.av306.keybindsgaloreplus.Configurations.DEBUG;
+
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.LOGGER;
 
@@ -35,10 +36,9 @@ public abstract class KeyBindingMixin
     @Inject( method = "setKeyPressed", at = @At( "HEAD" ), cancellable = true )
     private static void setKeyPressed( InputUtil.Key key, boolean pressed, CallbackInfo ci ) throws Exception
     {
-        if ( DEBUG )
-            LOGGER.info( "setKeyPressed called for key {} with pressed state {}", key.getTranslationKey(), pressed );
+        KeybindsGalorePlus.debugLog( "setKeyPressed called for key {} with pressed state {}", key.getTranslationKey(), pressed );
 
-        KeybindsGalorePlus.handleKeyPress( key, pressed, ci );
+        KeybindManager.handleKeyPress( key, pressed, ci );
     }
 
     // Normally this handles incrementing times pressed
@@ -47,11 +47,11 @@ public abstract class KeyBindingMixin
     @Inject( method = "onKeyPressed", at = @At( "HEAD" ), cancellable = true )
     private static void onKeyPressed( InputUtil.Key key, CallbackInfo ci )
     {
-        if ( DEBUG ) LOGGER.info( "onKeyPressed called for {}", key.getTranslationKey() );
+        KeybindsGalorePlus.debugLog( "onKeyPressed called for {}", key.getTranslationKey() );
 
         if ( KeybindManager.hasConflicts( key ) /*&& !KeybindManager.isSkippedKey( key )*/ )
         {
-            if ( DEBUG ) LOGGER.info( "\tCancelling sub-tick accumulation" );
+            KeybindsGalorePlus.debugLog( "\tCancelling sub-tick accumulation" );
 
             ci.cancel(); // Cancel, because we've sorted out the sub-tick presses (by forcing it to 1)
         }
@@ -65,7 +65,7 @@ public abstract class KeyBindingMixin
         KeybindsGalorePlus.LOGGER.warn( "setPressed called for keybind {} on physical key {} with value {}", this.translationKey, this.boundKey.getTranslationKey(), pressed );
         MinecraftClient.getInstance().player.sendMessage(
                 Text.translatable( "text.keybindsgaloreplus.setpressedhappened" )
-                        .append( KeybindsGalorePlus.createHyperlinkText( "https://github.com/AV306/KeybindsGalore-Plus/isues" ) ),
+                        .append( KeybindsGalorePlus.createHyperlinkText( "https://github.com/AV306/KeybindsGalore-Plus/" ) ),
                 false
         );
 
@@ -79,14 +79,7 @@ public abstract class KeyBindingMixin
         // Drop stack trace so we can find out how this happens
         new Exception().printStackTrace();
 
-
-        /*if ( KeybindManager.hasConflicts( this.boundKey ) )
-        {
-            if ( DEBUG ) LOGGER.info( "\tCancelled" );
-            ci.cancel();
-        }*/
-
         // Should fix https://github.com/AV306/KeybindsGalore-Plus/issues/10
-        KeybindsGalorePlus.handleKeyPress( this.boundKey, pressed, ci );
+        KeybindManager.handleKeyPress( this.boundKey, pressed, ci );
     }
 }

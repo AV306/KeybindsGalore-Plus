@@ -12,12 +12,18 @@ public class DataManager
 
     public final Hashtable<String, KeybindData> customData = new Hashtable<>();
 
+    /**
+     * True if the data file is present AND was read successfully
+     */
+    public boolean hasCustomData = true;
+
     public DataManager( Path dataFilePath, String dataFileName )
     {
         this.dataFile = dataFilePath.resolve( dataFileName ).toFile();
 
         if ( !this.dataFile.exists() )
         {
+            this.hasCustomData = false;
             KeybindsGalorePlus.LOGGER.warn( "No custom keybind data file found!" );
             return;
         }
@@ -27,6 +33,7 @@ public class DataManager
 
     public void readDataFile()
     {
+        this.hasCustomData = true;
         try ( BufferedReader fileReader = new BufferedReader( new FileReader( this.dataFile ) ); )
         {
             String line;
@@ -46,13 +53,15 @@ public class DataManager
                     String[] lines = line.trim().split( "=" );
                     try
                     {
+                        lines[1] = lines[1].replaceAll( "\"", "" );
+
                         switch ( lines[0] )
                         {
                             case "custom_name" -> this.customData.get( currentKeybind ).setDisplayName( lines[1] );
                             default -> KeybindsGalorePlus.LOGGER.info( "Unknown custom data field: {}", lines[0] );
                         }
 
-                        KeybindsGalorePlus.LOGGER.info( "Set property {} of {} to {}", lines[0], currentKeybind, lines[1] );
+                        KeybindsGalorePlus.LOGGER.info( "Set \"{}\"of keybind {} to \"{}\"", lines[0], currentKeybind, lines[1] );
                     }
                     catch ( ArrayIndexOutOfBoundsException oobe )
                     {
@@ -67,11 +76,15 @@ public class DataManager
                     KeybindsGalorePlus.LOGGER.info( "Reading custom data for keybind: {}", currentKeybind );
                 }
             }
+
+            this.hasCustomData = true;
+            KeybindsGalorePlus.LOGGER.info( "Custom keybind data file read successfully!" );
         }
         catch ( IOException ioe )
         {
-            KeybindsGalorePlus.LOGGER.error( "IOException while reading custom data: {}", ioe.getMessage() );
-            ioe.printStackTrace();
+            this.hasCustomData = false;
+            KeybindsGalorePlus.LOGGER.warn( "IOException while reading custom data: {}", ioe.getMessage() );
+            //ioe.printStackTrace();
         }
     }
 }

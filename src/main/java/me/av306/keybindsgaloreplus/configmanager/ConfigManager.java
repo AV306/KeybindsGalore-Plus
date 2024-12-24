@@ -32,6 +32,11 @@ public class ConfigManager
     private Object configurableClassInstance; /** The instance on which to set the config fields (if instance fields are used) */
 
     private File configFile; /** A {@Link java.io.File} object representing the config file, guaranteed to exist after {@Link #checkConfigFile} is run */
+
+    /**
+     * True if there were errors when reading the config file.
+     */
+    public boolean errorFlag = false;
     
     /**
      * Constructor for a config manager that tries to find a default config file in the JAR resources section
@@ -53,14 +58,14 @@ public class ConfigManager
         this.configurableClass = configurableClass;
         this.configurableClassInstance = configurableClassInstance;
 
-        this.checkConfigFile();
+        this.checkConfigFileExists();
         this.readConfigFile();
     }
 
     /**
      * Check for the existence of a config file, and copy the one on the classpath over if needed
      */
-    public void checkConfigFile() throws IOException
+    public void checkConfigFileExists() throws IOException
     {
         // TODO: I'm not too sure about how to handle closing all the streams, any help from more experienced devs would be much appreciated
         // https://stackoverflow.com/questions/38698182/close-java-8-stream about closing streams?
@@ -76,7 +81,7 @@ public class ConfigManager
             {
                 this.configFile.createNewFile();
                 
-                KeybindsGalorePlus.LOGGER.error( "{} config file not found, copying default config file", this.name );
+                KeybindsGalorePlus.LOGGER.warn( "{} config file not found, copying default config file", this.name );
                 defaultConfigFileInputStream.transferTo( fos );
             }
             catch ( IOException ioe ) 
@@ -87,16 +92,19 @@ public class ConfigManager
             }
         }
 
-        KeybindsGalorePlus.LOGGER.info( "Finished checking config file!" );
+        KeybindsGalorePlus.LOGGER.info( "Config file exists!" );
     }
 
     /**
-     * Read configs from the config file.
+     * Read configs from the config file. Sets hasCustomData if invalid config statements were read.
      * 
      * NOTE: entries in the config file MUST match field names EXACTLY
      */
     public void readConfigFile() throws IOException
     {
+        // Reset error flag
+        this.errorFlag = false;
+
         try ( BufferedReader reader = new BufferedReader( new FileReader( this.configFile ) ) )
         {
             // Iterate over each line in the file
@@ -108,13 +116,13 @@ public class ConfigManager
                 // Split it by the equals sign (.properties format)
                 String[] entry = line.split( "=" );
 
-                // Trim lines so you can have spaces around the equals ("prop = val" as opposed to "prop=val")
-                entry[0] = entry[0].trim();
-                entry[1] = entry[1].trim();
-
-                // Set fields in configurable class
                 try
                 {
+                    // Trim lines so you can have spaces around the equals ("prop = val" as opposed to "prop=val")
+                    entry[0] = entry[0].trim();
+                    entry[1] = entry[1].trim();
+
+                    // Set fields in configurable class
                     Field f = this.configurableClass.getDeclaredField( entry[0].toUpperCase( Locale.getDefault() ) );
                     Class<?> fieldTypeClass = f.getType();
                     
@@ -202,18 +210,21 @@ public class ConfigManager
                         KeybindsGalorePlus.LOGGER.error( "Unrecognised data type for config entry {}", line );
                     }
                 }
-                catch ( ArrayIndexOutOfBoundsException | NumberFormatException e )
-                {
-                    KeybindsGalorePlus.LOGGER.error( "Malformed config entry: {}", line );
-                }
                 catch ( NoSuchFieldException nsfe )
                 {
                     KeybindsGalorePlus.LOGGER.error( "No matching field found for config entry: {}", entry[0] );
+                    this.errorFlag = true;
                 }
                 catch ( IllegalAccessException illegal )
                 {
                     KeybindsGalorePlus.LOGGER.error( "Could not set field involved in: {}", line );
+                    this.errorFlag = true;
                     illegal.printStackTrace();
+                }
+                catch ( /*ArrayIndexOutOfBoundsException | NumberFormatException*/ Exception e )
+                {
+                    KeybindsGalorePlus.LOGGER.error( "Malformed config entry: {}", line );
+                    this.errorFlag = true;
                 }
 
                 //System.out.printf( "Set config %s to %s%n", entry[0], entry[1] );
@@ -237,7 +248,7 @@ public class ConfigManager
     {
         // Check old config file
         // POV: user deleted config file partway through execution
-        this.checkConfigFile();
+        this.checkConfigFileExists();
 
         // Create temporary config file
         File tempConfigFile;

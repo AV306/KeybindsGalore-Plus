@@ -8,6 +8,9 @@ import net.minecraft.client.util.InputUtil;
 import java.util.*;
 
 import org.lwjgl.glfw.GLFW;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import static me.av306.keybindsgaloreplus.Configurations.DEBUG;
 
 
 public class KeybindManager
@@ -22,6 +25,8 @@ public class KeybindManager
 
     /**
      * Maps physical keys to a list of bindings they can trigger
+     *
+     * Only contains keys bound to more than one binding
      */
     private static final Hashtable<InputUtil.Key, List<KeyBinding>> bindingsToKeys = new Hashtable<>();
 
@@ -86,8 +91,7 @@ public class KeybindManager
         {
             InputUtil.Key physicalKey = ((KeyBindingAccessor) keybinding).getBoundKey();
 
-            // Skip unbound keys
-            // (if you can make your keyboard trigger the unknown key, please tell me)
+            // Skip unbound keys -- keys are usually only bound to KEY_UNKNOWN when they are "unbound"
             if ( physicalKey.getCode() == GLFW.GLFW_KEY_UNKNOWN ) continue;
 
             //KeybindsGalorePlus.LOGGER.info( "Adding {} to list for physical key {}", keybinding.getTranslationKey(), physicalKey.getTranslationKey() );
@@ -108,7 +112,11 @@ public class KeybindManager
         } );
 
         // Debug -- prints the resulting hashtable
-        //bindingsToKeys.values().forEach( list -> list.forEach( binding -> KeybindsGalorePlus.LOGGER.info( "{} bound to physical key {}", binding.getTranslationKey(), ((KeyBindingAccessor) binding).getBoundKey() ) ) );
+        if ( Configurations.DEBUG )
+        {
+            KeybindsGalorePlus.LOGGER.info( "Dumping key conflict table" );
+            bindingsToKeys.values().forEach( list -> list.forEach( binding -> KeybindsGalorePlus.LOGGER.info( "\t{} bound to physical key {}", binding.getTranslationKey(), ((KeyBindingAccessor) binding).getBoundKey() ) ) );
+        }
     }
 
     /**
@@ -116,7 +124,7 @@ public class KeybindManager
      */
     public static boolean isIgnoredKey( InputUtil.Key key )
     {
-        return KeybindSelectorScreen.SKIPPED_KEYS.contains( key.getCode() );
+        return Configurations.SKIPPED_KEYS.contains( key.getCode() );
     }
 
     /**
@@ -143,5 +151,53 @@ public class KeybindManager
     public static List<KeyBinding> getConflicts( InputUtil.Key key )
     {
         return bindingsToKeys.get( key );
+    }
+
+    /**
+     * Handle mixin method cancellation and related logic when a conflicted key is presed
+     * @param key: the conflicted physical key
+     * @param pressed: the pressed state of the conflicted key
+     * @param ci: CallbackInfo for the mixin
+     */
+    public static void handleKeyPress( InputUtil.Key key, boolean pressed, CallbackInfo ci )
+    {
+        if ( hasConflicts( key ) )
+        {
+            if ( !isIgnoredKey( key ) )
+            {
+                // Conflicts and not ignored
+                ci.cancel();
+
+                if ( pressed )
+                {
+                    // Pressed -- open menu
+                    // Changing Screens (which this method does) resets all bindings to "unpressed",
+                    // so zoom mods should work absolutely fine with us :)
+                    KeybindsGalorePlus.debugLog( "\tOpened pie menu" );
+
+                    openConflictMenu( key );
+                }
+                // Released -- do nothing
+            }
+            else if ( Configurations.USE_KEYBIND_FIX )
+            {
+                // Skipped key and use vanilla fix
+                ci.cancel();
+
+                // Transfer key state to all bindings
+                getConflicts( key ).forEach( binding ->
+                {
+                    KeybindsGalorePlus.debugLog( "\tVanilla fix, enabling key {}", binding.getTranslationKey() );
+
+
+                    ((KeyBindingAccessor) binding).setPressed( pressed );
+                    ((KeyBindingAccessor) binding).setTimesPressed( 1 );
+                } );
+            }
+            //else {}
+            // Skipped and no vanilla fix -- proceed as per vanilla
+        }
+        // else {}
+        // No conflicts -- proceed as per vanilla
     }
 }

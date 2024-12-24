@@ -2,7 +2,9 @@
   "category.keybindsgaloreplus.keybinds": "KeybindsGalore Plus",
   "key.keybindsgaloreplus.reloadconfigs": "Reload config file",
   "text.keybindsgaloreplus.configreloaded": "[KeybindsGalorePlus] Configs reloaded!",
-  "text.keybindsgaloreplus.configreloadfail": "[KeybindsGalorePlus] Failed to reload configs! Will attempt to create a new config file.",
+  "text.keybindsgaloreplus.configerrors": "[KeybindsGalorePlus] Errors found in config file! (details in log file)",
+  "text.keybindsgaloreplus.customdatafound": "[KeybindsGalorePlus] Custom keybind data loaded!",
+  "text.keybindsgaloreplus.configreloadfail": "[KeybindsGalorePlus] Failed to reload configs: %s",
   "text.keybindsgaloreplus.configreloadfailagain": "[KeybindsGalorePlus] Failed to create a new config file! Please manually copy one over from:",
-  "text.keybindsgaloreplus.setpressedhappened": "[KeybindsGalorePlus] A key was activated in a way that isn't expected!\nPlease set debug=true in the config file and reload it, then try to make this message appear again and submit your log file in a bug report at"
+  "text.keybindsgaloreplus.setpressedhappened": "[KeybindsGalorePlus] A key was activated in a way that isn't expected!\nPlease follow the instructions in the GitHub repo: "
 }
