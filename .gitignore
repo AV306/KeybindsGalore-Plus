@@ -1,4 +1,5 @@
-
+# Ignore changes to minecraft version here
+gradle.properties
 
 # gradle
 .gradle/

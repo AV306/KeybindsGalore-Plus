@@ -15,7 +15,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import net.minecraft.client.MinecraftClient;
 //import net.minecraft.client.gl.ShaderProgramKeys;
-import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.KeyBinding;
@@ -124,8 +123,8 @@ public class KeybindSelectorScreen extends Screen
     
         RenderSystem.disableCull();
         RenderSystem.enableBlend();
-        //RenderSystem.setShader( GameRenderer::getPositionColorProgram ); // pre-1.21.2
-        RenderSystem.setShader( ShaderProgramKeys.POSITION_COLOR ); // Post-1.21.2
+        RenderSystem.setShader( GameRenderer::getPositionColorProgram ); // pre-1.21.2
+        //RenderSystem.setShader( ShaderProgramKeys.POSITION_COLOR ); // Post-1.21.2
 
         BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); // 1.21+
         //BufferBuilder buf = tess.getBuffer(); // 1.20.6
