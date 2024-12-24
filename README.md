@@ -23,6 +23,14 @@ Supports 1.21!
 
 <br>
 
+## If you got a message saying "A key was activated in a way that isn't expected!":
+
+Please follow the instructions in [this issue](https://github.com/AV306/KeybindsGalore-Plus/issues/7), under "Pie menu does not open at all".
+
+Long story short: there's a certain way that keybinds can be activated that does not seem to happen normally. Someone demonstrated that it *can* happen, probably with mods, so I need some more information on exactly what causes it to happen.
+
+<br>
+
 ## Modifications to Original
 
 - Reduced the list of keys which will never open a pie menu (more details [here](https://github.com/AV306/MultiBind/blob/master/docs.md))
