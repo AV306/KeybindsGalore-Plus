@@ -44,6 +44,20 @@ Long story short: there's a certain way that keybinds can be activated that does
 - Added config to choose whether to use "fixed" keybind conflict behaviour (activates all bindings like KeybindsFix, not just whichever one happened to be stored) on keys that do not open pie menus
 
 <br>
+
+## Bug-busters :heart:
+
+- lightmcxx (rexomi)
+- mo9713
+- Poopooracoocoo
+- GabanKillasta
+- Tgaisen
+- GhostIsBeHere
+- Alwis2000
+- StarsShine11904
+- ClutchMasterYT
+- GuardedHoney53
+
 <br>
 
 ## [[ Old README below ]]
