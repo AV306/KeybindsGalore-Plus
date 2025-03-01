@@ -30,49 +30,7 @@ public class KeybindManager
      */
     public static final Hashtable<InputUtil.Key, List<KeyBinding>> conflictTable = new Hashtable<>();
 
-    /**
-     * Check if a given key has any binding conflicts, and adds any bindings to its list.
-     * <br>
-     * NOTE: deprecated, bugs will not be fixed
-     * 
-     * @param key: The key to check
-     * @return If any conflicts were found
-     */
-    @Deprecated
-    public static boolean checkForConflicts( InputUtil.Key key )
-    {
-        //KeybindsGalorePlus.LOGGER.info( "Searching for conflicts..." );
-        // Stop if the key is invalid; invalid keys should never end up in the map
-        /*for ( InputUtil.Key illegalKey : illegalKeys )
-            if ( key.equals( illegalKey ) ) return false;*/
-        //if ( ILLEGAL_KEYS.contains( key ) ) return false;
-        //if ( isSkippedKey( key ) ) return false;
-
-        List<KeyBinding> matches = new ArrayList<>();
-
-
-        // Look for a KeyBinding bound to the key that was just pressed
-        // and add it to the running list
-        for ( KeyBinding binding : MinecraftClient.getInstance().options.allKeys )
-            if ( binding.matchesKey( key.getCode(), -1 ) ) matches.add( binding );
-
-        // More than one matching KeyBinding, found conflicts!
-        if ( matches.size() > 1 )
-        {
-            // Register the key in our map of conflicting keys
-            conflictTable.put( key, matches );
-            //LOGGER.info("Conflicting key: " + key);
-
-            return true;
-        }
-        else
-        {
-            // No conflicts, not worth handling
-            // Remove it if it's present (means it used to be valid, but has been changed)
-            conflictTable.remove( key );
-            return false;
-        }
-    }
+    public static final HashMap<Integer, KeyBinding> clickHoldKeys = new HashMap<>();
 
     /**
      * FInd all conflicts on all keys known to the vanilla keybind manager
@@ -127,6 +85,11 @@ public class KeybindManager
         return Configurations.SKIPPED_KEYS.contains( key.getCode() );
     }
 
+    public static boolean isClickHoldKey( InputUtil.Key key )
+    {
+        return clickHoldKeys.containsKey( key.getCode() );
+    }
+
     /**
      * Checks if there is a binding conflict on this key
      * @param key: The key to check
@@ -163,9 +126,28 @@ public class KeybindManager
     {
         if ( hasConflicts( key ) )
         {
-            if ( !isIgnoredKey( key ) )
+            if ( isClickHoldKey( key ) )
             {
-                // Key has conflicts and shouldn't be ignored
+                ci.cancel();
+                KeybindsGalorePlus.debugLog( "click hold" );
+
+                KeyBinding clickHoldBinding = clickHoldKeys.get( key.getCode() );
+
+                if ( clickHoldBinding != null )
+                {
+                    KeybindsGalorePlus.debugLog( "Activating {}", clickHoldBinding.getTranslationKey() );
+                    ((KeyBindingAccessor) clickHoldBinding).setPressed( pressed );
+                    ((KeyBindingAccessor) clickHoldBinding).setTimesPressed( pressed ? 1 : 0 );
+                }
+
+                if ( !pressed )
+                {
+                    clickHoldKeys.remove( key.getCode() );
+                }
+            }
+            else if ( !isIgnoredKey( key ) )
+            {
+                // Key has conflicts, and shouldn't be ignored
 
                 ci.cancel();
 

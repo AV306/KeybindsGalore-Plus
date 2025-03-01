@@ -356,25 +356,22 @@ public class KeybindSelectorScreen extends Screen
         }
         else
         {
-            // Close menu and do our own activation logic
-            KeybindsGalorePlus.debugLog( "\tClick-hold activated for pie menu" );
+            // Click-hold selected binding
             this.mc.setScreen( null );
+            KeyBinding.unpressAll();
 
-            if ( this.selectedSectorIndex == -1 )
+            if ( this.selectedSectorIndex != -1 )
             {
-                KeybindManager.temporaryIgnoredKeys.put( this.conflictedKey, null );
-                KeybindsGalorePlus.debugLog( "\tAdded {} (no action) to temp ignore list", this.conflictedKey.getCode()  );
+                KeybindManager.clickHoldKeys.put( this.conflictedKey.getCode(), KeybindManager.getConflicts( this.conflictedKey ).get( this.selectedSectorIndex ) );
             }
             else
             {
-                // Add the selected binding to temporary ignore list
-                KeyBinding clickHoldBinding = KeybindManager.getConflicts( this.conflictedKey ).get( this.selectedSectorIndex );
-                KeybindManager.temporaryIgnoredKeys.put( this.conflictedKey, KeybindManager.getConflicts( this.conflictedKey ).get( this.selectedSectorIndex ) );
-                KeybindsGalorePlus.debugLog( "\tAdded {} ({}) to temp ignore list", this.conflictedKey.getCode(), clickHoldBinding.getTranslationKey() );
-                KeybindsGalorePlus.debugLog( "\t{} elements in temp ignore list", KeybindManager.temporaryIgnoredKeys.size() );
+                KeybindManager.clickHoldKeys.put( this.conflictedKey.getCode(), null );
             }
+
+
+            //this.closePieMenu();
         }
-        
         return super.mouseReleased( mouseX, mouseY, button );
     }
 
