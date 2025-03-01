@@ -31,6 +31,7 @@ public class KeybindSelectorScreen extends Screen
     // Instance variables
     private int ticksInScreen = 0;
     private int selectedSectorIndex = -1;
+    private int highlightedSectorIndex = -1;
 
     private InputUtil.Key conflictedKey = InputUtil.UNKNOWN_KEY;
 
@@ -78,8 +79,10 @@ public class KeybindSelectorScreen extends Screen
     @Override
     public void render( DrawContext context, int mouseX, int mouseY, float delta )
     {
+        /// ===== Version dependent =====
         //super.render( context, mouseX, mouseY, delta );
         this.renderBackground( context, mouseX, mouseY, delta );
+        //this.renderBackground( context );
 
         // Pixel coords of screen centre
         // Only set these on the first frame
@@ -121,7 +124,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
 
-    // Rendering methods
+    // ==================== Rendering methods ====================
 
     private void renderPieMenu( DrawContext context, float delta, int numberOfSectors, float sectorAngle )
     {
@@ -133,12 +136,13 @@ public class KeybindSelectorScreen extends Screen
         // https://stackoverflow.com/questions/7505018/repeated-state-changes-in-opengl
         if ( Configurations.PIE_MENU_BLEND ) RenderSystem.enableBlend();
 
+        /// ===== Version dependent =====
         RenderSystem.setShader( GameRenderer::getPositionColorProgram ); //# <1.21.2
         //RenderSystem.setShader( ShaderProgramKeys.POSITION_COLOR ); //# >=1.21.2
 
-        BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //# >1.21
-        //BufferBuilder buf = tess.getBuffer(); //# <1.21
-        //buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //# <1.21
+        //BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //# >1.21
+        BufferBuilder buf = tess.getBuffer(); //# <1.21
+        buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //# <1.21
 
         float startAngle = 0;
         int vertices = Configurations.CIRCLE_VERTICES / numberOfSectors; // FP truncation here
@@ -147,8 +151,8 @@ public class KeybindSelectorScreen extends Screen
         {
             float outerRadius = calculateRadius( delta, numberOfSectors, sectorIndex );
             float innerRadius = this.cancelZoneRadius;
-            short innerColor = Configurations.PIE_MENU_COLOR;
-            short outerColor = Configurations.PIE_MENU_COLOR;
+            int innerColor = Configurations.PIE_MENU_COLOR;
+            int outerColor = Configurations.PIE_MENU_COLOR;
 
             // Lighten every other sector
             // Hardcoding lightening the inner color for a distinct visual identity or something
@@ -157,6 +161,11 @@ public class KeybindSelectorScreen extends Screen
             if ( this.selectedSectorIndex == sectorIndex )
             {
                 innerRadius *= Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
+                outerColor = Configurations.PIE_MENU_SELECT_COLOR;
+            }
+
+            if ( this.highlightedSectorIndex == sectorIndex )
+            {
                 outerColor = Configurations.PIE_MENU_HIGHLIGHT_COLOR;
             }
 
@@ -167,29 +176,31 @@ public class KeybindSelectorScreen extends Screen
             startAngle += sectorAngle;
         }
 
-        BufferRenderer.drawWithGlobalProgram( buf.end() ); //# >=1.21
-        //tess.draw(); //# <1.21
+        /// ===== Version dependent =====
+        //BufferRenderer.drawWithGlobalProgram( buf.end() ); //# >=1.21
+        tess.draw(); //# <1.21
         RenderSystem.enableCull();
         if ( Configurations.PIE_MENU_BLEND ) RenderSystem.disableBlend();
     }
 
     private void drawSector( BufferBuilder buf, float startAngle, float sectorAngle, int vertices, float innerRadius, float outerRadius,
-                             short innerColor, short outerColor )
+                             int innerColor, int outerColor )
     {
         for ( var i = 0; i <= vertices; i++ )
         {
             float angle = startAngle + ((float) i / vertices) * sectorAngle;
 
+            /// ===== Version dependent =====
             // Inner vertex
             // FIXME: is the compiler smart enough to optimise the trigo?
             buf.vertex( this.centreX + MathHelper.cos( angle ) * innerRadius, this.centreY + MathHelper.sin( angle ) * innerRadius, 0 );
-            buf.color( innerColor, innerColor, innerColor, Configurations.PIE_MENU_ALPHA );
-            //buf.next(); //# <1.21
+            buf.color( innerColor >> 16 & 0xFF, innerColor >> 8 & 0xFF, innerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
+            buf.next(); //# <1.21
 
             // Outer vertex
             buf.vertex( this.centreX + MathHelper.cos( angle ) * outerRadius, this.centreY + MathHelper.sin( angle ) * outerRadius, 0 );
-            buf.color( outerColor, outerColor, outerColor, Configurations.PIE_MENU_ALPHA );
-            //buf.next(); //# <1.21
+            buf.color( outerColor >> 16 & 0xFF, outerColor >> 8 & 0xFF, outerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
+            buf.next(); //# <1.21
         }
     }
 
@@ -275,7 +286,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
 
-    // Others
+    // ==================== Others ====================
 
     // Returns the angle of the line bounded by the given coordinates and the mouse position from the vertical axis
     // This is why we study trigo, guys
@@ -314,7 +325,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
 
-    // Overrides
+    // ==================== Overrides ====================
 
     @Override
     public void tick()
@@ -338,25 +349,65 @@ public class KeybindSelectorScreen extends Screen
     @Override
     public boolean mouseReleased( double mouseX, double mouseY, int button )
     {
-        if ( button == this.conflictedKey.getCode() ) this.closePieMenu();
+        if ( button == this.conflictedKey.getCode() )
+        {
+            // Close menu and activate selection normally – click-hold not applicable
+            this.closePieMenu();
+        }
+        else
+        {
+            // Close menu and do our own activation logic
+            KeybindsGalorePlus.debugLog( "\tClick-hold activated for pie menu" );
+            this.mc.setScreen( null );
+
+            if ( this.selectedSectorIndex == -1 )
+            {
+                KeybindManager.temporaryIgnoredKeys.put( this.conflictedKey, null );
+                KeybindsGalorePlus.debugLog( "\tAdded {} (no action) to temp ignore list", this.conflictedKey.getCode()  );
+            }
+            else
+            {
+                // Add the selected binding to temporary ignore list
+                KeyBinding clickHoldBinding = KeybindManager.getConflicts( this.conflictedKey ).get( this.selectedSectorIndex );
+                KeybindManager.temporaryIgnoredKeys.put( this.conflictedKey, KeybindManager.getConflicts( this.conflictedKey ).get( this.selectedSectorIndex ) );
+                KeybindsGalorePlus.debugLog( "\tAdded {} ({}) to temp ignore list", this.conflictedKey.getCode(), clickHoldBinding.getTranslationKey() );
+                KeybindsGalorePlus.debugLog( "\t{} elements in temp ignore list", KeybindManager.temporaryIgnoredKeys.size() );
+            }
+        }
         
         return super.mouseReleased( mouseX, mouseY, button );
     }
 
+    @Override
+    public boolean mouseClicked( double mouseX, double mouseY, int button )
+    {
+        this.highlightedSectorIndex = this.selectedSectorIndex;
 
+        return super.mouseClicked( mouseX, mouseY, button );
+    }
 
     @Override
     // Don't pause the game when this screen is open
     // actually why not
     public boolean shouldPause() { return false; }
 
+
+    //# >=1.20.2
     @Override
-    public void renderBackground( DrawContext context, int mouseX, int mouseY, float delta ) //# >=1.20.2
-    //public void renderBackground( DrawContext context ) //# <1.20.2
+    public void renderBackground( DrawContext context, int mouseX, int mouseY, float delta )
     {
         // Remove the darkened background if needed
         // This can help performance, as with all post-processing
         if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context, mouseX, mouseY, delta ); //# >=1.20.2
-        //if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context ); //# <1.20.2
     }
+
+    //# <1.20.2
+//    @Override
+//    //public void renderBackground( DrawContext context ) //# <1.20.2
+//    {
+//        /// ===== Version dependent =====
+//        // Remove the darkened background if needed
+//        // This can help performance, as with all post-processing
+//        //if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context ); //# <1.20.2
+//    }
 }

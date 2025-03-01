@@ -34,7 +34,7 @@ public abstract class KeyBindingMixin
     @Inject( method = "setKeyPressed", at = @At( "HEAD" ), cancellable = true )
     private static void setKeyPressed( InputUtil.Key key, boolean pressed, CallbackInfo ci ) throws Exception
     {
-        KeybindsGalorePlus.debugLog( "setKeyPressed called, targeting key {} with state {}", key.getTranslationKey(), pressed );
+        KeybindsGalorePlus.debugLog( "setKeyPressed( {}, {} ) called", key.getTranslationKey(), pressed );
 
         // Handle key
         KeybindManager.handleKeyPress( key, pressed, ci );
@@ -45,7 +45,7 @@ public abstract class KeyBindingMixin
     @Inject( method = "onKeyPressed", at = @At( "HEAD" ), cancellable = true )
     private static void onKeyPressed( InputUtil.Key key, CallbackInfo ci )
     {
-        KeybindsGalorePlus.debugLog( "onKeyPressed called, targeting key {}", key.getTranslationKey() );
+        KeybindsGalorePlus.debugLog( "onKeyPressed( {} ) called", key.getTranslationKey() );
 
         if ( KeybindManager.hasConflicts( key ) /*&& !KeybindManager.isSkippedKey( key )*/ )
         {

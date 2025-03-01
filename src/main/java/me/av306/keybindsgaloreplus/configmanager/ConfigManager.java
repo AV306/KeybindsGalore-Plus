@@ -140,7 +140,15 @@ public class ConfigManager
                     else if ( fieldTypeClass.isAssignableFrom( int.class ) )
                     {
                         // Integer value
-                        f.setInt(
+                        if ( entry[1].startsWith( "0x" ) )
+                        {
+                            // Hex literal
+                            Integer.parseInt(
+                                    entry[1].replace( "0x", "" ),
+                                    16
+                            );
+                        }
+                        else f.setInt(
                             this.configurableClassInstance,
                             Integer.parseInt( entry[1] )
                         );
