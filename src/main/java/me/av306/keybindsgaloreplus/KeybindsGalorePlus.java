@@ -46,14 +46,14 @@ public class KeybindsGalorePlus implements ClientModInitializer
                 null
             );
 
-            // There's no good, easy way to enable DEBUG level so I'm just gonna
+            // There's no good, easy way to enable DEBUG level, so I'm just gonna
             // cram a bunch of if statements around
             LOGGER.info( "Debug mode: {}", Configurations.DEBUG );
 
+            // (debug) Print all config fields
             if ( Configurations.DEBUG )
             {
                 LOGGER.info( "Dumping configs" );
-                // Print all config fields
                 for ( var f : Configurations.class.getDeclaredFields() )
                 {
                     try { LOGGER.info( "\t{}: {}", f.getName(), f.get( null ) ); }

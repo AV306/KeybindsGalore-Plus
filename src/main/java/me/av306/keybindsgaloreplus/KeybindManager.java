@@ -78,11 +78,11 @@ public class KeybindManager
     }
 
     /**
-     * Does a given key NOT open a pie menu?
+     * Does a given key NOT open a pie menu? (
      */
     public static boolean isIgnoredKey( InputUtil.Key key )
     {
-        return Configurations.SKIPPED_KEYS.contains( key.getCode() );
+        return Configurations.IGNORED_KEYS.contains( key.getCode() ) ^ Configurations.INVERT_SKIPPED_KEYS_LIST;
     }
 
     public static boolean isClickHoldKey( InputUtil.Key key )
@@ -129,13 +129,13 @@ public class KeybindManager
             if ( isClickHoldKey( key ) )
             {
                 ci.cancel();
-                KeybindsGalorePlus.debugLog( "click hold" );
+                //KeybindsGalorePlus.debugLog( "click hold" );
 
                 KeyBinding clickHoldBinding = clickHoldKeys.get( key.getCode() );
 
                 if ( clickHoldBinding != null )
                 {
-                    KeybindsGalorePlus.debugLog( "Activating {}", clickHoldBinding.getTranslationKey() );
+                    KeybindsGalorePlus.debugLog( "Activating {} (click-hold)", clickHoldBinding.getTranslationKey() );
                     ((KeyBindingAccessor) clickHoldBinding).setPressed( pressed );
                     ((KeyBindingAccessor) clickHoldBinding).setTimesPressed( pressed ? 1 : 0 );
                 }

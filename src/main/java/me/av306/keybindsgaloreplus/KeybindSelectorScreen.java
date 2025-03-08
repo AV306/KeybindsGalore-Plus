@@ -12,6 +12,8 @@ package me.av306.keybindsgaloreplus;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.customDataManager;
+
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import me.av306.keybindsgaloreplus.mixin.MinecraftClientAccessor;
 import net.minecraft.client.MinecraftClient;
@@ -26,14 +28,16 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
+import java.util.ArrayList;
+
 public class KeybindSelectorScreen extends Screen
 {
     // Instance variables
     private int ticksInScreen = 0;
     private int selectedSectorIndex = -1;
-    private int highlightedSectorIndex = -1;
+    private boolean mouseDown = false;
 
-    private InputUtil.Key conflictedKey = InputUtil.UNKNOWN_KEY;
+    private final InputUtil.Key conflictedKey;
 
     private final MinecraftClient mc;
 
@@ -45,13 +49,16 @@ public class KeybindSelectorScreen extends Screen
 
     private boolean isFirstFrame = true;
 
-    public KeybindSelectorScreen()
+    /** This is probably not going to change while the screen is open, so maybe this optimisation helps? */
+    private final ArrayList<KeyBinding> conflicts = new ArrayList<>();
+
+    /*public KeybindSelectorScreen()
     {
         super( NarratorManager.EMPTY );
         this.mc = MinecraftClient.getInstance();
 
         // Debug -- print all fields
-        /*for ( var f : this.getClass().getFields() )
+        for ( var f : this.getClass().getFields() )
         {
             try
             {
@@ -61,19 +68,18 @@ public class KeybindSelectorScreen extends Screen
             {
                 KeybindsGalorePlus.LOGGER.warn( e.getMessage() );
             }
-        }*/
-    }
+        }
+    }*/
 
     public KeybindSelectorScreen( InputUtil.Key key )
     {
-        this();
+        //this();
+        super( NarratorManager.EMPTY );
+        this.mc = MinecraftClient.getInstance();
 
-        this.setConflictedKey( key );
-    }
-
-    public void setConflictedKey( InputUtil.Key key )
-    {
         this.conflictedKey = key;
+
+        this.conflicts.addAll( KeybindManager.getConflicts( key ) );
     }
 
     @Override
@@ -107,7 +113,7 @@ public class KeybindSelectorScreen extends Screen
                         (mouseY - this.centreY) * (mouseY - this.centreY) );
 
         // Determines how many sectors to make for the pie menu
-        int numberOfSectors = KeybindManager.getConflicts( this.conflictedKey ).size();
+        int numberOfSectors = this.conflicts.size();
 
         // Calculate the angle occupied by each sector
         float sectorAngle = (MathHelper.TAU) / numberOfSectors;
@@ -154,6 +160,18 @@ public class KeybindSelectorScreen extends Screen
             int innerColor = Configurations.PIE_MENU_COLOR;
             int outerColor = Configurations.PIE_MENU_COLOR;
 
+            if ( customDataManager.hasCustomData )
+            {
+                try
+                {
+                    outerColor = customDataManager.customData.get( this.conflicts.get( sectorIndex ).getTranslationKey() ).sectorColor;
+                }
+                catch ( NullPointerException ignored )
+                {
+                    //KeybindsGalorePlus.debugLog( "No custom sector colour for {}", this.conflicts.get( sectorIndex ).getTranslationKey() );
+                }
+            }
+
             // Lighten every other sector
             // Hardcoding lightening the inner color for a distinct visual identity or something
             if ( sectorIndex % 2 == 0 ) innerColor = outerColor += Configurations.PIE_MENU_COLOR_LIGHTEN_FACTOR;
@@ -161,12 +179,7 @@ public class KeybindSelectorScreen extends Screen
             if ( this.selectedSectorIndex == sectorIndex )
             {
                 innerRadius *= Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
-                outerColor = Configurations.PIE_MENU_SELECT_COLOR;
-            }
-
-            if ( this.highlightedSectorIndex == sectorIndex )
-            {
-                outerColor = Configurations.PIE_MENU_HIGHLIGHT_COLOR;
+                outerColor = this.mouseDown ? Configurations.PIE_MENU_HIGHLIGHT_COLOR : Configurations.PIE_MENU_SELECT_COLOR;
             }
 
             if ( !Configurations.SECTOR_GRADATION ) innerColor = outerColor;
@@ -232,27 +245,35 @@ public class KeybindSelectorScreen extends Screen
             float xPos = this.centreX + MathHelper.cos( angle ) * radius;
             float yPos = this.centreY + MathHelper.sin( angle ) * radius;
 
-            KeyBinding action = KeybindManager.getConflicts( this.conflictedKey ).get( sectorIndex );
+            KeyBinding action = this.conflicts.get( sectorIndex );
 
             // The biggest nagging bug for me
             // Tells you which control category the action goes in
             // TODO: configurable
 
             String id = action.getTranslationKey();
-            String actionName = Text.translatable( action.getCategory() ).getString() + ": " +
-                Text.translatable( action.getTranslationKey() ).getString();
+            String actionName = Text.translatable( action.getCategory() ).getString() + ": " + Text.translatable( action.getTranslationKey() ).getString();;
 
             // Read custom data for this keybind, only if present
-            if ( KeybindsGalorePlus.customDataManager.hasCustomData )
+            if ( customDataManager.hasCustomData )
             {
                 try
                 {
-                    //KeybindsGalorePlus.LOGGER.info( "Keybind ID: {}", id );
-                    actionName = KeybindsGalorePlus.customDataManager.customData.get( id ).getDisplayName();
+                    if ( !customDataManager.customData.get( id ).hideCategory )
+                        actionName = Text.translatable( action.getCategory() ).getString() + ": ";
                 }
-                catch ( NullPointerException ignored )
+                catch ( NullPointerException npe )
                 {
-                    // Ignore NPE caused by missing data entry
+                    //KeybindsGalorePlus.debugLog( "No hideCategory setting for {}", id );
+                }
+
+                try
+                {
+                    actionName = customDataManager.customData.get( id ).displayName;
+                }
+                catch ( NullPointerException npe )
+                {
+                    //KeybindsGalorePlus.debugLog( "No custom name for {}", id );
                 }
             }
 
@@ -302,17 +323,17 @@ public class KeybindSelectorScreen extends Screen
         // Activate the selected binding
         if ( this.selectedSectorIndex != -1 )
         {
-            KeyBinding bind = KeybindManager.getConflicts( this.conflictedKey ).get( this.selectedSectorIndex );
+            KeyBinding selectedKeyBinding = this.conflicts.get( this.selectedSectorIndex );
 
-            KeybindsGalorePlus.debugLog( "Activated {} from pie menu", bind.getTranslationKey() );
+            KeybindsGalorePlus.debugLog( "Activated {} from pie menu", selectedKeyBinding.getTranslationKey() );
 
-            ((KeyBindingAccessor) bind).setPressed( true );
-            ((KeyBindingAccessor) bind).setTimesPressed( 1 );
+            ((KeyBindingAccessor) selectedKeyBinding).setPressed( true );
+            ((KeyBindingAccessor) selectedKeyBinding).setTimesPressed( 1 );
             //((KeyBindingAccessor) bind).invokeSetPressed( true );
 
             // Attack workaround (very hacky)
             // Abusable??? (FIXME)
-            if ( bind.equals( this.mc.options.attackKey ) && Configurations.ENABLE_ATTACK_WORKAROUND )
+            if ( selectedKeyBinding.equals( this.mc.options.attackKey ) && Configurations.ENABLE_ATTACK_WORKAROUND )
             {
                 KeybindsGalorePlus.debugLog( "\tAttack workaround enabled" );
                 ((MinecraftClientAccessor) this.mc).setAttackCooldown( 0 );
@@ -349,6 +370,8 @@ public class KeybindSelectorScreen extends Screen
     @Override
     public boolean mouseReleased( double mouseX, double mouseY, int button )
     {
+        //this.mouseDown = false;
+
         if ( button == this.conflictedKey.getCode() )
         {
             // Close menu and activate selection normally – click-hold not applicable
@@ -362,23 +385,26 @@ public class KeybindSelectorScreen extends Screen
 
             if ( this.selectedSectorIndex != -1 )
             {
-                KeybindManager.clickHoldKeys.put( this.conflictedKey.getCode(), KeybindManager.getConflicts( this.conflictedKey ).get( this.selectedSectorIndex ) );
+                // Clicked on a sector; add its binding to the click-hold map
+                KeybindManager.clickHoldKeys.put(
+                        this.conflictedKey.getCode(),
+                        this.conflicts.get( this.selectedSectorIndex )
+                );
             }
             else
             {
+                // No sector clicked; add null to the click-hold map to signal a cancel
                 KeybindManager.clickHoldKeys.put( this.conflictedKey.getCode(), null );
             }
-
-
-            //this.closePieMenu();
         }
+
         return super.mouseReleased( mouseX, mouseY, button );
     }
 
     @Override
     public boolean mouseClicked( double mouseX, double mouseY, int button )
     {
-        this.highlightedSectorIndex = this.selectedSectorIndex;
+        this.mouseDown = true;
 
         return super.mouseClicked( mouseX, mouseY, button );
     }

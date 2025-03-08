@@ -1,8 +1,12 @@
 package me.av306.keybindsgaloreplus.customdata;
 
+import me.av306.keybindsgaloreplus.Configurations;
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 
+import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.LOGGER;
+
 import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.Hashtable;
 
@@ -24,7 +28,7 @@ public class DataManager
         if ( !this.dataFile.exists() )
         {
             this.hasCustomData = false;
-            KeybindsGalorePlus.LOGGER.warn( "No custom keybind data file found!" );
+            LOGGER.warn( "No custom keybind data file found!" );
             return;
         }
 
@@ -57,15 +61,17 @@ public class DataManager
 
                         switch ( lines[0] )
                         {
-                            case "custom_name" -> this.customData.get( currentKeybind ).setDisplayName( lines[1] );
-                            default -> KeybindsGalorePlus.LOGGER.info( "Unknown custom data field: {}", lines[0] );
+                            case "display_name" -> this.customData.get( currentKeybind ).displayName = lines[1];
+                            case "sector_color" -> this.customData.get( currentKeybind ).sectorColor = Integer.parseInt( lines[1].replace( "0x", "" ), 16 );
+                            case "hide_category" -> this.customData.get( currentKeybind ).hideCategory = Boolean.parseBoolean( lines[1] );
+                            default -> LOGGER.info( "Unknown custom data field: {}", lines[0] );
                         }
 
-                        KeybindsGalorePlus.LOGGER.info( "Set \"{}\"of keybind {} to \"{}\"", lines[0], currentKeybind, lines[1] );
+                        LOGGER.info( "Set \"{}\" of keybind {} to \"{}\"", lines[0], currentKeybind, lines[1] );
                     }
                     catch ( ArrayIndexOutOfBoundsException oobe )
                     {
-                        KeybindsGalorePlus.LOGGER.warn( "Skipped invalid data line: {}", line );
+                        LOGGER.warn( "Skipped invalid data line: {}", line );
                     }
                 }
                 else
@@ -73,21 +79,43 @@ public class DataManager
                     // Non-indented line -- is header
                     currentKeybind = line.replace( ":", "" ).trim();
                     this.customData.put( currentKeybind, new KeybindData() );
-                    KeybindsGalorePlus.LOGGER.info( "Reading custom data for keybind: {}", currentKeybind );
+                    LOGGER.info( "Reading custom data for keybind: {}", currentKeybind );
                 }
             }
 
             // Finished reading file
             //this.hasCustomData = true;
-            KeybindsGalorePlus.LOGGER.info( "Custom keybind data file read successfully!" );
+            LOGGER.info( "Custom keybind data file read successfully!" );
         }
         catch ( IOException ioe )
         {
             // IOE -- usually file not found
             this.hasCustomData = false;
 
-            KeybindsGalorePlus.LOGGER.warn( "IOException while reading custom data: {}", ioe.getMessage() );
+            LOGGER.warn( "IOException while reading custom data: {}", ioe.getMessage() );
             //ioe.printStackTrace();
+        }
+        
+        if ( Configurations.DEBUG )
+        {
+            // Dump data table
+            LOGGER.info( "Custom data present: {}", this.hasCustomData );
+
+            this.customData.forEach( (keyId, data) ->
+            {
+                for ( Field f : data.getClass().getDeclaredFields() )
+                {
+                    try
+                    {
+                        f.setAccessible( true ); // :3
+                        LOGGER.info( "\t[{} -> {}]: {}", keyId, f.getName(), f.get( data ) );
+                    }
+                    catch ( IllegalAccessException e )
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            } );
         }
     }
 }

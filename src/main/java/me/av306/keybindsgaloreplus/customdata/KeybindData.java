@@ -2,10 +2,9 @@ package me.av306.keybindsgaloreplus.customdata;
 
 public class KeybindData
 {
-    public static final KeybindData EMPTY_DATA = new KeybindData();
+    public String displayName = null;
 
-    private String displayName = null;
+    public Integer sectorColor = null;
 
-    public String getDisplayName() { return this.displayName; }
-    public void setDisplayName( String displayName ) { this.displayName = displayName; }
+    public boolean hideCategory = false;
 }

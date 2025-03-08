@@ -40,7 +40,9 @@ public class ConfigManager
     public boolean errorFlag = false;
     
     /**
-     * Constructor for a config manager that tries to find a default config file in the JAR resources section
+     * Constructor for a config manager that tries to find a default config file in the JAR resources section.
+     * This constructor calls checkConfigFileExists() and readConfigFile().
+     *
      * @param name: Name of the application, used in logging statements
      * @param configFilePath: Path to the config file
      * @param configFileName: Name of the config file (with extension, e.g. "app_config.properties") (this will be used both to name the newly created one, and to find the embedded default one)
