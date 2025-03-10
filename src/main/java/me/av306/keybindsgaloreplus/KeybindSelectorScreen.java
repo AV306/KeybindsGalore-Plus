@@ -85,7 +85,7 @@ public class KeybindSelectorScreen extends Screen
     @Override
     public void render( DrawContext context, int mouseX, int mouseY, float delta )
     {
-        /// ===== Version dependent =====
+        // ===== Version dependent =====
         //super.render( context, mouseX, mouseY, delta );
         this.renderBackground( context, mouseX, mouseY, delta );
         //this.renderBackground( context );
@@ -142,13 +142,13 @@ public class KeybindSelectorScreen extends Screen
         // https://stackoverflow.com/questions/7505018/repeated-state-changes-in-opengl
         if ( Configurations.PIE_MENU_BLEND ) RenderSystem.enableBlend();
 
-        /// ===== Version dependent =====
-        RenderSystem.setShader( GameRenderer::getPositionColorProgram ); //# <1.21.2
-        //RenderSystem.setShader( ShaderProgramKeys.POSITION_COLOR ); //# >=1.21.2
+        // ===== Version dependent =====
+        RenderSystem.setShader( GameRenderer::getPositionColorProgram ); //* <1.21.2
+        //RenderSystem.setShader( ShaderProgramKeys.POSITION_COLOR ); //* >=1.21.2
 
-        //BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //# >1.21
-        BufferBuilder buf = tess.getBuffer(); //# <1.21
-        buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //# <1.21
+        //BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //* >1.21
+        BufferBuilder buf = tess.getBuffer(); //* <1.21
+        buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //* <1.21
 
         float startAngle = 0;
         int vertices = Configurations.CIRCLE_VERTICES / numberOfSectors; // FP truncation here
@@ -189,9 +189,9 @@ public class KeybindSelectorScreen extends Screen
             startAngle += sectorAngle;
         }
 
-        /// ===== Version dependent =====
-        //BufferRenderer.drawWithGlobalProgram( buf.end() ); //# >=1.21
-        tess.draw(); //# <1.21
+        // ===== Version dependent =====
+        //BufferRenderer.drawWithGlobalProgram( buf.end() ); //* >=1.21
+        tess.draw(); //* <1.21
         RenderSystem.enableCull();
         if ( Configurations.PIE_MENU_BLEND ) RenderSystem.disableBlend();
     }
@@ -203,17 +203,17 @@ public class KeybindSelectorScreen extends Screen
         {
             float angle = startAngle + ((float) i / vertices) * sectorAngle;
 
-            /// ===== Version dependent =====
+            // ===== Version dependent =====
             // Inner vertex
             // FIXME: is the compiler smart enough to optimise the trigo?
             buf.vertex( this.centreX + MathHelper.cos( angle ) * innerRadius, this.centreY + MathHelper.sin( angle ) * innerRadius, 0 );
             buf.color( innerColor >> 16 & 0xFF, innerColor >> 8 & 0xFF, innerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
-            buf.next(); //# <1.21
+            buf.next(); //* <1.21
 
             // Outer vertex
             buf.vertex( this.centreX + MathHelper.cos( angle ) * outerRadius, this.centreY + MathHelper.sin( angle ) * outerRadius, 0 );
             buf.color( outerColor >> 16 & 0xFF, outerColor >> 8 & 0xFF, outerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
-            buf.next(); //# <1.21
+            buf.next(); //* <1.21
         }
     }
 
@@ -307,7 +307,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
 
-    // ==================== Others ====================
+    // ==================== Others // ====================
 
     // Returns the angle of the line bounded by the given coordinates and the mouse position from the vertical axis
     // This is why we study trigo, guys
@@ -346,7 +346,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
 
-    // ==================== Overrides ====================
+    // ==================== Overrides // ====================
 
     @Override
     public void tick()
@@ -415,23 +415,23 @@ public class KeybindSelectorScreen extends Screen
     public boolean shouldPause() { return false; }
 
 
-    //# >=1.20.2
+    //* >=1.20.2
     @Override
     public void renderBackground( DrawContext context, int mouseX, int mouseY, float delta )
     {
         // Remove the darkened background if needed
         // This can help performance, as with all post-processing
-        if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context, mouseX, mouseY, delta ); //# >=1.20.2
+        if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context, mouseX, mouseY, delta ); //* >=1.20.2
     }
 
-    //# <1.20.2
+    //* <1.20.2
     // Annoyingly, we can have the method in >1.20.2 but not the super call :(
     //@Override
-    // public void renderBackground( DrawContext context ) //# <1.20.2
+    // public void renderBackground( DrawContext context ) //* <1.20.2
     // {
-    //     /// ===== Version dependent =====
+    //     //* // ===== Version dependent =====
     //     // Remove the darkened background if needed
     //     // This can help performance, as with all post-processing
-    //     if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context ); //# <1.20.2
+    //     if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context ); //* <1.20.2
     // }
 }

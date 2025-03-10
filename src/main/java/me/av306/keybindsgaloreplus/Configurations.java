@@ -15,8 +15,7 @@ public class Configurations
     public static boolean LABEL_TEXT_SHADOW = false;
 
     // Behaviour
-
-    public static boolean ENABLE_ATTACK_WORKAROUND = false;
+    public static boolean ENABLE_ATTACK_WORKAROUND = true;
 
     // Impl as list of ints to make config easier
     public static ArrayList<Integer> IGNORED_KEYS = new ArrayList<>();
