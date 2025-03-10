@@ -1,0 +1,8 @@
+{
+	"name": "KBG+ Gitpod Env",
+	"image": "./.gitpod.Dockerfile",
+	"features": {
+	},
+	"customizations": {
+  }
+}
