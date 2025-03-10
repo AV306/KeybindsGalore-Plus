@@ -29,6 +29,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class KeybindSelectorScreen extends Screen
 {
@@ -269,7 +270,8 @@ public class KeybindSelectorScreen extends Screen
 
                 try
                 {
-                    actionName = customDataManager.customData.get( id ).displayName;
+                    // Assigning `null` doesn't throw an NPE, so we wrap with this to throw one
+                    actionName = Objects.requireNonNull( customDataManager.customData.get( id ).displayName );
                 }
                 catch ( NullPointerException npe )
                 {
