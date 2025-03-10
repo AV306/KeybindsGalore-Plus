@@ -4,9 +4,9 @@
 	"version": "${version}",
 
 	"name": "KeybindsGalore Plus",
-	"description": "All-in-one keybind conflict manager mod, built upon KeybindsGalore by CaelTheCohler and HVB007.",
+	"description": "Keybind pie menu / QoL mod :D A fork of KeybindsGalore, originally by Cael and updated to 1.20 by HVB007",
 	"authors": [
-		"diblenderbenzene",
+		"Blender",
 		"HVB007",
 		"Cael"
 	],
@@ -20,10 +20,9 @@
 		"ClutchMasterYT",
 		"BumbleTree -- bad SemVer",
 		"Mideks -- console spam",
-		"UNI717 -- Sinytra Connector compatibility",
+		"UNI717 -- sinytra Connector compatibility",
 		"IG114514 -- mouse support and compatibility",
 		"WxAaRoNxW -- click-to-activate and compatibility",
-		"Warp159 -- extensive 1.21.11 testing",
 		"...and more on GitHub!"
 	],
 	"license": "GNU Lesser General Public License v3.0",
@@ -38,6 +37,12 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.14.8",
-		"minecraft": "1.21.11"
-	}
+		"minecraft": ">=1.21 <=1.21.1"
+	},
+	"dummy": [
+		">=1.21 <=1.21.1",
+		">=1.21.2",
+		">=1.20 <=1.20.1",
+		">=1.20.2 <=1.20.6"
+	]
 }
