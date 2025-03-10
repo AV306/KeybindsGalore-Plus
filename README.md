@@ -1,5 +1,9 @@
 # KeybindsGalore Plus
 
+> [!WARNING]<br>
+> Version 1.4.0 has been removed from Modrinth as it contains too many bugs.
+> Version 1.4.1 will be published soon.
+
 > [!NOTE]<br>
 > This project is a fork of KeybindsGalore, originally by Cael and updated to 1.20 by HVB007.
 > <br>[HVB007's project is here](https://github.com/HVB007og/KeybindsGalore_HVB007_1.20.x), and Cael's [original project is here](https://github.com/CaelTheColher/KeybindsGalore).
