@@ -82,7 +82,7 @@ public class KeybindManager
      */
     public static boolean isIgnoredKey( InputUtil.Key key )
     {
-        return Configurations.IGNORED_KEYS.contains( key.getCode() ) ^ Configurations.INVERT_SKIPPED_KEYS_LIST;
+        return Configurations.IGNORED_KEYS.contains( key.getCode() ) ^ Configurations.INVERT_IGNORED_KEYS_LIST;
     }
 
     public static boolean isClickHoldKey( InputUtil.Key key )

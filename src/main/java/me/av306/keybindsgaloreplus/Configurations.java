@@ -20,7 +20,7 @@ public class Configurations
 
     // Impl as list of ints to make config easier
     public static ArrayList<Integer> IGNORED_KEYS = new ArrayList<>();
-    public static boolean INVERT_SKIPPED_KEYS_LIST = false;
+    public static boolean INVERT_IGNORED_KEYS_LIST = false;
     public static boolean USE_KEYBIND_FIX = true;
 
 

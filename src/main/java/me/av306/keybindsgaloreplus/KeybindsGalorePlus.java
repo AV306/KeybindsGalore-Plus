@@ -53,12 +53,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
             // (debug) Print all config fields
             if ( Configurations.DEBUG )
             {
-                LOGGER.info( "Dumping configs" );
-                for ( var f : Configurations.class.getDeclaredFields() )
-                {
-                    try { LOGGER.info( "\t{}: {}", f.getName(), f.get( null ) ); }
-                    catch ( IllegalAccessException | NullPointerException ignored ) {}
-                }
+                this.configManager.printAllConfigs();
             }
 
             // Initialise custom data manager and read data file
@@ -101,12 +96,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
                     if ( Configurations.DEBUG )
                     {
                         // Print all config fields
-                        LOGGER.info( "Dumping configs" );
-                        for ( var f : Configurations.class.getDeclaredFields() )
-                        {
-                            try { LOGGER.info( "\t{}: {}", f.getName(), f.get( null ) ); }
-                            catch ( IllegalAccessException | NullPointerException ignored ) {}
-                        }
+                        this.configManager.printAllConfigs();                        
                     }
                 }
             } );
@@ -115,7 +105,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
         }
         catch ( IOException ioe )
         {
-            LOGGER.error( "IOException while reading config file on init!" );
+            LOGGER.error( "(KBG+) IOException while reading config file on init!" );
             ioe.printStackTrace();
         }
 
@@ -125,12 +115,12 @@ public class KeybindsGalorePlus implements ClientModInitializer
 
     public static void debugLog( String message )
     {
-        if ( Configurations.DEBUG ) LOGGER.info( message );
+        if ( Configurations.DEBUG ) LOGGER.info( "(KBG+ DEBUG) " + message );
     }
 
     public static void debugLog( String message, Object... objects )
     {
-        if ( Configurations.DEBUG ) LOGGER.info( message, objects );
+        if ( Configurations.DEBUG ) LOGGER.info( "(KBG+ DEBUG) " + message, objects );
     }
 
     public static Text createHyperlinkText( String url )

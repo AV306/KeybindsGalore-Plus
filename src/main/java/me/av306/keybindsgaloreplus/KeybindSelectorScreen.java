@@ -425,12 +425,13 @@ public class KeybindSelectorScreen extends Screen
     }
 
     //# <1.20.2
-//    @Override
-//    //public void renderBackground( DrawContext context ) //# <1.20.2
-//    {
-//        /// ===== Version dependent =====
-//        // Remove the darkened background if needed
-//        // This can help performance, as with all post-processing
-//        //if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context ); //# <1.20.2
-//    }
+    // Annoyingly, we can have the method in >1.20.2 but not the super call :(
+    //@Override
+    // public void renderBackground( DrawContext context ) //# <1.20.2
+    // {
+    //     /// ===== Version dependent =====
+    //     // Remove the darkened background if needed
+    //     // This can help performance, as with all post-processing
+    //     if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context ); //# <1.20.2
+    // }
 }

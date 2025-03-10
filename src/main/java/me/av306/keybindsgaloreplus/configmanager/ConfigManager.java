@@ -4,21 +4,18 @@
 
 package me.av306.keybindsgaloreplus.configmanager;
 
+import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
+
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Locale;
-
-import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 
 /**
  * Configuration manager. Handles reading/saving config file, and setting fields in confugurable class.
@@ -85,18 +82,18 @@ public class ConfigManager
             {
                 this.configFile.createNewFile();
                 
-                KeybindsGalorePlus.LOGGER.warn( "{} config file not found, copying default config file", this.name );
+                KeybindsGalorePlus.LOGGER.warn( "(KBG+ Config Manager) {} config file not found, copying default config file", this.name );
                 defaultConfigFileInputStream.transferTo( fos );
             }
             catch ( IOException ioe ) 
             {
-                KeybindsGalorePlus.LOGGER.error( "IOException while copying default config file!" );
+                KeybindsGalorePlus.LOGGER.error( "(KBG+ Config Manager) IOException while copying default config file!" );
                 ioe.printStackTrace();
                 throw ioe; // Re-throw for user app to handle exception
             }
         }
 
-        KeybindsGalorePlus.LOGGER.info( "Config file exists!" );
+        KeybindsGalorePlus.LOGGER.info( "(KBG+ Config Manager) Config file exists!" );
     }
 
     /**
@@ -219,23 +216,23 @@ public class ConfigManager
                     }
                     else
                     {
-                        KeybindsGalorePlus.LOGGER.error( "Unrecognised data type for config entry {}", line );
+                        KeybindsGalorePlus.LOGGER.error( "(KBG+ Config Manager) Unrecognised data type for config entry {}", line );
                     }
                 }
                 catch ( NoSuchFieldException nsfe )
                 {
-                    KeybindsGalorePlus.LOGGER.error( "No matching field found for config entry: {}", entry[0] );
+                    KeybindsGalorePlus.LOGGER.error( "(KBG+ Config Manager) No matching field found for config entry: {}", entry[0] );
                     this.errorFlag = true;
                 }
                 catch ( IllegalAccessException illegal )
                 {
-                    KeybindsGalorePlus.LOGGER.error( "Could not set field involved in: {}", line );
+                    KeybindsGalorePlus.LOGGER.error( "(KBG+ Config Manager) Could not set field involved in: {}", line );
                     this.errorFlag = true;
                     illegal.printStackTrace();
                 }
                 catch ( /*ArrayIndexOutOfBoundsException | NumberFormatException*/ Exception e )
                 {
-                    KeybindsGalorePlus.LOGGER.error( "Malformed config entry: {}", line );
+                    KeybindsGalorePlus.LOGGER.error( "(KBG+ Config Manager) Malformed config entry: {}", line );
                     this.errorFlag = true;
                 }
 
@@ -244,10 +241,20 @@ public class ConfigManager
         }
         catch ( IOException ioe )
         {
-            KeybindsGalorePlus.LOGGER.error( "IOException while reading config file: {}", ioe.getMessage() );
+            KeybindsGalorePlus.LOGGER.error( "(KBG+ Config Manager) IOException while reading config file: {}", ioe.getMessage() );
             throw ioe;
         }
 
-        KeybindsGalorePlus.LOGGER.info( "Finished reading config file!" );
+        KeybindsGalorePlus.LOGGER.info( "(KBG+ Config Manager) Finished reading config file!" );
+    }
+
+    public void printAllConfigs()
+    {
+        KeybindsGalorePlus.LOGGER.info( "(KBG+ Config Manager) Dumping configs:" );
+        for ( var f : this.configurableClass.getDeclaredFields() )
+        {
+            try { KeybindsGalorePlus.LOGGER.info( "\t{}: {}", f.getName(), f.get( this.configurableClassInstance ) ); }
+            catch ( IllegalAccessException | NullPointerException ignored ) {}
+        }
     }
 }
