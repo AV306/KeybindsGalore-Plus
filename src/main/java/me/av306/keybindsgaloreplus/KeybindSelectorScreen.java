@@ -17,7 +17,7 @@ import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.customDataManager;
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import me.av306.keybindsgaloreplus.mixin.MinecraftClientAccessor;
 import net.minecraft.client.MinecraftClient;
-//import net.minecraft.client.gl.ShaderProgramKeys;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.KeyBinding;
@@ -145,12 +145,12 @@ public class KeybindSelectorScreen extends Screen
         if ( Configurations.PIE_MENU_BLEND ) RenderSystem.enableBlend();
 
         // ===== Version dependent =====
-        RenderSystem.setShader( GameRenderer::getPositionColorProgram ); //* <1.21.2
-        //RenderSystem.setShader( ShaderProgramKeys.POSITION_COLOR ); //* >=1.21.2
+        //RenderSystem.setShader( GameRenderer::getPositionColorProgram ); //* <1.21.2
+        RenderSystem.setShader( ShaderProgramKeys.POSITION_COLOR ); //* >=1.21.2
 
-        //BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //* >1.21
-        BufferBuilder buf = tess.getBuffer(); //* <1.21
-        buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //* <1.21
+        BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //* >1.21
+        //BufferBuilder buf = tess.getBuffer(); //* <1.21
+        //buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //* <1.21
 
         float startAngle = 0;
         int vertices = Configurations.CIRCLE_VERTICES / numberOfSectors; // FP truncation here
@@ -192,8 +192,8 @@ public class KeybindSelectorScreen extends Screen
         }
 
         // ===== Version dependent =====
-        //BufferRenderer.drawWithGlobalProgram( buf.end() ); //* >=1.21
-        tess.draw(); //* <1.21
+        BufferRenderer.drawWithGlobalProgram( buf.end() ); //* >=1.21
+        //tess.draw(); //* <1.21
         RenderSystem.enableCull();
         if ( Configurations.PIE_MENU_BLEND ) RenderSystem.disableBlend();
     }
@@ -210,12 +210,12 @@ public class KeybindSelectorScreen extends Screen
             // FIXME: is the compiler smart enough to optimise the trigo?
             buf.vertex( this.centreX + MathHelper.cos( angle ) * innerRadius, this.centreY + MathHelper.sin( angle ) * innerRadius, 0 );
             buf.color( innerColor >> 16 & 0xFF, innerColor >> 8 & 0xFF, innerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
-            buf.next(); //* <1.21
+            //buf.next(); //* <1.21
 
             // Outer vertex
             buf.vertex( this.centreX + MathHelper.cos( angle ) * outerRadius, this.centreY + MathHelper.sin( angle ) * outerRadius, 0 );
             buf.color( outerColor >> 16 & 0xFF, outerColor >> 8 & 0xFF, outerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
-            buf.next(); //* <1.21
+            //buf.next(); //* <1.21
         }
     }
 
