@@ -31,10 +31,9 @@ KeybindsGalore+ will automatically detect conflicting keybinds!
 
 - **Pressing** a conflicted key *down* will **open the pie menu**
 - **Releasing** a conflicted key (when the pie menu is displayed) will **activate the highlighted action** and **close** the pie menu
-- **Clicking** on a section of the pie menu (without releasing the key) will **activate the highlighted action** and **disable** it when the key is **released**
+- **Clicking** on a section of the pie menu (without releasing the key) will **activate the highlighted action** and **deactivate** it when the key is **released**
 
-NB: When the pie menu closes, all actions currently activated (e.g. holding a key down) will be released.
-
+NB: When the pie menu *opens*, all actions currently activated (e.g. holding a key down) will be deactivated.
 <br>
 
 ## Modifications to Original
