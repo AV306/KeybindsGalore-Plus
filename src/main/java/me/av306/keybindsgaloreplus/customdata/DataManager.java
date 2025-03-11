@@ -107,7 +107,7 @@ public class DataManager
                 {
                     try
                     {
-                        f.setAccessible( true ); // :3
+                        //f.setAccessible( true );
                         LOGGER.info( "\t[{} -> {}]: {}", keyId, f.getName(), f.get( data ) );
                     }
                     catch ( IllegalAccessException e )

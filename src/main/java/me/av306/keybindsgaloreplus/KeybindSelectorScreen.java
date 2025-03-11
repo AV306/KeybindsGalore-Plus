@@ -27,6 +27,7 @@ import net.minecraft.client.util.NarratorManager;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -253,15 +254,15 @@ public class KeybindSelectorScreen extends Screen
             // TODO: configurable
 
             String id = action.getTranslationKey();
-            String actionName = Text.translatable( action.getCategory() ).getString() + ": " + Text.translatable( action.getTranslationKey() ).getString();;
+            String actionName = Text.translatable( action.getCategory() ).getString() + ": " + Text.translatable( action.getTranslationKey() ).getString();
 
             // Read custom data for this keybind, only if present
             if ( customDataManager.hasCustomData )
             {
                 try
                 {
-                    if ( !customDataManager.customData.get( id ).hideCategory )
-                        actionName = Text.translatable( action.getCategory() ).getString() + ": ";
+                    if ( customDataManager.customData.get( id ).hideCategory )
+                        actionName = Text.translatable( action.getTranslationKey() ).getString();
                 }
                 catch ( NullPointerException npe )
                 {
@@ -382,19 +383,30 @@ public class KeybindSelectorScreen extends Screen
         else
         {
             // Click-hold selected binding
+
             this.mc.setScreen( null );
-            KeyBinding.unpressAll();
+            KeyBinding.unpressAll(); // This stops the other actions from triggering. Not sure why they do in the first place, though.
 
             if ( this.selectedSectorIndex != -1 )
             {
+                KeyBinding binding = this.conflicts.get( this.selectedSectorIndex );
+
                 // Clicked on a sector; add its binding to the click-hold map
+                //KeybindsGalorePlus.debugLog( "Activated sector {} (key {}) (click-hold) via pie menu", this.selectedSectorIndex, this.conflictedKey.getCategory() );
+                KeybindsGalorePlus.debugLog( "Pie menu closed with click-hold" );
                 KeybindManager.clickHoldKeys.put(
                         this.conflictedKey.getCode(),
-                        this.conflicts.get( this.selectedSectorIndex )
+                        binding
                 );
+
+                // Key events are generated repeatedly for keyboard keys held down, but not for mouse buttons,
+                // so we have to make one manually
+                if ( this.conflictedKey.getCode() <= GLFW.GLFW_MOUSE_BUTTON_LAST )
+                    binding.setPressed( true );
             }
             else
             {
+                KeybindsGalorePlus.debugLog( "Pie menu closed via click-hold with no selection" );
                 // No sector clicked; add null to the click-hold map to signal a cancel
                 KeybindManager.clickHoldKeys.put( this.conflictedKey.getCode(), null );
             }

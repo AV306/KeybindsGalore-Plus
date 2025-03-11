@@ -129,7 +129,6 @@ public class KeybindManager
             if ( isClickHoldKey( key ) )
             {
                 ci.cancel();
-                //KeybindsGalorePlus.debugLog( "click hold" );
 
                 KeyBinding clickHoldBinding = clickHoldKeys.get( key.getCode() );
 
@@ -142,6 +141,7 @@ public class KeybindManager
 
                 if ( !pressed )
                 {
+                    KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getTranslationKey() );
                     clickHoldKeys.remove( key.getCode() );
                 }
             }
