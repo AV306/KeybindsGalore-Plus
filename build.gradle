@@ -1,7 +1,6 @@
 plugins {
 	id 'fabric-loom' version '1.8-SNAPSHOT'
 	id 'maven-publish'
-  	//id "com.github.hexomod.macro.preprocessor" version "0.9"
 }
 
 version = project.mod_version
@@ -89,32 +88,9 @@ jar {
 	}
 }
 
-// Preprocessor settings
-/*macroPreprocessorSettings {
-    verbose = true      // default: false
-    inPlace = false     // default: false
-    remove = false      // default: false
-
-    java {
-        enable = true       // default: true
-        inPlace = true      // default: false
-        remove = false      // default: false
-    }
-
-    resources {
-        enable = true       // default: true
-        inPlace = true      // default: true
-        remove = true       // default: true
-    }
-    
-    //vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: true]
-	vars = [
-		VERSION: project.minecraft_version
-	];
-}*/
 
 // configure the maven publication
-/*publishing {
+publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			from components.java
@@ -128,4 +104,4 @@ jar {
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
 	}
-}*/
+}
