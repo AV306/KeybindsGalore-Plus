@@ -435,7 +435,14 @@ public class KeybindSelectorScreen extends Screen
     {
         // Remove the darkened background if needed
         // This can help performance, as with all post-processing
-        if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context, mouseX, mouseY, delta ); //* >=1.20.2
+        if ( Configurations.DARKENED_BACKGROUND )
+        {
+            // Don't crash on 1.20.1 because I REALLY don't want another branch
+            // TODO: maybe we can use reflection to call the correct method?
+            try { super.renderBackground( context, mouseX, mouseY, delta ); } //* >=1.20.2
+            catch ( NoSuchMethodException | NoSuchMethodError e )
+            {}
+        }
     }
 
     //* <1.20.2
