@@ -60,11 +60,18 @@ public abstract class KeyBindingMixin
     @Inject( method = "setPressed", at = @At("HEAD"), cancellable = true )
     private void setPressed( boolean pressed, CallbackInfo ci )
     {
-        KeybindsGalorePlus.debugLog( "setPressed( {} ) called for keybind {} on physical key {}", pressed, this.translationKey, this.boundKey.getTranslationKey() );
+        //KeybindsGalorePlus.debugLog( "setPressed( {} ) called for keybind {} on physical key {}", pressed, this.translationKey, this.boundKey.getTranslationKey() );
+        // FIXME: this *may* fix the CraftPresence thing, but I can't use this method in a dev environment for some weird reason
 
         // I can't demonstrate that this actually causes issues (setPressed( true ) only happened for the mouse when I tried)
         // but it has potential for duplicating the handleKeyPress call, since setKeyPressed is *supposed* to call setPressed...
         // Not calling handleKeyPress may cause https://github.com/AV306/KeybindsGalore-Plus/issues/10 though
         //KeybindManager.handleKeyPress( this.boundKey, pressed, ci );
+    }
+
+    @Inject( method = "unpressAll", at = @At( "HEAD" ), cancellable = true )
+    private static void onUnpressAll( CallbackInfo ci )
+    {
+
     }
 }

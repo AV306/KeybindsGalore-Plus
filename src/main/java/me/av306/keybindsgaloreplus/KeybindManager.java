@@ -128,6 +128,7 @@ public class KeybindManager
         {
             if ( isClickHoldKey( key ) )
             {
+                //clickHoldKeys.forEach( (keyCode, binding) -> KeybindsGalorePlus.debugLog( binding.getTranslationKey() ) );
                 ci.cancel();
 
                 KeyBinding clickHoldBinding = clickHoldKeys.get( key.getCode() );
@@ -141,6 +142,11 @@ public class KeybindManager
 
                 if ( !pressed )
                 {
+                    // FIXME: CraftPresence prevents this branch from being reached because a setKeyPressed( false ) is never made
+                    // so if click-hold is used, (1) CraftPresence hijacks it to open its menu, and
+                    // (2) the click-hold map isn't cleared, so subsequent key-presses skip the menu and trigger the click-hold,
+                    // which is hijacked again...
+                    // FIXME: we need to find some other place to clear the click-hold map
                     KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getTranslationKey() );
                     clickHoldKeys.remove( key.getCode() );
                 }

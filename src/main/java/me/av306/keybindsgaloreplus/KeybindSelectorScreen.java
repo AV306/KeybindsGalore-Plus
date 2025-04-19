@@ -88,8 +88,8 @@ public class KeybindSelectorScreen extends Screen
     public void render( DrawContext context, int mouseX, int mouseY, float delta )
     {
         // ===== Version dependent =====
-        //super.render( context, mouseX, mouseY, delta );
-        this.renderBackground( context, mouseX, mouseY, delta );
+        super.render( context, mouseX, mouseY, delta );
+        //this.renderBackground( context, mouseX, mouseY, delta );
         //this.renderBackground( context );
 
         // Pixel coords of screen centre
@@ -430,29 +430,28 @@ public class KeybindSelectorScreen extends Screen
 
 
     //* >=1.20.2
-    @Override
-    public void renderBackground( DrawContext context, int mouseX, int mouseY, float delta )
-    {
-        // Remove the darkened background if needed
-        // This can help performance, as with all post-processing
-        if ( Configurations.DARKENED_BACKGROUND )
-        {
-            // Don't crash on 1.20.1 because I REALLY don't want another branch
-            // TODO: maybe we can use reflection to call the correct method?
-            try { super.renderBackground( context, mouseX, mouseY, delta ); } //* >=1.20.2
-            catch ( NoSuchMethodException | NoSuchMethodError e )
-            {}
-        }
-    }
+//    @Override
+//    public void renderBackground( DrawContext context, int mouseX, int mouseY, float delta )
+//    {
+//        // Remove the darkened background if needed
+//        // This can help performance, as with all post-processing
+//        if ( Configurations.DARKENED_BACKGROUND )
+//        {
+//            // Don't crash on 1.20.1 because I REALLY don't want another branch
+//            // TODO: maybe we can use reflection to call the correct method?
+//            try { super.renderBackground( context, mouseX, mouseY, delta ); } //* >=1.20.2
+//            catch ( NoSuchMethodError e )
+//            {}
+//        }
+//    }
 
     //* <1.20.2
     // Annoyingly, we can have the method in >1.20.2 but not the super call :(
-    //@Override
-    // public void renderBackground( DrawContext context ) //* <1.20.2
-    // {
-    //     //* // ===== Version dependent =====
-    //     // Remove the darkened background if needed
-    //     // This can help performance, as with all post-processing
-    //     if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context ); //* <1.20.2
-    // }
+    @Override
+     public void renderBackground( DrawContext context )
+     {
+         // Remove the darkened background if needed
+         // This can help performance, as with all post-processing
+         if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context );
+     }
 }
