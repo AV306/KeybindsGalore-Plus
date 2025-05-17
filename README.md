@@ -1,8 +1,8 @@
 # KeybindsGalore Plus
 
 > [!WARNING]<br>
-> Version 1.4.0 has been removed from Modrinth as it contains too many bugs.
-> Version 1.4.1 will be published soon.
+> Updates to this mod are paused until 2027 as I prepare for national exams.
+> <br>Bugfixes will probably come around June/December, but I can't promise more than that :(
 
 > [!NOTE]<br>
 > This project is a fork of KeybindsGalore, originally by Cael and updated to 1.20 by HVB007.
