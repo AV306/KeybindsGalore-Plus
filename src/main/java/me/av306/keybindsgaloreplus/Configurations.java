@@ -12,6 +12,7 @@ public class Configurations
     public static int CIRCLE_VERTICES = 120;
     public static boolean PIE_MENU_BLEND = false;
     public static boolean DARKENED_BACKGROUND = true;
+    public static final boolean BLUR_BACKGROUND = true;
     public static boolean LABEL_TEXT_SHADOW = false;
 
     // Behaviour

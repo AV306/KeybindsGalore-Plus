@@ -12,6 +12,7 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 
 import java.io.IOException;
+import java.net.URI;
 
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
@@ -123,10 +124,10 @@ public class KeybindsGalorePlus implements ClientModInitializer
         if ( Configurations.DEBUG ) LOGGER.info( "(KBG+ DEBUG) " + message, objects );
     }
 
-    public static Text createHyperlinkText( String url )
+    public static Text createHyperlinkText( URI url )
     {
-        return Text.literal( url )
+        return Text.literal( url.toString() )
                 .formatted( Formatting.YELLOW )
-                .styled( style -> style.withClickEvent( new ClickEvent( ClickEvent.Action.OPEN_URL, url ) ) );
+                .styled( style -> style.withClickEvent( new ClickEvent.OpenUrl( url ) ) );
     }
 }

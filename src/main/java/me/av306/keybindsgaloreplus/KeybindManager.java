@@ -117,7 +117,7 @@ public class KeybindManager
     }
 
     /**
-     * Handle mixin method cancellation and related logic when a conflicted key is presed
+     * Handle mixin method cancellation and related logic when a conflicted key is pressed
      * @param key: the physical key that was pressed
      * @param pressed: the pressed state of the conflicted key
      * @param ci: CallbackInfo for the mixin

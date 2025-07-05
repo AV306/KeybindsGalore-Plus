@@ -10,18 +10,16 @@
  */
 package me.av306.keybindsgaloreplus;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.customDataManager;
 
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import me.av306.keybindsgaloreplus.mixin.MinecraftClientAccessor;
-import net.minecraft.client.MinecraftClient;
 //import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.*;
+import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.text.Text;
@@ -41,8 +39,6 @@ public class KeybindSelectorScreen extends Screen
 
     private final InputUtil.Key conflictedKey;
 
-    private final MinecraftClient mc;
-
     private int centreX = 0, centreY = 0;
 
     private float maxRadius = 0;
@@ -50,6 +46,8 @@ public class KeybindSelectorScreen extends Screen
     private float cancelZoneRadius = 0;
 
     private boolean isFirstFrame = true;
+
+    private VertexConsumerProvider.Immediate vertexConsumerProvider;
 
     /** This is probably not going to change while the screen is open, so maybe this optimisation helps? */
     private final ArrayList<KeyBinding> conflicts = new ArrayList<>();
@@ -77,7 +75,6 @@ public class KeybindSelectorScreen extends Screen
     {
         //this();
         super( NarratorManager.EMPTY );
-        this.mc = MinecraftClient.getInstance();
 
         this.conflictedKey = key;
 
@@ -85,42 +82,41 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
+    protected void init()
+    {
+        this.vertexConsumerProvider = this.client.getBufferBuilders().getEntityVertexConsumers();
+                //VertexConsumerProvider.immediate( new BufferAllocator( 786432 ) );
+
+        // Set centre of screen
+        this.centreX = this.width / 2;
+        this.centreY = this.height / 2;
+
+        this.maxRadius = Math.min( (this.centreX * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN, (this.centreY * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN );
+        this.maxExpandedRadius = this.maxRadius * Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
+        this.cancelZoneRadius = maxRadius * Configurations.CANCEL_ZONE_SCALE;
+
+        if ( Configurations.DEBUG )
+        {
+            KeybindsGalorePlus.debugLog( "Centre: ({}, {})", this.centreX, this.centreY );
+        }
+    }
+
+    @Override
     public void render( DrawContext context, int mouseX, int mouseY, float delta )
     {
-        // ===== Version dependent =====
-        //super.render( context, mouseX, mouseY, delta );
-        this.renderBackground( context, mouseX, mouseY, delta );
-        //this.renderBackground( context );
-
-        // Pixel coords of screen centre
-        // Only set these on the first frame
-        // Side effect: If window is resized when the screen is open, the menu won't update
-        if ( this.isFirstFrame )
-        {
-            // Set centre of screen
-            this.centreX = this.width / 2;
-            this.centreY = this.height / 2;
-
-            this.maxRadius = Math.min( (this.centreX * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN, (this.centreY * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN );
-            this.maxExpandedRadius = this.maxRadius * Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
-            this.cancelZoneRadius = maxRadius * Configurations.CANCEL_ZONE_SCALE;
-
-            this.isFirstFrame = false;
-        }
-
         // Angle of mouse, in radians from +X-axis, centred on the origin
         double mouseAngle = mouseAngle( this.centreX, this.centreY, mouseX, mouseY );
 
         float mouseDistanceFromCentre = MathHelper.sqrt( (mouseX - this.centreX) * (mouseX - this.centreX) +
                         (mouseY - this.centreY) * (mouseY - this.centreY) );
 
-        // Determines how many sectors to make for the pie menu
+        // How many sectors to make for the pie menu?
         int numberOfSectors = this.conflicts.size();
 
-        // Calculate the angle occupied by each sector
+        // Angle occupied by each sector
         float sectorAngle = (MathHelper.TAU) / numberOfSectors;
 
-        // Get the exact sector index that is selected
+        // Exact index of selected sector
         this.selectedSectorIndex = (int) (mouseAngle / sectorAngle);
 
         // Deselect slot if mouse is within cancel zone
@@ -137,20 +133,7 @@ public class KeybindSelectorScreen extends Screen
     private void renderPieMenu( DrawContext context, float delta, int numberOfSectors, float sectorAngle )
     {
         // Setup rendering stuff
-        Tessellator tess = Tessellator.getInstance();
-    
-        RenderSystem.disableCull();
-        // We may not save on the state change itself, but I suppose being able to disable blend might help Sinytra users' performance
-        // https://stackoverflow.com/questions/7505018/repeated-state-changes-in-opengl
-        if ( Configurations.PIE_MENU_BLEND ) RenderSystem.enableBlend();
-
-        // ===== Version dependent =====
-        RenderSystem.setShader( GameRenderer::getPositionColorProgram ); //* <1.21.2
-        //RenderSystem.setShader( ShaderProgramKeys.POSITION_COLOR ); //* >=1.21.2
-
-        //BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //* >1.21
-        BufferBuilder buf = tess.getBuffer(); //* <1.21
-        buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //* <1.21
+        BufferBuilder buf = (BufferBuilder) this.vertexConsumerProvider.getBuffer( CustomRenderLayers.GUI );
 
         float startAngle = 0;
         int vertices = Configurations.CIRCLE_VERTICES / numberOfSectors; // FP truncation here
@@ -191,14 +174,11 @@ public class KeybindSelectorScreen extends Screen
             startAngle += sectorAngle;
         }
 
-        // ===== Version dependent =====
-        //BufferRenderer.drawWithGlobalProgram( buf.end() ); //* >=1.21
-        tess.draw(); //* <1.21
-        RenderSystem.enableCull();
-        if ( Configurations.PIE_MENU_BLEND ) RenderSystem.disableBlend();
+        this.vertexConsumerProvider.draw();
+        //CustomRenderLayers.GUI.draw( buf.end() );
     }
 
-    private void drawSector( BufferBuilder buf, float startAngle, float sectorAngle, int vertices, float innerRadius, float outerRadius,
+    private void drawSector( VertexConsumer buf, float startAngle, float sectorAngle, int vertices, float innerRadius, float outerRadius,
                              int innerColor, int outerColor )
     {
         for ( var i = 0; i <= vertices; i++ )
@@ -210,12 +190,12 @@ public class KeybindSelectorScreen extends Screen
             // FIXME: is the compiler smart enough to optimise the trigo?
             buf.vertex( this.centreX + MathHelper.cos( angle ) * innerRadius, this.centreY + MathHelper.sin( angle ) * innerRadius, 0 );
             buf.color( innerColor >> 16 & 0xFF, innerColor >> 8 & 0xFF, innerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
-            buf.next(); //* <1.21
+            //buf.next(); //* <1.21
 
             // Outer vertex
             buf.vertex( this.centreX + MathHelper.cos( angle ) * outerRadius, this.centreY + MathHelper.sin( angle ) * outerRadius, 0 );
             buf.color( outerColor >> 16 & 0xFF, outerColor >> 8 & 0xFF, outerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
-            buf.next(); //* <1.21
+            //buf.next(); //* <1.21
         }
     }
 
@@ -231,11 +211,8 @@ public class KeybindSelectorScreen extends Screen
         return radius;
     }
 
-    private void renderLabelTexts(
-            DrawContext context,
-            float delta,
-            int numberOfSectors, float sectorAngle
-    )
+    // At least this works fine in 1.21.6.
+    private void renderLabelTexts( DrawContext context, float delta, int numberOfSectors, float sectorAngle )
     {
         for ( var sectorIndex = 0; sectorIndex < numberOfSectors; sectorIndex++ )
         {
@@ -283,17 +260,18 @@ public class KeybindSelectorScreen extends Screen
             int textWidth = this.textRenderer.getWidth( actionName );
 
             // Which side of the screen are we on?
-            if ( xPos > this.centreX ) // Right side
+            if ( xPos > this.centreX )
             {
+                // Right side
                 xPos -= Configurations.LABEL_TEXT_INSET;
 
                 // Check text going off-screen
                 if ( this.width - xPos < textWidth )
                     xPos -= textWidth - this.width + xPos;
             }
-            else // Left side
+            else
             {
-
+                // Left side
                 xPos -= textWidth - Configurations.LABEL_TEXT_INSET;
 
                 // Check text going off-screen
@@ -305,12 +283,13 @@ public class KeybindSelectorScreen extends Screen
 
             actionName = (this.selectedSectorIndex == sectorIndex ? Formatting.UNDERLINE : Formatting.RESET) + actionName;
 
-            context.drawText( this.textRenderer, actionName, (int) xPos, (int) yPos, 0xFFFFFF, Configurations.LABEL_TEXT_SHADOW );
+            context.drawText( this.textRenderer, actionName, (int) xPos, (int) yPos, 0xFFFFFFFF,
+                    Configurations.LABEL_TEXT_SHADOW );
         }
     }
 
 
-    // ==================== Others // ====================
+    // ==================== Others ====================
 
     // Returns the angle of the line bounded by the given coordinates and the mouse position from the vertical axis
     // This is why we study trigo, guys
@@ -321,7 +300,7 @@ public class KeybindSelectorScreen extends Screen
 
     private void closePieMenu()
     {
-        this.mc.setScreen( null );
+        this.client.setScreen( null );
 
         // Activate the selected binding
         if ( this.selectedSectorIndex != -1 )
@@ -336,10 +315,10 @@ public class KeybindSelectorScreen extends Screen
 
             // Attack workaround (very hacky)
             // Abusable??? (FIXME)
-            if ( selectedKeyBinding.equals( this.mc.options.attackKey ) && Configurations.ENABLE_ATTACK_WORKAROUND )
+            if ( selectedKeyBinding.equals( this.client.options.attackKey ) && Configurations.ENABLE_ATTACK_WORKAROUND )
             {
                 KeybindsGalorePlus.debugLog( "\tAttack workaround enabled" );
-                ((MinecraftClientAccessor) this.mc).setAttackCooldown( 0 );
+                ((MinecraftClientAccessor) this.client).setAttackCooldown( 0 );
             }
         }
         else
@@ -383,8 +362,7 @@ public class KeybindSelectorScreen extends Screen
         else
         {
             // Click-hold selected binding
-
-            this.mc.setScreen( null );
+            this.client.setScreen( null );
             KeyBinding.unpressAll(); // This stops the other actions from triggering. Not sure why they do in the first place, though.
 
             if ( this.selectedSectorIndex != -1 )
@@ -431,18 +409,12 @@ public class KeybindSelectorScreen extends Screen
 
     //* >=1.20.2
     @Override
-    public void renderBackground( DrawContext context, int mouseX, int mouseY, float delta )
+    public void renderBackground( DrawContext context, int mouseX, int mouseY, float deltaTicks )
     {
-        // Remove the darkened background if needed
-        // This can help performance, as with all post-processing
-        if ( Configurations.DARKENED_BACKGROUND )
-        {
-            // Don't crash on 1.20.1 because I REALLY don't want another branch
-            // TODO: maybe we can use reflection to call the correct method?
-            try { super.renderBackground( context, mouseX, mouseY, delta ); } //* >=1.20.2
-            catch ( NoSuchMethodException | NoSuchMethodError e )
-            {}
-        }
+        if ( this.client.world == null ) this.renderPanoramaBackground( context, deltaTicks );
+
+        if ( Configurations.BLUR_BACKGROUND ) this.applyBlur( context );
+        if ( Configurations.DARKENED_BACKGROUND ) this.renderDarkening( context );
     }
 
     //* <1.20.2
