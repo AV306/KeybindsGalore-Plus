@@ -123,7 +123,7 @@ public class KeybindSelectorScreen extends Screen
         if ( mouseDistanceFromCentre <= this.cancelZoneRadius )
             this.selectedSectorIndex = -1;
         
-        this.renderPieMenu( context, delta, numberOfSectors, sectorAngle );
+        //this.renderPieMenu( context, delta, numberOfSectors, sectorAngle );
         this.renderLabelTexts( context, delta, numberOfSectors, sectorAngle );
     }
 
