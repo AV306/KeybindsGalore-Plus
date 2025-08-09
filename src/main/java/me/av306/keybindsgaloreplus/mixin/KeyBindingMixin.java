@@ -57,14 +57,14 @@ public abstract class KeyBindingMixin
 
     // Theoretically, this should be called ALL THE TIME
     // which it *is*, but ONLY IN A NON-DEV ENVIRONMENT, somehow
-    @Inject( method = "setPressed", at = @At("HEAD"), cancellable = true )
+    /*@Inject( method = "setPressed", at = @At( "HEAD" ), cancellable = true )
     private void setPressed( boolean pressed, CallbackInfo ci )
     {
-        KeybindsGalorePlus.debugLog( "setPressed( {} ) called for keybind {} on physical key {}", pressed, this.translationKey, this.boundKey.getTranslationKey() );
+        //KeybindsGalorePlus.debugLog( "setPressed( {} ) called for keybind {} on physical key {}", pressed, this.translationKey, this.boundKey.getTranslationKey() );
 
         // I can't demonstrate that this actually causes issues (setPressed( true ) only happened for the mouse when I tried)
         // but it has potential for duplicating the handleKeyPress call, since setKeyPressed is *supposed* to call setPressed...
         // Not calling handleKeyPress may cause https://github.com/AV306/KeybindsGalore-Plus/issues/10 though
         //KeybindManager.handleKeyPress( this.boundKey, pressed, ci );
-    }
+    }*/
 }

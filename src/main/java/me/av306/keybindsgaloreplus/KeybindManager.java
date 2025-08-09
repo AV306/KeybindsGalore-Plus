@@ -37,7 +37,7 @@ public class KeybindManager
      */
     public static void findAllConflicts()
     {
-        KeybindsGalorePlus.LOGGER.info( "Performing lazy conflict check" );
+        KeybindsGalorePlus.LOGGER.info( "(KBG+) Performing lazy conflict check" );
 
         MinecraftClient client = MinecraftClient.getInstance();
 

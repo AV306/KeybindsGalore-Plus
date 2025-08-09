@@ -30,6 +30,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
     public static final Logger LOGGER = LoggerFactory.getLogger( "keybingsgaloreplus" );
 
     private static KeyBinding configreloadKeybind;
+    private static KeyBinding keyStateReloadKeybind;
 
     @Override
     public void onInitializeClient()
@@ -66,7 +67,14 @@ public class KeybindsGalorePlus implements ClientModInitializer
 
             // Set config reload key
             configreloadKeybind = KeyBindingHelper.registerKeyBinding( new KeyBinding(
-                    "key.keybindsgaloreplus.reloadconfigs",
+                        "key.keybindsgaloreplus.reloadconfigs",
+                        InputUtil.Type.KEYSYM,
+                        GLFW.GLFW_KEY_UNKNOWN,
+                        "category.keybindsgaloreplus.keybinds"
+            ) );
+
+            keyStateReloadKeybind = KeyBindingHelper.registerKeyBinding( new KeyBinding(
+                    "key.keybindsgaloreplus.reloadkeystate",
                     InputUtil.Type.KEYSYM,
                     GLFW.GLFW_KEY_UNKNOWN,
                     "category.keybindsgaloreplus.keybinds"
@@ -99,6 +107,13 @@ public class KeybindsGalorePlus implements ClientModInitializer
                         // Print all config fields
                         this.configManager.printAllConfigs();                        
                     }
+                }
+
+                while ( keyStateReloadKeybind.wasPressed() )
+                {
+                    KeybindManager.findAllConflicts();
+                    client.player.sendMessage(
+                            Text.translatable( "text.keybindsgaloreplus.keystatereloaded" ), false );
                 }
             } );
 
