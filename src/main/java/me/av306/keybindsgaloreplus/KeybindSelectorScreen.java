@@ -15,6 +15,8 @@ import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.customDataManager;
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import me.av306.keybindsgaloreplus.mixin.MinecraftClientAccessor;
 //import net.minecraft.client.gl.ShaderProgramKeys;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.KeyBinding;
@@ -149,11 +151,11 @@ public class KeybindSelectorScreen extends Screen
             {
                 try
                 {
-                    outerColor = customDataManager.customData.get( this.conflicts.get( sectorIndex ).getTranslationKey() ).sectorColor;
+                    outerColor = customDataManager.customData.get( this.conflicts.get( sectorIndex ).getBoundKeyTranslationKey() ).sectorColor;
                 }
                 catch ( NullPointerException ignored )
                 {
-                    //KeybindsGalorePlus.debugLog( "No custom sector colour for {}", this.conflicts.get( sectorIndex ).getTranslationKey() );
+                    //KeybindsGalorePlus.debugLog( "No custom sector colour for {}", this.conflicts.get( sectorIndex ).getBoundKeyTranslationKey() );
                 }
             }
 
@@ -230,8 +232,8 @@ public class KeybindSelectorScreen extends Screen
             // Tells you which control category the action goes in
             // TODO: configurable
 
-            String id = action.getTranslationKey();
-            String actionName = Text.translatable( action.getCategory() ).getString() + ": " + Text.translatable( action.getTranslationKey() ).getString();
+            String id = action.getBoundKeyTranslationKey();
+            String actionName = Text.translatable( action.getCategory().toTranslationKey() ).getString() + ": " + Text.translatable( action.getBoundKeyTranslationKey() ).getString();
 
             // Read custom data for this keybind, only if present
             if ( customDataManager.hasCustomData )
@@ -239,7 +241,7 @@ public class KeybindSelectorScreen extends Screen
                 try
                 {
                     if ( customDataManager.customData.get( id ).hideCategory )
-                        actionName = Text.translatable( action.getTranslationKey() ).getString();
+                        actionName = Text.translatable( action.getBoundKeyTranslationKey() ).getString();
                 }
                 catch ( NullPointerException npe )
                 {
@@ -307,7 +309,7 @@ public class KeybindSelectorScreen extends Screen
         {
             KeyBinding selectedKeyBinding = this.conflicts.get( this.selectedSectorIndex );
 
-            KeybindsGalorePlus.debugLog( "Activated {} from pie menu", selectedKeyBinding.getTranslationKey() );
+            KeybindsGalorePlus.debugLog( "Activated {} from pie menu", selectedKeyBinding.getBoundKeyTranslationKey() );
 
             ((KeyBindingAccessor) selectedKeyBinding).setPressed( true );
             ((KeyBindingAccessor) selectedKeyBinding).setTimesPressed( 1 );
@@ -342,19 +344,20 @@ public class KeybindSelectorScreen extends Screen
     // Previously, InputUtil.isKeyPressed would throw a GL error when called for a mouse code (0, 1, 2) and return a meaningless value
 
     @Override
-    public boolean keyReleased( int keyCode, int scanCode, int modifiers )
+    public boolean keyReleased( KeyInput input )
     {
-        if ( keyCode == this.conflictedKey.getCode() ) this.closePieMenu();
 
-        return super.keyReleased( keyCode, scanCode, modifiers );
+        if ( input.keyCode == this.conflictedKey.getCode() ) this.closePieMenu();
+
+        return super.keyReleased( input.keyCode, input.scanCode, input.modifiers );
     }
 
     @Override
-    public boolean mouseReleased( double mouseX, double mouseY, int button )
+    public boolean mouseReleased( Click click )
     {
         //this.mouseDown = false;
 
-        if ( button == this.conflictedKey.getCode() )
+        if ( click.button() == this.conflictedKey.getCode() )
         {
             // Close menu and activate selection normally – click-hold not applicable
             this.closePieMenu();
@@ -394,11 +397,11 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
-    public boolean mouseClicked( double mouseX, double mouseY, int button )
+    public boolean mouseClicked( Click click )
     {
         this.mouseDown = true;
 
-        return super.mouseClicked( mouseX, mouseY, button );
+        return super.mouseClicked( click );
     }
 
     @Override

@@ -70,14 +70,16 @@ public class KeybindsGalorePlus implements ClientModInitializer
                         "key.keybindsgaloreplus.reloadconfigs",
                         InputUtil.Type.KEYSYM,
                         GLFW.GLFW_KEY_UNKNOWN,
-                        "category.keybindsgaloreplus.keybinds"
+                        //"category.keybindsgaloreplus.keybinds"
+                        KeyBinding.Category.MISC // FIXME
             ) );
 
             keyStateReloadKeybind = KeyBindingHelper.registerKeyBinding( new KeyBinding(
                     "key.keybindsgaloreplus.reloadkeystate",
                     InputUtil.Type.KEYSYM,
                     GLFW.GLFW_KEY_UNKNOWN,
-                    "category.keybindsgaloreplus.keybinds"
+                    //"category.keybindsgaloreplus.keybinds"
+                    KeyBinding.Category.MISC // FIXME
             ) );
 
             // Bind action to config reload key

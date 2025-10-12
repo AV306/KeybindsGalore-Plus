@@ -29,6 +29,8 @@ public class KeybindManager
      * but must not make changes to existing values.
      */
     public static final Hashtable<InputUtil.Key, List<KeyBinding>> conflictTable = new Hashtable<>();
+    // FIXME: Minecraft 1.21.10 seems to have fixed the original issue! Need to see if we can use their mapping table...
+    //  Might have to completely rewrite the mixins and below logic (ugh)
 
     public static final HashMap<Integer, KeyBinding> clickHoldKeys = new HashMap<>();
 
@@ -52,7 +54,7 @@ public class KeybindManager
             // Skip unbound keys — keys are usually only bound to KEY_UNKNOWN when they are "unbound"
             if ( physicalKey.getCode() == GLFW.GLFW_KEY_UNKNOWN ) continue;
 
-            //KeybindsGalorePlus.LOGGER.info( "Adding {} to list for physical key {}", keybinding.getTranslationKey(), physicalKey.getTranslationKey() );
+            //KeybindsGalorePlus.LOGGER.info( "Adding {} to list for physical key {}", keybinding.getBoundKeyTranslationKey(), physicalKey.getBoundKeyTranslationKey() );
 
             // Create a new list if the key doesn't have one
             conflictTable.computeIfAbsent( physicalKey, key -> new ArrayList<>() );
@@ -73,7 +75,7 @@ public class KeybindManager
         if ( Configurations.DEBUG )
         {
             KeybindsGalorePlus.LOGGER.info( "Dumping key conflict table" );
-            conflictTable.values().forEach( list -> list.forEach( binding -> KeybindsGalorePlus.LOGGER.info( "\t{} bound to physical key {}", binding.getTranslationKey(), ((KeyBindingAccessor) binding).getBoundKey() ) ) );
+            conflictTable.values().forEach( list -> list.forEach( binding -> KeybindsGalorePlus.LOGGER.info( "\t{} bound to physical key {}", binding.getBoundKeyTranslationKey(), ((KeyBindingAccessor) binding).getBoundKey() ) ) );
         }
     }
 
@@ -134,7 +136,7 @@ public class KeybindManager
 
                 if ( clickHoldBinding != null )
                 {
-                    KeybindsGalorePlus.debugLog( "Activating {} (click-hold)", clickHoldBinding.getTranslationKey() );
+                    KeybindsGalorePlus.debugLog( "Activating {} (click-hold)", clickHoldBinding.getBoundKeyTranslationKey() );
                     ((KeyBindingAccessor) clickHoldBinding).setPressed( pressed );
                     ((KeyBindingAccessor) clickHoldBinding).setTimesPressed( pressed ? 1 : 0 );
                 }
@@ -171,7 +173,7 @@ public class KeybindManager
                 // Transfer key state to all bindings on the key
                 getConflicts( key ).forEach( binding ->
                 {
-                    KeybindsGalorePlus.debugLog( "\tVanilla fix, {} key {}", pressed ? "enabling" : "disabling", binding.getTranslationKey() );
+                    KeybindsGalorePlus.debugLog( "\tVanilla fix, {} key {}", pressed ? "enabling" : "disabling", binding.getBoundKeyTranslationKey() );
 
                     if ( pressed )
                     {

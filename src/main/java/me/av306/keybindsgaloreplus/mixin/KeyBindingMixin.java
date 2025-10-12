@@ -22,11 +22,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin( value = KeyBinding.class )
 public abstract class KeyBindingMixin
 {
-    @Shadow
-    private InputUtil.Key boundKey;
-
-    @Shadow @Final
-    private String translationKey;
 
     @Shadow private boolean pressed;
 
