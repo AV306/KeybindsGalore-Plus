@@ -23,6 +23,8 @@
 		"UNI717 -- sinytra Connector compatibility",
 		"IG114514 -- mouse support and compatibility",
 		"WxAaRoNxW -- click-to-activate and compatibility",
+		"YnwLNE -- compatability",
+		"Trollinator316 -- compatibility",
 		"...and more on GitHub!"
 	],
 	"license": "GNU Lesser General Public License v3.0",
@@ -37,7 +39,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.14.8",
-		"minecraft": "1.20.x"
+		"minecraft": ">=1.20 <=1.20.1"
 	},
 	"dummy": [
 		">=1.21 <=1.21.1",

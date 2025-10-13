@@ -455,8 +455,7 @@ public class KeybindSelectorScreen extends Screen
         // Catch
         if ( Configurations.DARKENED_BACKGROUND ) 
         {
-            try { super.renderBackground( context ); }
-            catch ( NoSuchMethodError e ) {}
+            super.renderBackground( context );
         }
     }
 }
