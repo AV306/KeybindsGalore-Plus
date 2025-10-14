@@ -2,21 +2,11 @@ package me.av306.keybindsgaloreplus.render;
 
 import me.av306.keybindsgaloreplus.Configurations;
 import me.av306.keybindsgaloreplus.CustomRenderLayers;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
-
-import java.util.Objects;
-
-import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.LOGGER;
-import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.customDataManager;
 
 public class KeybindSelectorElementRenderer extends SpecialGuiElementRenderer<KeybindSelectorElementRenderState>
 {
@@ -29,35 +19,34 @@ public class KeybindSelectorElementRenderer extends SpecialGuiElementRenderer<Ke
     protected void render( KeybindSelectorElementRenderState state, MatrixStack matrices )
     {
         VertexConsumer buffer = this.vertexConsumers.getBuffer( CustomRenderLayers.GUI_TRIANGLE_STRIP );
-        //VertexConsumer buffer = this.vertexConsumers.getBuffer( RenderLayer.getDebugTriangleFan() );
 
+        int centreX = (state.x2() - state.x1()) / 2;
+        int centreY = (state.y2() - state.y1()) / 2;
         int numberOfSectors = state.numberOfSectors();
         float sectorAngle = state.sectorAngle();
         int selectedSectorIndex = state.selectedSectorIndex();
         float delta = state.tickDelta();
 
-        int centreX = (state.x2() - state.x1()) / 2;
-        int centreY = (state.y2() - state.y1()) / 2;
-
         float maxRadius = Math.min( (centreX * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN,
                 (centreY * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN );
-        float maxExpandedRadius = maxRadius * Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
+        //float maxExpandedRadius = maxRadius * Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
         float cancelZoneRadius = maxRadius * Configurations.CANCEL_ZONE_SCALE;
 
-        float startAngle = 0;
-        int vertices = Configurations.CIRCLE_VERTICES / numberOfSectors; // FP truncation here
-        if ( vertices < 1 ) vertices = 1; // Make sure there's always at least 2 vertices for a visible trapezium
-        for ( var currentDrawnSectorIndex = 0;
-              currentDrawnSectorIndex < numberOfSectors; currentDrawnSectorIndex++ )
+        float currentAngle = 0;
+        int numberOfVerticesPerSector = Configurations.CIRCLE_VERTICES / numberOfSectors; // FP truncation here
+        if ( numberOfVerticesPerSector < 1 ) numberOfVerticesPerSector = 1; // Make sure there's always at least 2 vertices for a visible trapezium
+
+        for ( var currentDrawnSectorIndex = 0; currentDrawnSectorIndex < numberOfSectors; currentDrawnSectorIndex++ )
         {
             float outerRadius = calculateRadius( state.ticksInScreen(), delta,
                     numberOfSectors, currentDrawnSectorIndex,
                     state.selectedSectorIndex(), maxRadius );
+
             float innerRadius = cancelZoneRadius;
             int innerColor = Configurations.PIE_MENU_COLOR;
             int outerColor = Configurations.PIE_MENU_COLOR;
 
-            // TODO
+            // TODO: custom data
             /*if ( customDataManager.hasCustomData )
             {
                 try
@@ -84,21 +73,20 @@ public class KeybindSelectorElementRenderer extends SpecialGuiElementRenderer<Ke
 
             if ( !Configurations.SECTOR_GRADATION ) innerColor = outerColor;
 
-            this.drawSector( buffer, centreX, centreY, startAngle, sectorAngle,
-                    vertices, innerRadius, outerRadius, innerColor, outerColor );
+            this.writeSectorVertices( buffer, centreX, centreY, currentAngle, sectorAngle,
+                    numberOfVerticesPerSector, innerRadius, outerRadius, innerColor, outerColor );
 
-            startAngle += sectorAngle;
+            currentAngle += sectorAngle;
         }
     }
 
-    private void drawSector( VertexConsumer buf, int centreX, int centreY, float startAngle, float sectorAngle, int vertices, float innerRadius,
-                             float outerRadius, int innerColor, int outerColor )
+    private void writeSectorVertices( VertexConsumer buf, int centreX, int centreY, float startAngle, float sectorAngle, int vertices, float innerRadius,
+                                      float outerRadius, int innerColor, int outerColor )
     {
         for ( var i = 0; i <= vertices; i++ )
         {
             float angle = startAngle + ((float) i / vertices) * sectorAngle;
 
-            // ===== Version dependent =====
             // Inner vertex
             buf.vertex( centreX + MathHelper.cos( angle ) * innerRadius,
                     centreY + MathHelper.sin( angle ) * innerRadius, 0 );
@@ -128,7 +116,7 @@ public class KeybindSelectorElementRenderer extends SpecialGuiElementRenderer<Ke
     @Override
     protected String getName()
     {
-        return "KeybindsGalorePlus Keybind Selector Ring Renderer";
+        return "KeybindsGalorePlus Keybind Selector Renderer";
     }
 
     @Override

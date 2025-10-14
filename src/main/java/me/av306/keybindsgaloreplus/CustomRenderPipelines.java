@@ -14,7 +14,7 @@ public class CustomRenderPipelines
             .withLocation( Identifier.of( "keybindsgaloreplus:pipeline/gui_tristrip" ) )
             .withVertexFormat( VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLE_STRIP )
             .withCull( false )
-            .withDepthWrite( false )
-            .withDepthTestFunction( DepthTestFunction.NO_DEPTH_TEST )
+            /*.withDepthWrite( false )
+            .withDepthTestFunction( DepthTestFunction.NO_DEPTH_TEST )*/
             .build();
 }

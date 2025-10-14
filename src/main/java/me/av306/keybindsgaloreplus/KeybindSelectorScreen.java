@@ -107,7 +107,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
-    public void render( DrawContext context, int mouseX, int mouseY, float delta )
+    public void render( DrawContext context, int mouseX, int mouseY, float tickDelta )
     {
         // Angle of mouse, in radians from +X-axis, centred on the origin
         double mouseAngle = mouseAngle( this.centreX, this.centreY, mouseX, mouseY );
@@ -130,13 +130,13 @@ public class KeybindSelectorScreen extends Screen
 
         // Need real dimensions of window, not scaled dimensions provided by this.width/height
         context.state.addSpecialElement( new KeybindSelectorElementRenderState(
-                delta, numberOfSectors, sectorAngle, selectedSectorIndex,
-                mouseDown, ticksInScreen,
-                0, 0, client.getWindow().getWidth(), client.getWindow().getHeight(),
+                tickDelta, numberOfSectors, sectorAngle, this.selectedSectorIndex,
+                this.mouseDown, this.ticksInScreen,
+                0, 0, this.client.getWindow().getWidth(), this.client.getWindow().getHeight(),
                 null
         ) ); // FIXME: getWidth() vs getFrameBufferWidth()?
 
-        this.renderLabelTexts( context, delta, numberOfSectors, sectorAngle );
+        this.renderLabelTexts( context, tickDelta, numberOfSectors, sectorAngle );
     }
 
 
