@@ -36,8 +36,8 @@ public class KeybindSelectorElementRenderer extends SpecialGuiElementRenderer<Ke
         int selectedSectorIndex = state.selectedSectorIndex();
         float delta = state.tickDelta();
 
-        int centreX = state.screenWidth() / 2;
-        int centreY = state.screenHeight() / 2;
+        int centreX = (state.x2() - state.x1()) / 2;
+        int centreY = (state.y2() - state.y1()) / 2;
 
         float maxRadius = Math.min( (centreX * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN,
                 (centreY * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN );
@@ -89,7 +89,6 @@ public class KeybindSelectorElementRenderer extends SpecialGuiElementRenderer<Ke
 
             startAngle += sectorAngle;
         }
-        this.vertexConsumers.draw();
     }
 
     private void drawSector( VertexConsumer buf, int centreX, int centreY, float startAngle, float sectorAngle, int vertices, float innerRadius,

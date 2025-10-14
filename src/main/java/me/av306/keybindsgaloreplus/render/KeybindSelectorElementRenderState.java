@@ -5,7 +5,7 @@ import net.minecraft.client.gui.render.state.special.SpecialGuiElementRenderStat
 import org.jetbrains.annotations.Nullable;
 
 // TODO: maybe get the element renderer to handle the label texts too?
-public record KeybindSelectorElementRenderState( float tickDelta, int screenWidth, int screenHeight,
+public record KeybindSelectorElementRenderState( float tickDelta,
                                                  int numberOfSectors, float sectorAngle, int selectedSectorIndex,
                                                  boolean mouseDown, int ticksInScreen,
                                                  int x1, int y1, int x2, int y2,
@@ -13,14 +13,13 @@ public record KeybindSelectorElementRenderState( float tickDelta, int screenWidt
                                                  @Nullable ScreenRect bounds )
         implements SpecialGuiElementRenderState
 {
-    public KeybindSelectorElementRenderState( float tickDelta, int screenWidth, int screenHeight,
+    public KeybindSelectorElementRenderState( float tickDelta,
                                               int numberOfSectors, float sectorAngle, int selectedSectorIndex,
                                               boolean mouseDown, int ticksInScreen,
                                               int x1, int y1, int x2, int y2,
                                               @Nullable ScreenRect scissorArea )
     {
-        this( tickDelta, screenWidth, screenHeight, numberOfSectors,
-                sectorAngle, selectedSectorIndex, mouseDown,
+        this( tickDelta, numberOfSectors, sectorAngle, selectedSectorIndex, mouseDown,
                 ticksInScreen, x1, y1, x2, y2, scissorArea,
                 SpecialGuiElementRenderState.createBounds( x1, y1, x2, y2, scissorArea ) );
     }

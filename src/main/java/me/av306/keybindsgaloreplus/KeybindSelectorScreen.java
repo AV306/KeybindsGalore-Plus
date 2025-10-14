@@ -128,12 +128,13 @@ public class KeybindSelectorScreen extends Screen
         if ( mouseDistanceFromCentre <= this.cancelZoneRadius )
             this.selectedSectorIndex = -1;
 
+        // Need real dimensions of window, not scaled dimensions provided by this.width/height
         context.state.addSpecialElement( new KeybindSelectorElementRenderState(
-                delta, width, height, numberOfSectors, sectorAngle,
-                selectedSectorIndex, mouseDown, ticksInScreen,
-                0, 0, width, height, null
-        ) );
-
+                delta, numberOfSectors, sectorAngle, selectedSectorIndex,
+                mouseDown, ticksInScreen,
+                0, 0, client.getWindow().getWidth(), client.getWindow().getHeight(),
+                null
+        ) ); // FIXME: getWidth() vs getFrameBufferWidth()?
 
         this.renderLabelTexts( context, delta, numberOfSectors, sectorAngle );
     }
