@@ -127,6 +127,9 @@ public class KeybindsGalorePlus implements ClientModInitializer
 
         // Find conflicts on first world join
         ClientPlayConnectionEvents.JOIN.register( (handler, sender, client) -> KeybindManager.findAllConflicts() );
+
+        // Register our fancy circle renderer
+        
     }
 
     public static void debugLog( String message )

@@ -30,6 +30,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.Objects;
 
+// FIXME: pretty much all of this goes into SelectorRingGuiElementRenderer
 public class KeybindSelectorScreen extends Screen
 {
     // Instance variables
