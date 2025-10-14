@@ -1,13 +1,13 @@
 package me.av306.keybindsgaloreplus;
 
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase;
 
 public class CustomRenderLayers
 {
-    public static final RenderLayer.MultiPhase GUI = RenderLayer.of(
-            "keybindsgaloreplus:immediate_gui", 2048, false, true,
-            CustomRenderPipelines.GUI_TRISTRIP,
+    public static final RenderLayer.MultiPhase GUI_TRIANGLE_STRIP = RenderLayer.of(
+            "keybindsgaloreplus:gui_triangle_strip", RenderLayer.CUTOUT_BUFFER_SIZE,
+            false, true,
+            CustomRenderPipelines.GUI_TRIANGLE_STRIP,
             RenderLayer.MultiPhaseParameters.builder()
                     //.layering( RenderPhase.NO_LAYERING )
                     //.target( RenderPhase.MAIN_TARGET )

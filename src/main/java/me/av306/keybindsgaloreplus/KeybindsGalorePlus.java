@@ -3,9 +3,13 @@ package me.av306.keybindsgaloreplus;
 import me.av306.keybindsgaloreplus.configmanager.ConfigManager;
 import me.av306.keybindsgaloreplus.customdata.DataManager;
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
+import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderState;
+import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.ClickEvent;
@@ -15,6 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,8 +134,10 @@ public class KeybindsGalorePlus implements ClientModInitializer
         ClientPlayConnectionEvents.JOIN.register( (handler, sender, client) -> KeybindManager.findAllConflicts() );
 
         // Register our fancy circle renderer
-        
+        SpecialGuiElementRegistry.register(
+                ctx -> new KeybindSelectorElementRenderer( ctx.vertexConsumers() ) );
     }
+
 
     public static void debugLog( String message )
     {

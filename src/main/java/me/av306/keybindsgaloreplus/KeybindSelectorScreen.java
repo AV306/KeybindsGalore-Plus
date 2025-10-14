@@ -15,11 +15,17 @@ import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.customDataManager;
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import me.av306.keybindsgaloreplus.mixin.MinecraftClientAccessor;
 //import net.minecraft.client.gl.ShaderProgramKeys;
+import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderState;
+import net.minecraft.block.WoodType;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.render.state.special.SignGuiElementRenderState;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.*;
-import net.minecraft.client.util.BufferAllocator;
+import net.minecraft.client.render.block.entity.SignBlockEntityRenderer;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.text.Text;
@@ -30,7 +36,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.Objects;
 
-// FIXME: pretty much all of this goes into SelectorRingGuiElementRenderer
+// FIXME: pretty much all of this goes into KeybindSelectorElementRenderer
 public class KeybindSelectorScreen extends Screen
 {
     // Instance variables
@@ -85,9 +91,7 @@ public class KeybindSelectorScreen extends Screen
     @Override
     protected void init()
     {
-        this.vertexConsumerProvider = this.client.getBufferBuilders().getEntityVertexConsumers();
-                //VertexConsumerProvider.immediate( new BufferAllocator( 786432 ) );
-
+        // TODO: What do we need to pass to the render state, and what can the renderer infer?
         // Set centre of screen
         this.centreX = this.width / 2;
         this.centreY = this.height / 2;
@@ -123,82 +127,19 @@ public class KeybindSelectorScreen extends Screen
         // Deselect slot if mouse is within cancel zone
         if ( mouseDistanceFromCentre <= this.cancelZoneRadius )
             this.selectedSectorIndex = -1;
-        
-        //this.renderPieMenu( context, delta, numberOfSectors, sectorAngle );
+
+        context.state.addSpecialElement( new KeybindSelectorElementRenderState(
+                delta, width, height, numberOfSectors, sectorAngle,
+                selectedSectorIndex, mouseDown, ticksInScreen,
+                0, 0, width, height, null
+        ) );
+
+
         this.renderLabelTexts( context, delta, numberOfSectors, sectorAngle );
     }
 
 
     // ==================== Rendering methods ====================
-
-    private void renderPieMenu( DrawContext context, float delta, int numberOfSectors, float sectorAngle )
-    {
-        // Setup rendering stuff
-        BufferBuilder buf = (BufferBuilder) this.vertexConsumerProvider.getBuffer( CustomRenderLayers.GUI );
-
-        float startAngle = 0;
-        int vertices = Configurations.CIRCLE_VERTICES / numberOfSectors; // FP truncation here
-        if ( vertices < 1 ) vertices = 1; // Make sure there's always at least 2 vertices for a visible trapezium
-        for ( var sectorIndex = 0; sectorIndex < numberOfSectors; sectorIndex++ )
-        {
-            float outerRadius = calculateRadius( delta, numberOfSectors, sectorIndex );
-            float innerRadius = this.cancelZoneRadius;
-            int innerColor = Configurations.PIE_MENU_COLOR;
-            int outerColor = Configurations.PIE_MENU_COLOR;
-
-            if ( customDataManager.hasCustomData )
-            {
-                try
-                {
-                    outerColor = customDataManager.customData.get( this.conflicts.get( sectorIndex ).getTranslationKey() ).sectorColor;
-                }
-                catch ( NullPointerException ignored )
-                {
-                    //KeybindsGalorePlus.debugLog( "No custom sector colour for {}", this.conflicts.get( sectorIndex ).getTranslationKey() );
-                }
-            }
-
-            // Lighten every other sector
-            // Hardcoding lightening the inner color for a distinct visual identity or something
-            if ( sectorIndex % 2 == 0 ) innerColor = outerColor += Configurations.PIE_MENU_COLOR_LIGHTEN_FACTOR;
-
-            if ( this.selectedSectorIndex == sectorIndex )
-            {
-                innerRadius *= Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
-                outerColor = this.mouseDown ? Configurations.PIE_MENU_HIGHLIGHT_COLOR : Configurations.PIE_MENU_SELECT_COLOR;
-            }
-
-            if ( !Configurations.SECTOR_GRADATION ) innerColor = outerColor;
-
-            this.drawSector( buf, startAngle, sectorAngle, vertices, innerRadius, outerRadius, innerColor, outerColor );
-
-            startAngle += sectorAngle;
-        }
-
-        this.vertexConsumerProvider.draw();
-        //CustomRenderLayers.GUI.draw( buf.end() );
-    }
-
-    private void drawSector( VertexConsumer buf, float startAngle, float sectorAngle, int vertices, float innerRadius, float outerRadius,
-                             int innerColor, int outerColor )
-    {
-        for ( var i = 0; i <= vertices; i++ )
-        {
-            float angle = startAngle + ((float) i / vertices) * sectorAngle;
-
-            // ===== Version dependent =====
-            // Inner vertex
-            // FIXME: is the compiler smart enough to optimise the trigo?
-            buf.vertex( this.centreX + MathHelper.cos( angle ) * innerRadius, this.centreY + MathHelper.sin( angle ) * innerRadius, 0 );
-            buf.color( innerColor >> 16 & 0xFF, innerColor >> 8 & 0xFF, innerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
-            //buf.next(); //* <1.21
-
-            // Outer vertex
-            buf.vertex( this.centreX + MathHelper.cos( angle ) * outerRadius, this.centreY + MathHelper.sin( angle ) * outerRadius, 0 );
-            buf.color( outerColor >> 16 & 0xFF, outerColor >> 8 & 0xFF, outerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
-            //buf.next(); //* <1.21
-        }
-    }
 
     private float calculateRadius( float delta, int numberOfSectors, int sectorIndex )
     {
@@ -213,6 +154,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
     // At least this works fine in 1.21.6.
+    // TODO: move into KeybindSelectorElementRenderer
     private void renderLabelTexts( DrawContext context, float delta, int numberOfSectors, float sectorAngle )
     {
         for ( var sectorIndex = 0; sectorIndex < numberOfSectors; sectorIndex++ )
