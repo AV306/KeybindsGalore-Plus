@@ -11,6 +11,7 @@
 package me.av306.keybindsgaloreplus;
 
 import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.customDataManager;
+import static me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer.calculateRadius;
 
 import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
 import me.av306.keybindsgaloreplus.mixin.MinecraftClientAccessor;
@@ -91,11 +92,11 @@ public class KeybindSelectorScreen extends Screen
     @Override
     protected void init()
     {
-        // TODO: What do we need to pass to the render state, and what can the renderer infer?
         // Set centre of screen
         this.centreX = this.width / 2;
         this.centreY = this.height / 2;
 
+        // These are computed twice, once in here (SCALED window coords) and once in the selector renderer (ABSOLUTE window coords)
         this.maxRadius = Math.min( (this.centreX * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN, (this.centreY * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN );
         this.maxExpandedRadius = this.maxRadius * Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
         this.cancelZoneRadius = maxRadius * Configurations.CANCEL_ZONE_SCALE;
@@ -115,11 +116,9 @@ public class KeybindSelectorScreen extends Screen
         float mouseDistanceFromCentre = MathHelper.sqrt( (mouseX - this.centreX) * (mouseX - this.centreX) +
                         (mouseY - this.centreY) * (mouseY - this.centreY) );
 
-        // How many sectors to make for the pie menu?
-        int numberOfSectors = this.conflicts.size();
 
-        // Angle occupied by each sector
-        float sectorAngle = (MathHelper.TAU) / numberOfSectors;
+        int numberOfSectors = this.conflicts.size(); // How many sectors to make for the pie menu?
+        float sectorAngle = (MathHelper.TAU) / numberOfSectors; // Angle occupied by each sector
 
         // Exact index of selected sector
         this.selectedSectorIndex = (int) (mouseAngle / sectorAngle);
@@ -142,25 +141,12 @@ public class KeybindSelectorScreen extends Screen
 
     // ==================== Rendering methods ====================
 
-    private float calculateRadius( float delta, int numberOfSectors, int sectorIndex )
-    {
-        float radius = Configurations.ANIMATE_PIE_MENU ?
-                Math.max( 0f, Math.min( (this.ticksInScreen + delta - sectorIndex * 6f / numberOfSectors) * 40f, this.maxRadius ) ) :
-                this.maxRadius;
-
-        // Expand the sector if selected
-        if ( this.selectedSectorIndex == sectorIndex ) radius *= Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
-
-        return radius;
-    }
-
     // At least this works fine in 1.21.6.
-    // TODO: move into KeybindSelectorElementRenderer
     private void renderLabelTexts( DrawContext context, float delta, int numberOfSectors, float sectorAngle )
     {
         for ( var sectorIndex = 0; sectorIndex < numberOfSectors; sectorIndex++ )
         {
-            float radius = calculateRadius( delta, numberOfSectors, sectorIndex );
+            float radius = calculateRadius( this.ticksInScreen, delta, numberOfSectors, sectorIndex, this.selectedSectorIndex, this.maxRadius );
             
             float angle = (sectorIndex + 0.5f) * sectorAngle;
 

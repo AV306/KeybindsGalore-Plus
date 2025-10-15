@@ -2,6 +2,7 @@ package me.av306.keybindsgaloreplus.render;
 
 import me.av306.keybindsgaloreplus.Configurations;
 import me.av306.keybindsgaloreplus.CustomRenderLayers;
+import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -27,6 +28,8 @@ public class KeybindSelectorElementRenderer extends SpecialGuiElementRenderer<Ke
         int selectedSectorIndex = state.selectedSectorIndex();
         float delta = state.tickDelta();
 
+        // TODO: document the fact that these configs are defined in absolute pixel coords, not scaled coords (like text)
+        // These are computed twice, once in here (ABSOLUTE window coords) and once in the screen (SCALED window coords)
         float maxRadius = Math.min( (centreX * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN,
                 (centreY * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN );
         //float maxExpandedRadius = maxRadius * Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
@@ -101,7 +104,7 @@ public class KeybindSelectorElementRenderer extends SpecialGuiElementRenderer<Ke
         }
     }
 
-    private float calculateRadius( int ticksInScreen, float delta, int numberOfSectors, int sectorIndex, int selectedSectorIndex, float maxRadius )
+    public static float calculateRadius( int ticksInScreen, float delta, int numberOfSectors, int sectorIndex, int selectedSectorIndex, float maxRadius )
     {
         float radius = Configurations.ANIMATE_PIE_MENU ?
                 Math.max( 0f, Math.min( (ticksInScreen + delta - sectorIndex * 6f / numberOfSectors) * 40f, maxRadius ) )
