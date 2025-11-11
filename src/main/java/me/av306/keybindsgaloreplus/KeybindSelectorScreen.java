@@ -136,66 +136,7 @@ public class KeybindSelectorScreen extends Screen
 
     private void renderPieMenu( DrawContext context, float delta, int numberOfSectors, float sectorAngle )
     {
-        // Setup rendering stuff
-        Tessellator tess = Tessellator.getInstance();
-    
-        RenderSystem.disableCull();
-        // We may not save on the state change itself, but I suppose being able to disable blend might help Sinytra users' performance
-        // https://stackoverflow.com/questions/7505018/repeated-state-changes-in-opengl
-        if ( Configurations.PIE_MENU_BLEND ) RenderSystem.enableBlend();
-
-        // ===== Version dependent =====
-        RenderSystem.setShader( GameRenderer::getPositionColorProgram ); //* <1.21.2
-        //RenderSystem.setShader( ShaderProgramKeys.POSITION_COLOR ); //* >=1.21.2
-
-        BufferBuilder buf = tess.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //* >1.21
-        //BufferBuilder buf = tess.getBuffer(); //* <1.21
-        //buf.begin( VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR ); //* <1.21
-
-        float startAngle = 0;
-        int vertices = Configurations.CIRCLE_VERTICES / numberOfSectors; // FP truncation here
-        if ( vertices < 1 ) vertices = 1; // Make sure there's always at least 2 vertices for a visible trapezium
-        for ( var sectorIndex = 0; sectorIndex < numberOfSectors; sectorIndex++ )
-        {
-            float outerRadius = calculateRadius( delta, numberOfSectors, sectorIndex );
-            float innerRadius = this.cancelZoneRadius;
-            int innerColor = Configurations.PIE_MENU_COLOR;
-            int outerColor = Configurations.PIE_MENU_COLOR;
-
-            if ( customDataManager.hasCustomData )
-            {
-                try
-                {
-                    outerColor = customDataManager.customData.get( this.conflicts.get( sectorIndex ).getTranslationKey() ).sectorColor;
-                }
-                catch ( NullPointerException ignored )
-                {
-                    //KeybindsGalorePlus.debugLog( "No custom sector colour for {}", this.conflicts.get( sectorIndex ).getTranslationKey() );
-                }
-            }
-
-            // Lighten every other sector
-            // Hardcoding lightening the inner color for a distinct visual identity or something
-            if ( sectorIndex % 2 == 0 ) innerColor = outerColor += Configurations.PIE_MENU_COLOR_LIGHTEN_FACTOR;
-
-            if ( this.selectedSectorIndex == sectorIndex )
-            {
-                innerRadius *= Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
-                outerColor = this.mouseDown ? Configurations.PIE_MENU_HIGHLIGHT_COLOR : Configurations.PIE_MENU_SELECT_COLOR;
-            }
-
-            if ( !Configurations.SECTOR_GRADATION ) innerColor = outerColor;
-
-            this.drawSector( buf, startAngle, sectorAngle, vertices, innerRadius, outerRadius, innerColor, outerColor );
-
-            startAngle += sectorAngle;
-        }
-
-        // ===== Version dependent =====
-        BufferRenderer.drawWithGlobalProgram( buf.end() ); //* >=1.21
-        //tess.draw(); //* <1.21
-        RenderSystem.enableCull();
-        if ( Configurations.PIE_MENU_BLEND ) RenderSystem.disableBlend();
+        // I can't figure out how to make this work. Neither BufferRenderer nor SpecialGuiElementRenderer exist...
     }
 
     private void drawSector( BufferBuilder buf, float startAngle, float sectorAngle, int vertices, float innerRadius, float outerRadius,

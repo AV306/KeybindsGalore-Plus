@@ -12,6 +12,7 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 
 import java.io.IOException;
+import java.net.URI;
 
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
@@ -127,6 +128,6 @@ public class KeybindsGalorePlus implements ClientModInitializer
     {
         return Text.literal( url )
                 .formatted( Formatting.YELLOW )
-                .styled( style -> style.withClickEvent( new ClickEvent( ClickEvent.Action.OPEN_URL, url ) ) );
+                .styled( style -> style.withClickEvent( new ClickEvent.OpenUrl( URI.create( url ) ) ) );
     }
 }
