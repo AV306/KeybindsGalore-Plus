@@ -14,39 +14,33 @@ A keybind conflict management and general quality-of-life mod!
 
 - Provides a **pie menu** for conflicting keybinds
 - **Corrects vanilla conflict handling**, similar to [Keybinds Fix](https://www.curseforge.com/minecraft/mc-mods/keybind-fix)
-- Supports **mouse buttons**
-- **Fixes many bugs** and adds many improvements to the original mod
-- Supports **1.20.x** and **1.21.x**
+- Supports **mouse buttons**!
+- Supports **1.20.x** and **1.21.1-1.21.6**
 - Supports **Fabric** and **Forge/NeoForge (via Sinytra Connector)**
 
 <div style="display: flex; justify-content: center; align-items: center;">
   <img src="https://github.com/AV306/KeybindsGalore-Plus/blob/14b7001f913c9bf089ef4fc41934c60dcf0db275/images/kbg_plus_demo.gif?raw=true" max-height=400 />
 </div>
 
-<br>
-
 ## How to Use
 
-KeybindsGalore+ will automatically detect conflicting keybinds!
+KeybindsGalore Plus will automatically detect conflicting keybinds!
 
-- **Pressing** a conflicted key *down* will **open the pie menu**
-- **Releasing** a conflicted key (when the pie menu is displayed) will **activate the highlighted action** and **close** the pie menu
-- **Clicking** on a section of the pie menu (without releasing the key) will **activate the highlighted action** and **deactivate** it when the key is **released**
+- **Pressing down** a conflicted key will **open the pie menu**
+- **Releasing** a conflicted key (when the pie menu is displayed) will **activate the highlighted action, if any** and **close** the pie menu
+- **Clicking** on a section of the pie menu *without releasing the key* will **activate the highlighted action** and **deactivate** it only when the key is **released**
 
-NB: When the pie menu *opens*, all actions currently activated (e.g. holding a key down) will be deactivated.
-<br>
+NB: When the pie menu opens, all actions currently activated (e.g. from holding another key down) will be deactivated.
 
 ## Modifications to Original
 
 - Optimised conflict searching
 - Keybind labels now show their category along with their name
-- Customisable keybind labels (see [this issue](https://github.com/AV306/KeybindsGalore-Plus/issues/3))
-- Label texts no longer run off the screen
+- Customisable keybind labels (see [here](https://github.com/AV306/KeybindsGalore-Plus/issues/3))
+- Prevented label texts from runing off the screen
 - Fully customisable pie menu
 - Allows compatibility with non-vanilla keybinds (insert your mod's keybinds into the [conflict table](https://github.com/AV306/KeybindsGalore-Plus/blob/1.21/src/main/java/me/av306/keybindsgaloreplus/KeybindManager.java) whenever convenient!)
 - **And more...**
-
-<br>
 
 ## Bug-busters :heart:
 
@@ -70,22 +64,20 @@ Bug reports and feature requests VERY welcome!
 
 (let me know if I missed you!)
 
-<br>
-
 ## Roadmap
 
-### 1.3.5
+### 1.5.0
 
-- Bugfixes
-
-### 1.4.0
-
-- Blacklist/whitelist toggle for ignored key list
 - Per-keybind overrides in custom data for:
-  - Label text (category + name / name only / custom text)
+  - Label text format (category + name / name only / custom text)
   - sector colour
   - sector opacity
-- Removal of non-lazy conflict check
+ 
+### Future
+
+- In-game config menu
+- Configurable key repeat delay for click-hold
+- 1.21.7+ support
 
 (need more features? make a [feature request](https://github.com/AV306/KeybindsGalore-Plus/issues)!)
 
