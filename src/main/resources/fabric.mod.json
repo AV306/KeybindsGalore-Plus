@@ -4,9 +4,9 @@
 	"version": "${version}",
 
 	"name": "KeybindsGalore Plus",
-	"description": "Keybind pie menu / QoL mod :D A fork of KeybindsGalore, originally by Cael and updated to 1.20 by HVB007",
+	"description": "All-in-one keybind conflict manager mod, built upon KeybindsGalore by CaelTheCohler and HVB007.",
 	"authors": [
-		"Blender",
+		"diblenderbenzene",
 		"HVB007",
 		"Cael"
 	],
