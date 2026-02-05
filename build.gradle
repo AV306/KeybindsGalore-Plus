@@ -69,17 +69,17 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
 	//it.options.source = 21
-	it.options.release = 17 // Maintain JVM compatibility with 1.20-1.20.4
+	it.options.release = 21 // Maintain JVM compatibility with 1.20-1.20.4
 }
 
 
 java {
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_17 // JVM compat with 1.20-1.20.6
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_21 // JVM compat with 1.20-1.20.6
 	
-	toolchain { languageVersion = JavaLanguageVersion.of( 21 ) }
+	toolchain { languageVersion = JavaLanguageVersion.of( 25 ) }
 }
 
 jar {

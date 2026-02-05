@@ -1,18 +1,27 @@
 package me.av306.keybindsgaloreplus;
 
 import java.util.ArrayList;
+import me.av306.keybindsgaloreplus.configmanager.ConfigComment;
 
+@ConfigComment( "Quick rundown of data types:" )
+@ConfigComment( " - float: floating-point number, can have decimal places. Use a period as the decimal separator, please, e.g. 3.14" )
+@ConfigComment( " - int: integers, whole numbers (no decimals)" )
+@ConfigComment( "       Can also represent a color, in which case you can use hex notation:" )
+@ConfigComment( "       0x(RR)(GG)(BB) e.g. 0xEED202 for #EED202 (not case sensitive!) ")
+@ConfigComment( " - boolean: true/false" )
+@ConfigComment( " - hexadecimal (color): \"short\" value (0-255) represented by TWO hexadecimal (base-16) numbers., e.g. 0xFF" )
 public class Configurations
 {
+    @ConfigComment( "Debug mode - enable this when reproducing your bug; disable normally" )
+    @ConfigComment( "Prints many messages to the console" )
     public static boolean DEBUG = false;
 
     // Performance
-
-    public static boolean LAZY_CONFLICT_CHECK = true;
+    //public static boolean LAZY_CONFLICT_CHECK = true;
     public static int CIRCLE_VERTICES = 120;
     public static boolean PIE_MENU_BLEND = false;
     public static boolean DARKENED_BACKGROUND = true;
-    public static final boolean BLUR_BACKGROUND = true;
+    public static boolean BLUR_BACKGROUND = true;
     public static boolean LABEL_TEXT_SHADOW = false;
 
     // Behaviour

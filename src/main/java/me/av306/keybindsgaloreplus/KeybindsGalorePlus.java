@@ -1,31 +1,26 @@
 package me.av306.keybindsgaloreplus;
 
-import me.av306.keybindsgaloreplus.configmanager.ConfigManager;
-import me.av306.keybindsgaloreplus.customdata.DataManager;
-import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
-import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderState;
-import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
-
 import java.io.IOException;
 import java.net.URI;
 
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import me.av306.keybindsgaloreplus.configmanager.ConfigManager;
+import me.av306.keybindsgaloreplus.customdata.DataManager;
+import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 public class KeybindsGalorePlus implements ClientModInitializer
 {
@@ -46,11 +41,9 @@ public class KeybindsGalorePlus implements ClientModInitializer
         {
             // Initialise ConfigManager and load config file
             configManager = new ConfigManager(
-                "KeybindsGalorePlus",    
                 FabricLoader.getInstance().getConfigDir(),
                 "keybindsgaloreplus_config.properties",
-                Configurations.class,
-                null
+                Configurations.class
             );
 
             // There's no good, easy way to enable DEBUG level, so I'm just gonna
@@ -110,7 +103,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
                     if ( Configurations.DEBUG )
                     {
                         // Print all config fields
-                        this.configManager.printAllConfigs();                        
+                        configManager.printAllConfigs();                        
                     }
                 }
 

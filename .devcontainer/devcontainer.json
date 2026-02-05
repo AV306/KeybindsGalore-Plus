@@ -1,0 +1,15 @@
+{
+    "name": "keybindsgaloreplus",
+    "image": "mcr.microsoft.com/devcontainers/base:debian",
+    "features": {
+        "ghcr.io/devcontainers/features/desktop-lite:1": {}
+    },
+    "forwardPorts": [6080],
+    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y xfce4 xfce4-terminal xfce4-panel xfce4-session xvfb x11-utils x11-apps tigervnc-server novnc websockify curl zip unzip",
+    "postStartCommand": "bash -c 'Xvfb :1 -screen 0 1280x720x24 &' && bash -c 'vncserver :1 -geometry 1920x1080 -depth 24' && bash -c 'websockify --web=/usr/share/novnc 6080 localhost:5901 &'",
+    "customizations": {
+        "codespaces": {
+            "openFiles": []
+        }
+    }
+}
