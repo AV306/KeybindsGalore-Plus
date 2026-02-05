@@ -1,9 +1,9 @@
 package me.av306.keybindsgaloreplus;
 
-import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
+import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.*;
 
@@ -28,9 +28,9 @@ public class KeybindManager
      * Compatibility mods may add other bindings (e.g. from another mod's keybind manager) here,
      * but must not make changes to existing values.
      */
-    public static final Hashtable<InputUtil.Key, List<KeyBinding>> conflictTable = new Hashtable<>();
+    public static final Hashtable<InputConstants.Key, List<KeyMapping>> conflictTable = new Hashtable<>();
 
-    public static final HashMap<Integer, KeyBinding> clickHoldKeys = new HashMap<>();
+    public static final HashMap<Integer, KeyMapping> clickHoldKeys = new HashMap<>();
 
     /**
      * FInd all conflicts on all keys known to the vanilla keybind manager
@@ -39,18 +39,18 @@ public class KeybindManager
     {
         KeybindsGalorePlus.LOGGER.info( "(KBG+) Performing lazy conflict check" );
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
 
         // Clear map
         conflictTable.clear();
 
         // Iterate over all bindings, adding them to the list under its assigned physical key
-        for ( KeyBinding keybinding : client.options.allKeys )
+        for ( KeyMapping keybinding : client.options.keyMappings )
         {
-            InputUtil.Key physicalKey = ((KeyBindingAccessor) keybinding).getBoundKey();
+            InputConstants.Key physicalKey = ((KeyMappingAccessor) keybinding).getKey();
 
             // Skip unbound keys — keys are usually only bound to KEY_UNKNOWN when they are "unbound"
-            if ( physicalKey.getCode() == GLFW.GLFW_KEY_UNKNOWN ) continue;
+            if ( physicalKey.getValue() == GLFW.GLFW_KEY_UNKNOWN ) continue;
 
             //KeybindsGalorePlus.LOGGER.info( "Adding {} to list for physical key {}", keybinding.getTranslationKey(), physicalKey.getTranslationKey() );
 
@@ -73,28 +73,28 @@ public class KeybindManager
         if ( Configurations.DEBUG )
         {
             KeybindsGalorePlus.LOGGER.info( "Dumping key conflict table" );
-            conflictTable.values().forEach( list -> list.forEach( binding -> KeybindsGalorePlus.LOGGER.info( "\t{} bound to physical key {}", binding.getTranslationKey(), ((KeyBindingAccessor) binding).getBoundKey() ) ) );
+            conflictTable.values().forEach( list -> list.forEach( binding -> KeybindsGalorePlus.LOGGER.info( "\t{} bound to physical key {}", binding.getTranslationKey(), ((KeyMappingAccessor) binding).getKey() ) ) );
         }
     }
 
     /**
      * Does a given key NOT open a pie menu? (
      */
-    public static boolean isIgnoredKey( InputUtil.Key key )
+    public static boolean isIgnoredKey( InputConstants.Key key )
     {
-        return Configurations.IGNORED_KEYS.contains( key.getCode() ) ^ Configurations.INVERT_IGNORED_KEYS_LIST;
+        return Configurations.IGNORED_KEYS.contains( key.getValue() ) ^ Configurations.INVERT_IGNORED_KEYS_LIST;
     }
 
-    public static boolean isClickHoldKey( InputUtil.Key key )
+    public static boolean isClickHoldKey( InputConstants.Key key )
     {
-        return clickHoldKeys.containsKey( key.getCode() );
+        return clickHoldKeys.containsKey( key.getValue() );
     }
 
     /**
      * Checks if there is a binding conflict on this key
      * @param key: The key to check
      */
-    public static boolean hasConflicts( InputUtil.Key key )
+    public static boolean hasConflicts( InputConstants.Key key )
     {
         return conflictTable.containsKey( key );
     }
@@ -102,16 +102,16 @@ public class KeybindManager
     /**
      * Initializes and open the pie menu for the given conflicted key
      */
-    public static void openConflictMenu( InputUtil.Key key )
+    public static void openConflictMenu( InputConstants.Key key )
     {
         KeybindSelectorScreen screen = new KeybindSelectorScreen( key );   
-        MinecraftClient.getInstance().setScreen( screen );
+        Minecraft.getInstance().setScreen( screen );
     }
 
     /**
      * Shortcut method to get conflicts on a key
      */
-    public static List<KeyBinding> getConflicts( InputUtil.Key key )
+    public static List<KeyMapping> getConflicts( InputConstants.Key key )
     {
         return conflictTable.get( key );
     }
@@ -122,7 +122,7 @@ public class KeybindManager
      * @param pressed: the pressed state of the conflicted key
      * @param ci: CallbackInfo for the mixin
      */
-    public static void handleKeyPress( InputUtil.Key key, boolean pressed, CallbackInfo ci )
+    public static void handleKeyPress( InputConstants.Key key, boolean pressed, CallbackInfo ci )
     {
         if ( hasConflicts( key ) )
         {
@@ -130,19 +130,19 @@ public class KeybindManager
             {
                 ci.cancel();
 
-                KeyBinding clickHoldBinding = clickHoldKeys.get( key.getCode() );
+                KeyMapping clickHoldBinding = clickHoldKeys.get( key.getValue() );
 
                 if ( clickHoldBinding != null )
                 {
                     KeybindsGalorePlus.debugLog( "Activating {} (click-hold)", clickHoldBinding.getTranslationKey() );
-                    ((KeyBindingAccessor) clickHoldBinding).setPressed( pressed );
-                    ((KeyBindingAccessor) clickHoldBinding).setTimesPressed( pressed ? 1 : 0 );
+                    ((KeyMappingAccessor) clickHoldBinding).setIsDown( pressed );
+                    ((KeyMappingAccessor) clickHoldBinding).setClickCount( pressed ? 1 : 0 );
                 }
 
                 if ( !pressed )
                 {
-                    KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getTranslationKey() );
-                    clickHoldKeys.remove( key.getCode() );
+                    KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
+                    clickHoldKeys.remove( key.getValue() );
                 }
             }
             else if ( !isIgnoredKey( key ) )
@@ -175,12 +175,12 @@ public class KeybindManager
 
                     if ( pressed )
                     {
-                        ((KeyBindingAccessor) binding).setPressed( true );
-                        ((KeyBindingAccessor) binding).setTimesPressed( 1 );
+                        ((KeyMappingAccessor) binding).setIsDown( true );
+                        ((KeyMappingAccessor) binding).setClickCount( 1 );
                     }
                     // We can't simply pass "false" to the previous branch, becuase wasPressed() will return true
                     // as long as timesPressed > 0, even if pressed == false.
-                    else ((KeyBindingAccessor) binding).invokeReset();
+                    else ((KeyMappingAccessor) binding).invokeRelease();
 
                 } );
             }

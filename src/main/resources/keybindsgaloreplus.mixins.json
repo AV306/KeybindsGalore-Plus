@@ -7,9 +7,9 @@
         "defaultRequire": 1
     },
     "client": [
-        "KeyBindingAccessor",
-        "KeyBindingMixin",
-        "KeybindsScreenMixin",
-        "MinecraftClientAccessor"
+        "KeyMappingAccessor",
+        "KeyMappingMixin",
+        "KeyBindsScreenMixin",
+        "MinecraftAccessor"
     ]
 }

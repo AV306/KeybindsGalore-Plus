@@ -2,7 +2,7 @@ package me.av306.keybindsgaloreplus;
 
 import me.av306.keybindsgaloreplus.configmanager.ConfigManager;
 import me.av306.keybindsgaloreplus.customdata.DataManager;
-import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
+import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
 import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderState;
 import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -10,16 +10,16 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 
 import java.io.IOException;
 import java.net.URI;
 
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +34,8 @@ public class KeybindsGalorePlus implements ClientModInitializer
 
     public static final Logger LOGGER = LoggerFactory.getLogger( "keybingsgaloreplus" );
 
-    private static KeyBinding configreloadKeybind;
-    private static KeyBinding keyStateReloadKeybind;
+    private static KeyMapping configreloadKeybind;
+    private static KeyMapping keyStateReloadKeybind;
 
     @Override
     public void onInitializeClient()
@@ -71,16 +71,16 @@ public class KeybindsGalorePlus implements ClientModInitializer
 
 
             // Set config reload key
-            configreloadKeybind = KeyBindingHelper.registerKeyBinding( new KeyBinding(
+            configreloadKeybind = KeyBindingHelper.registerKeyBinding( new KeyMapping(
                         "key.keybindsgaloreplus.reloadconfigs",
-                        InputUtil.Type.KEYSYM,
+                        InputConstants.Type.KEYSYM,
                         GLFW.GLFW_KEY_UNKNOWN,
                         "category.keybindsgaloreplus.keybinds"
             ) );
 
-            keyStateReloadKeybind = KeyBindingHelper.registerKeyBinding( new KeyBinding(
+            keyStateReloadKeybind = KeyBindingHelper.registerKeyBinding( new KeyMapping(
                     "key.keybindsgaloreplus.reloadkeystate",
-                    InputUtil.Type.KEYSYM,
+                    InputConstants.Type.KEYSYM,
                     GLFW.GLFW_KEY_UNKNOWN,
                     "category.keybindsgaloreplus.keybinds"
             ) );
@@ -88,7 +88,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
             // Bind action to config reload key
             ClientTickEvents.END_CLIENT_TICK.register( client ->
             {
-                while ( configreloadKeybind.wasPressed() )
+                while ( configreloadKeybind.consumeClick() )
                 {
                     try
                     {
@@ -97,15 +97,15 @@ public class KeybindsGalorePlus implements ClientModInitializer
                     }
                     catch ( IOException firstIoe )
                     {
-                        client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloadfail", firstIoe.getMessage() ), false );
+                        client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.configreloadfail", firstIoe.getMessage() ), false );
 
                         return;
                     }
 
-                    if ( configManager.errorFlag ) client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configerrors" ).formatted( Formatting.RED ), false );
-                    if ( customDataManager.hasCustomData ) client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.customdatafound" ), false );
+                    if ( configManager.errorFlag ) client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.configerrors" ).withStyle( ChatFormatting.RED ), false );
+                    if ( customDataManager.hasCustomData ) client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.customdatafound" ), false );
 
-                    client.player.sendMessage( Text.translatable( "text.keybindsgaloreplus.configreloaded" ), false );
+                    client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.configreloaded" ), false );
 
                     if ( Configurations.DEBUG )
                     {
@@ -114,11 +114,11 @@ public class KeybindsGalorePlus implements ClientModInitializer
                     }
                 }
 
-                while ( keyStateReloadKeybind.wasPressed() )
+                while ( keyStateReloadKeybind.consumeClick() )
                 {
                     KeybindManager.findAllConflicts();
-                    client.player.sendMessage(
-                            Text.translatable( "text.keybindsgaloreplus.keystatereloaded" ), false );
+                    client.player.displayClientMessage(
+                            Component.translatable( "text.keybindsgaloreplus.keystatereloaded" ), false );
                 }
             } );
 
@@ -149,10 +149,10 @@ public class KeybindsGalorePlus implements ClientModInitializer
         if ( Configurations.DEBUG ) LOGGER.info( "(KBG+ DEBUG) " + message, objects );
     }
 
-    public static Text createHyperlinkText( URI url )
+    public static Component createHyperlinkText( URI url )
     {
-        return Text.literal( url.toString() )
-                .formatted( Formatting.YELLOW )
-                .styled( style -> style.withClickEvent( new ClickEvent.OpenUrl( url ) ) );
+        return Component.literal( url.toString() )
+                .withStyle( ChatFormatting.YELLOW )
+                .withStyle( style -> style.withClickEvent( new ClickEvent.OpenUrl( url ) ) );
     }
 }

@@ -2,11 +2,11 @@ package me.av306.keybindsgaloreplus.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.WindowEventHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.GameOptions;
-import net.minecraft.util.thread.ReentrantThreadExecutor;
+import net.minecraft.client.Minecraft;
+import com.mojang.blaze3d.platform.WindowEventHandler;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.Options;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,15 +14,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin( MinecraftClient.class )
-public abstract class MinecraftClientMixin extends ReentrantThreadExecutor<Runnable> implements WindowEventHandler
+@Mixin( Minecraft.class )
+public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler
 {
-    @Shadow public @Final GameOptions options;
-    @Shadow public int attackCooldown;
+    @Shadow public @Final Options options;
+    @Shadow public int missTime;
 
-    @Shadow public abstract void openGameMenu( boolean pauseOnly );
+    @Shadow public abstract void pauseGame( boolean pauseOnly );
 
-    public MinecraftClientMixin( String string )
+    public MinecraftMixin( String string )
     {
         super( string );
     }

@@ -13,25 +13,26 @@ package me.av306.keybindsgaloreplus;
 import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.customDataManager;
 import static me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer.calculateRadius;
 
-import me.av306.keybindsgaloreplus.mixin.KeyBindingAccessor;
-import me.av306.keybindsgaloreplus.mixin.MinecraftClientAccessor;
+import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
+import me.av306.keybindsgaloreplus.mixin.MinecraftAccessor;
 //import net.minecraft.client.gl.ShaderProgramKeys;
 import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderState;
-import net.minecraft.block.WoodType;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.state.special.SignGuiElementRenderState;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.state.pip.GuiSignRenderState;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.render.*;
-import net.minecraft.client.render.block.entity.SignBlockEntityRenderer;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.renderer.blockentity.SignRenderer;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public class KeybindSelectorScreen extends Screen
     private int selectedSectorIndex = -1;
     private boolean mouseDown = false;
 
-    private final InputUtil.Key conflictedKey;
+    private final InputConstants.Key conflictedKey;
 
     private int centreX = 0, centreY = 0;
 
@@ -55,10 +56,10 @@ public class KeybindSelectorScreen extends Screen
 
     private boolean isFirstFrame = true;
 
-    private VertexConsumerProvider.Immediate vertexConsumerProvider;
+    private MultiBufferSource.BufferSource vertexConsumerProvider;
 
     /** This is probably not going to change while the screen is open, so maybe this optimisation helps? */
-    private final ArrayList<KeyBinding> conflicts = new ArrayList<>();
+    private final ArrayList<KeyMapping> conflicts = new ArrayList<>();
 
     /*public KeybindSelectorScreen()
     {
@@ -79,10 +80,10 @@ public class KeybindSelectorScreen extends Screen
         }
     }*/
 
-    public KeybindSelectorScreen( InputUtil.Key key )
+    public KeybindSelectorScreen( InputConstants.Key key )
     {
         //this();
-        super( NarratorManager.EMPTY );
+        super( GameNarrator.NO_TITLE );
 
         this.conflictedKey = key;
 
@@ -108,17 +109,17 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
-    public void render( DrawContext context, int mouseX, int mouseY, float tickDelta )
+    public void render( GuiGraphics context, int mouseX, int mouseY, float tickDelta )
     {
         // Angle of mouse, in radians from +X-axis, centred on the origin
         double mouseAngle = mouseAngle( this.centreX, this.centreY, mouseX, mouseY );
 
-        float mouseDistanceFromCentre = MathHelper.sqrt( (mouseX - this.centreX) * (mouseX - this.centreX) +
+        float mouseDistanceFromCentre = Mth.sqrt( (mouseX - this.centreX) * (mouseX - this.centreX) +
                         (mouseY - this.centreY) * (mouseY - this.centreY) );
 
 
         int numberOfSectors = this.conflicts.size(); // How many sectors to make for the pie menu?
-        float sectorAngle = (MathHelper.TAU) / numberOfSectors; // Angle occupied by each sector
+        float sectorAngle = (Mth.TWO_PI) / numberOfSectors; // Angle occupied by each sector
 
         // Exact index of selected sector
         this.selectedSectorIndex = (int) (mouseAngle / sectorAngle);
@@ -128,10 +129,10 @@ public class KeybindSelectorScreen extends Screen
             this.selectedSectorIndex = -1;
 
         // Need real dimensions of window, not scaled dimensions provided by this.width/height
-        context.state.addSpecialElement( new KeybindSelectorElementRenderState(
+        context.guiRenderState.submitPicturesInPictureState( new KeybindSelectorElementRenderState(
                 tickDelta, numberOfSectors, sectorAngle, this.selectedSectorIndex,
                 this.mouseDown, this.ticksInScreen,
-                0, 0, this.client.getWindow().getWidth(), this.client.getWindow().getHeight(),
+                0, 0, this.minecraft.getWindow().getScreenWidth(), this.minecraft.getWindow().getScreenHeight(),
                 null
         ) ); // FIXME: getWidth() vs getFrameBufferWidth()?
 
@@ -142,7 +143,7 @@ public class KeybindSelectorScreen extends Screen
     // ==================== Rendering methods ====================
 
     // At least this works fine in 1.21.6.
-    private void renderLabelTexts( DrawContext context, float delta, int numberOfSectors, float sectorAngle )
+    private void renderLabelTexts( GuiGraphics context, float delta, int numberOfSectors, float sectorAngle )
     {
         for ( var sectorIndex = 0; sectorIndex < numberOfSectors; sectorIndex++ )
         {
@@ -151,17 +152,17 @@ public class KeybindSelectorScreen extends Screen
             float angle = (sectorIndex + 0.5f) * sectorAngle;
 
             // Position in the middle of the arc
-            float xPos = this.centreX + MathHelper.cos( angle ) * radius;
-            float yPos = this.centreY + MathHelper.sin( angle ) * radius;
+            float xPos = this.centreX + Mth.cos( angle ) * radius;
+            float yPos = this.centreY + Mth.sin( angle ) * radius;
 
-            KeyBinding action = this.conflicts.get( sectorIndex );
+            KeyMapping action = this.conflicts.get( sectorIndex );
 
             // The biggest nagging bug for me
             // Tells you which control category the action goes in
             // TODO: configurable
 
             String id = action.getTranslationKey();
-            String actionName = Text.translatable( action.getCategory() ).getString() + ": " + Text.translatable( action.getTranslationKey() ).getString();
+            String actionName = Component.translatable( action.getCategory() ).getString() + ": " + Component.translatable( action.getTranslationKey() ).getString();
 
             // Read custom data for this keybind, only if present
             if ( customDataManager.hasCustomData )
@@ -169,7 +170,7 @@ public class KeybindSelectorScreen extends Screen
                 try
                 {
                     if ( customDataManager.customData.get( id ).hideCategory )
-                        actionName = Text.translatable( action.getTranslationKey() ).getString();
+                        actionName = Component.translatable( action.getTranslationKey() ).getString();
                 }
                 catch ( NullPointerException npe )
                 {
@@ -187,7 +188,7 @@ public class KeybindSelectorScreen extends Screen
                 }
             }
 
-            int textWidth = this.textRenderer.getWidth( actionName );
+            int textWidth = this.font.width( actionName );
 
             // Which side of the screen are we on?
             if ( xPos > this.centreX )
@@ -211,9 +212,9 @@ public class KeybindSelectorScreen extends Screen
             // Move the text closer to the centre of the circle
             yPos -= Configurations.LABEL_TEXT_INSET;
 
-            actionName = (this.selectedSectorIndex == sectorIndex ? Formatting.UNDERLINE : Formatting.RESET) + actionName;
+            actionName = (this.selectedSectorIndex == sectorIndex ? ChatFormatting.UNDERLINE : ChatFormatting.RESET) + actionName;
 
-            context.drawText( this.textRenderer, actionName, (int) xPos, (int) yPos, 0xFFFFFFFF,
+            context.drawString( this.font, actionName, (int) xPos, (int) yPos, 0xFFFFFFFF,
                     Configurations.LABEL_TEXT_SHADOW );
         }
     }
@@ -225,30 +226,30 @@ public class KeybindSelectorScreen extends Screen
     // This is why we study trigo, guys
     private static double mouseAngle( int x, int y, int mx, int my )
     {
-        return (MathHelper.atan2(my - y, mx - x) + Math.PI * 2) % (Math.PI * 2);
+        return (Mth.atan2(my - y, mx - x) + Math.PI * 2) % (Math.PI * 2);
     }
 
     private void closePieMenu()
     {
-        this.client.setScreen( null );
+        this.minecraft.setScreen( null );
 
         // Activate the selected binding
         if ( this.selectedSectorIndex != -1 )
         {
-            KeyBinding selectedKeyBinding = this.conflicts.get( this.selectedSectorIndex );
+            KeyMapping selectedKeyBinding = this.conflicts.get( this.selectedSectorIndex );
 
             KeybindsGalorePlus.debugLog( "Activated {} from pie menu", selectedKeyBinding.getTranslationKey() );
 
-            ((KeyBindingAccessor) selectedKeyBinding).setPressed( true );
-            ((KeyBindingAccessor) selectedKeyBinding).setTimesPressed( 1 );
+            ((KeyMappingAccessor) selectedKeyBinding).setIsDown( true );
+            ((KeyMappingAccessor) selectedKeyBinding).setClickCount( 1 );
             //((KeyBindingAccessor) bind).invokeSetPressed( true );
 
             // Attack workaround (very hacky)
             // Abusable??? (FIXME)
-            if ( selectedKeyBinding.equals( this.client.options.attackKey ) && Configurations.ENABLE_ATTACK_WORKAROUND )
+            if ( selectedKeyBinding.same( this.minecraft.options.keyAttack ) && Configurations.ENABLE_ATTACK_WORKAROUND )
             {
                 KeybindsGalorePlus.debugLog( "\tAttack workaround enabled" );
-                ((MinecraftClientAccessor) this.client).setAttackCooldown( 0 );
+                ((MinecraftAccessor) this.minecraft).setMissTime( 0 );
             }
         }
         else
@@ -274,7 +275,7 @@ public class KeybindSelectorScreen extends Screen
     @Override
     public boolean keyReleased( int keyCode, int scanCode, int modifiers )
     {
-        if ( keyCode == this.conflictedKey.getCode() ) this.closePieMenu();
+        if ( keyCode == this.conflictedKey.getValue() ) this.closePieMenu();
 
         return super.keyReleased( keyCode, scanCode, modifiers );
     }
@@ -284,7 +285,7 @@ public class KeybindSelectorScreen extends Screen
     {
         //this.mouseDown = false;
 
-        if ( button == this.conflictedKey.getCode() )
+        if ( button == this.conflictedKey.getValue() )
         {
             // Close menu and activate selection normally – click-hold not applicable
             this.closePieMenu();
@@ -292,31 +293,31 @@ public class KeybindSelectorScreen extends Screen
         else
         {
             // Click-hold selected binding
-            this.client.setScreen( null );
-            KeyBinding.unpressAll(); // This stops the other actions from triggering. Not sure why they do in the first place, though.
+            this.minecraft.setScreen( null );
+            KeyMapping.releaseAll(); // This stops the other actions from triggering. Not sure why they do in the first place, though.
 
             if ( this.selectedSectorIndex != -1 )
             {
-                KeyBinding binding = this.conflicts.get( this.selectedSectorIndex );
+                KeyMapping binding = this.conflicts.get( this.selectedSectorIndex );
 
                 // Clicked on a sector; add its binding to the click-hold map
                 //KeybindsGalorePlus.debugLog( "Activated sector {} (key {}) (click-hold) via pie menu", this.selectedSectorIndex, this.conflictedKey.getCategory() );
                 KeybindsGalorePlus.debugLog( "Pie menu closed with click-hold" );
                 KeybindManager.clickHoldKeys.put(
-                        this.conflictedKey.getCode(),
+                        this.conflictedKey.getValue(),
                         binding
                 );
 
                 // Key events are generated repeatedly for keyboard keys held down, but not for mouse buttons,
                 // so we have to make one manually
-                if ( this.conflictedKey.getCode() <= GLFW.GLFW_MOUSE_BUTTON_LAST )
-                    binding.setPressed( true );
+                if ( this.conflictedKey.getValue() <= GLFW.GLFW_MOUSE_BUTTON_LAST )
+                    binding.setDown( true );
             }
             else
             {
                 KeybindsGalorePlus.debugLog( "Pie menu closed via click-hold with no selection" );
                 // No sector clicked; add null to the click-hold map to signal a cancel
-                KeybindManager.clickHoldKeys.put( this.conflictedKey.getCode(), null );
+                KeybindManager.clickHoldKeys.put( this.conflictedKey.getValue(), null );
             }
         }
 
@@ -334,17 +335,17 @@ public class KeybindSelectorScreen extends Screen
     @Override
     // Don't pause the game when this screen is open
     // actually why not
-    public boolean shouldPause() { return false; }
+    public boolean isPauseScreen() { return false; }
 
 
     //* >=1.20.2
     @Override
-    public void renderBackground( DrawContext context, int mouseX, int mouseY, float deltaTicks )
+    public void renderBackground( GuiGraphics context, int mouseX, int mouseY, float deltaTicks )
     {
-        if ( this.client.world == null ) this.renderPanoramaBackground( context, deltaTicks );
+        if ( this.minecraft.level == null ) this.renderPanorama( context, deltaTicks );
 
-        if ( Configurations.BLUR_BACKGROUND ) this.applyBlur( context );
-        if ( Configurations.DARKENED_BACKGROUND ) this.renderDarkening( context );
+        if ( Configurations.BLUR_BACKGROUND ) this.renderBlurredBackground( context );
+        if ( Configurations.DARKENED_BACKGROUND ) this.renderMenuBackground( context );
     }
 
     //* <1.20.2

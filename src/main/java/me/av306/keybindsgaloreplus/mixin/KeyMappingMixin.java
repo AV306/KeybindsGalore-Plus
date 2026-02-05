@@ -5,10 +5,10 @@ import static me.av306.keybindsgaloreplus.Configurations.DEBUG;
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.LOGGER;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -19,22 +19,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import me.av306.keybindsgaloreplus.KeybindManager;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin( value = KeyBinding.class )
-public abstract class KeyBindingMixin
+@Mixin( value = KeyMapping.class )
+public abstract class KeyMappingMixin
 {
     @Shadow
-    private InputUtil.Key boundKey;
+    private InputConstants.Key key;
 
     @Shadow @Final
     private String translationKey;
 
-    @Shadow private boolean pressed;
+    @Shadow private boolean isDown;
 
 
-    @Inject( method = "setKeyPressed", at = @At( "HEAD" ), cancellable = true )
-    private static void setKeyPressed( InputUtil.Key key, boolean pressed, CallbackInfo ci ) throws Exception
+    @Inject( method = "set", at = @At( "HEAD" ), cancellable = true )
+    private static void setKeyPressed( InputConstants.Key key, boolean pressed, CallbackInfo ci ) throws Exception
     {
-        KeybindsGalorePlus.debugLog( "setKeyPressed( {}, {} ) called", key.getTranslationKey(), pressed );
+        KeybindsGalorePlus.debugLog( "setKeyPressed( {}, {} ) called", key.getName(), pressed );
 
         // Handle key
         KeybindManager.handleKeyPress( key, pressed, ci );
@@ -42,10 +42,10 @@ public abstract class KeyBindingMixin
 
     // Normally this handles incrementing times pressed; only called when key first goes down
     // "times pressed" is used for sub-tick input accumulation
-    @Inject( method = "onKeyPressed", at = @At( "HEAD" ), cancellable = true )
-    private static void onKeyPressed( InputUtil.Key key, CallbackInfo ci )
+    @Inject( method = "click", at = @At( "HEAD" ), cancellable = true )
+    private static void onKeyPressed( InputConstants.Key key, CallbackInfo ci )
     {
-        KeybindsGalorePlus.debugLog( "onKeyPressed( {} ) called", key.getTranslationKey() );
+        KeybindsGalorePlus.debugLog( "onKeyPressed( {} ) called", key.getName() );
 
         if ( KeybindManager.hasConflicts( key ) /*&& !KeybindManager.isSkippedKey( key )*/ )
         {

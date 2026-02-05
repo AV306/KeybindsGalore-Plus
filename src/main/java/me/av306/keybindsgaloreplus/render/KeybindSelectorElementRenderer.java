@@ -3,23 +3,23 @@ package me.av306.keybindsgaloreplus.render;
 import me.av306.keybindsgaloreplus.Configurations;
 import me.av306.keybindsgaloreplus.CustomRenderLayers;
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
-import net.minecraft.client.gui.render.SpecialGuiElementRenderer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.util.Mth;
 
-public class KeybindSelectorElementRenderer extends SpecialGuiElementRenderer<KeybindSelectorElementRenderState>
+public class KeybindSelectorElementRenderer extends PictureInPictureRenderer<KeybindSelectorElementRenderState>
 {
-    public KeybindSelectorElementRenderer( VertexConsumerProvider.Immediate vertexConsumerProvider )
+    public KeybindSelectorElementRenderer( MultiBufferSource.BufferSource vertexConsumerProvider )
     {
         super( vertexConsumerProvider );
     }
 
     @Override
-    protected void render( KeybindSelectorElementRenderState state, MatrixStack matrices )
+    protected void renderToTexture( KeybindSelectorElementRenderState state, PoseStack matrices )
     {
-        VertexConsumer buffer = this.vertexConsumers.getBuffer( CustomRenderLayers.GUI_TRIANGLE_STRIP );
+        VertexConsumer buffer = this.bufferSource.getBuffer( CustomRenderLayers.GUI_TRIANGLE_STRIP );
 
         int centreX = (state.x2() - state.x1()) / 2;
         int centreY = (state.y2() - state.y1()) / 2;
@@ -91,15 +91,15 @@ public class KeybindSelectorElementRenderer extends SpecialGuiElementRenderer<Ke
             float angle = startAngle + ((float) i / vertices) * sectorAngle;
 
             // Inner vertex
-            buf.vertex( centreX + MathHelper.cos( angle ) * innerRadius,
-                    centreY + MathHelper.sin( angle ) * innerRadius, 0 );
-            buf.color( innerColor >> 16 & 0xFF, innerColor >> 8 & 0xFF,
+            buf.addVertex( centreX + Mth.cos( angle ) * innerRadius,
+                    centreY + Mth.sin( angle ) * innerRadius, 0 );
+            buf.setColor( innerColor >> 16 & 0xFF, innerColor >> 8 & 0xFF,
                     innerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
 
             // Outer vertex
-            buf.vertex( centreX + MathHelper.cos( angle ) * outerRadius,
-                    centreY + MathHelper.sin( angle ) * outerRadius, 0 );
-            buf.color( outerColor >> 16 & 0xFF, outerColor >> 8 & 0xFF,
+            buf.addVertex( centreX + Mth.cos( angle ) * outerRadius,
+                    centreY + Mth.sin( angle ) * outerRadius, 0 );
+            buf.setColor( outerColor >> 16 & 0xFF, outerColor >> 8 & 0xFF,
                     outerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
         }
     }
@@ -117,13 +117,13 @@ public class KeybindSelectorElementRenderer extends SpecialGuiElementRenderer<Ke
     }
 
     @Override
-    protected String getName()
+    protected String getTextureLabel()
     {
         return "KeybindsGalorePlus Keybind Selector Renderer";
     }
 
     @Override
-    public Class<KeybindSelectorElementRenderState> getElementClass()
+    public Class<KeybindSelectorElementRenderState> getRenderStateClass()
     {
         return KeybindSelectorElementRenderState.class;
     }
