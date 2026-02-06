@@ -1,14 +1,19 @@
 package me.av306.keybindsgaloreplus;
 
-import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.KeyMapping;
-import com.mojang.blaze3d.platform.InputConstants;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
 
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.mojang.blaze3d.platform.InputConstants;
+
+import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 
 
 public class KeybindManager
@@ -28,7 +33,7 @@ public class KeybindManager
      * Compatibility mods may add other bindings (e.g. from another mod's keybind manager) here,
      * but must not make changes to existing values.
      */
-    // TODO: remove this; we can use cvanilla's
+    // TODO: remove this; we can use vanilla's
     public static final Hashtable<InputConstants.Key, List<KeyMapping>> conflictTable = new Hashtable<>();
 
     public static final HashMap<Integer, KeyMapping> clickHoldKeys = new HashMap<>();
@@ -36,6 +41,7 @@ public class KeybindManager
     /**
      * FInd all conflicts on all keys known to the vanilla keybind manager
      */
+    // TODO: this is no longer necessary
     public static void findAllConflicts()
     {
         KeybindsGalorePlus.LOGGER.info( "(KBG+) Performing lazy conflict check" );
