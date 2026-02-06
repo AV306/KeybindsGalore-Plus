@@ -1,31 +1,28 @@
 package me.av306.keybindsgaloreplus;
 
-import me.av306.keybindsgaloreplus.configmanager.ConfigManager;
-import me.av306.keybindsgaloreplus.customdata.DataManager;
-import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
-import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderState;
-import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
-import net.minecraft.client.KeyMapping;
-import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-
 import java.io.IOException;
 import java.net.URI;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.mojang.blaze3d.platform.InputConstants;
+
+import me.av306.keybindsgaloreplus.configmanager.ConfigManager;
+import me.av306.keybindsgaloreplus.customdata.DataManager;
+import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 public class KeybindsGalorePlus implements ClientModInitializer
 {
@@ -36,6 +33,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
 
     private static KeyMapping configreloadKeybind;
     private static KeyMapping keyStateReloadKeybind;
+    private static final KeyMapping.Category modKeybindCategory = new KeyMapping.Category( Identifier.parse( "category.keybindsgaloreplus.keybinds" ) );
 
     @Override
     public void onInitializeClient()
@@ -75,14 +73,14 @@ public class KeybindsGalorePlus implements ClientModInitializer
                         "key.keybindsgaloreplus.reloadconfigs",
                         InputConstants.Type.KEYSYM,
                         GLFW.GLFW_KEY_UNKNOWN,
-                        "category.keybindsgaloreplus.keybinds"
+                        modKeybindCategory
             ) );
 
             keyStateReloadKeybind = KeyBindingHelper.registerKeyBinding( new KeyMapping(
                     "key.keybindsgaloreplus.reloadkeystate",
                     InputConstants.Type.KEYSYM,
                     GLFW.GLFW_KEY_UNKNOWN,
-                    "category.keybindsgaloreplus.keybinds"
+                    modKeybindCategory
             ) );
 
             // Bind action to config reload key

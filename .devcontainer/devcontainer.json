@@ -2,7 +2,10 @@
     "name": "keybindsgaloreplus",
     "image": "mcr.microsoft.com/devcontainers/base:debian",
     "features": {
-        "ghcr.io/devcontainers/features/desktop-lite:1": {}
+        "ghcr.io/devcontainers/features/desktop-lite:1": {},
+        "ghcr.io/devcontainers/features/java:1": {
+            "version": "latest"
+        }
     },
     "forwardPorts": [6080],
     "customizations": {

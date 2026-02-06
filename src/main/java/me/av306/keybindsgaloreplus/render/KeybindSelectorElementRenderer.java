@@ -1,12 +1,12 @@
 package me.av306.keybindsgaloreplus.render;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+
 import me.av306.keybindsgaloreplus.Configurations;
 import me.av306.keybindsgaloreplus.CustomRenderLayers;
-import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.util.Mth;
 
 public class KeybindSelectorElementRenderer extends PictureInPictureRenderer<KeybindSelectorElementRenderState>
@@ -21,8 +21,8 @@ public class KeybindSelectorElementRenderer extends PictureInPictureRenderer<Key
     {
         VertexConsumer buffer = this.bufferSource.getBuffer( CustomRenderLayers.GUI_TRIANGLE_STRIP );
 
-        int centreX = (state.x2() - state.x1()) / 2;
-        int centreY = (state.y2() - state.y1()) / 2;
+        int centreX = (state.y1() - state.x0()) / 2;
+        int centreY = (state.y1() - state.y0()) / 2;
         int numberOfSectors = state.numberOfSectors();
         float sectorAngle = state.sectorAngle();
         int selectedSectorIndex = state.selectedSectorIndex();

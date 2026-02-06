@@ -4,9 +4,6 @@
  *
  * Psi is Open Source and distributed under the
  * Psi License: https://psi.vazkii.net/license.php
- *
- * HVB007: IDK What Part This credit refers to, if you want to know contact https://github.com/CaelTheColher as he is the maker of this mod
- * I am just updating it to 1.20.x
  */
 package me.av306.keybindsgaloreplus;
 
@@ -18,21 +15,18 @@ import me.av306.keybindsgaloreplus.mixin.MinecraftAccessor;
 //import net.minecraft.client.gl.ShaderProgramKeys;
 import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderState;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.level.block.state.properties.WoodType;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.render.state.pip.GuiSignRenderState;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.render.*;
-import net.minecraft.client.renderer.blockentity.SignRenderer;
+import net.minecraft.client.input.KeyEvent;
+
 import com.mojang.blaze3d.platform.InputConstants;
+
 import net.minecraft.client.GameNarrator;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.Mth;
+
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -161,8 +155,9 @@ public class KeybindSelectorScreen extends Screen
             // Tells you which control category the action goes in
             // TODO: configurable
 
-            String id = action.getTranslationKey();
-            String actionName = Component.translatable( action.getCategory() ).getString() + ": " + Component.translatable( action.getTranslationKey() ).getString();
+            String id = action.getName();
+            String actionName = Component.translatable( action.getCategory().id().toLanguageKey( "key.category" ) ).getString()
+                    + ": " + Component.translatable( action.getName() ).getString();
 
             // Read custom data for this keybind, only if present
             if ( customDataManager.hasCustomData )
@@ -170,7 +165,7 @@ public class KeybindSelectorScreen extends Screen
                 try
                 {
                     if ( customDataManager.customData.get( id ).hideCategory )
-                        actionName = Component.translatable( action.getTranslationKey() ).getString();
+                        actionName = Component.translatable( action.getName() ).getString();
                 }
                 catch ( NullPointerException npe )
                 {
@@ -238,7 +233,7 @@ public class KeybindSelectorScreen extends Screen
         {
             KeyMapping selectedKeyBinding = this.conflicts.get( this.selectedSectorIndex );
 
-            KeybindsGalorePlus.debugLog( "Activated {} from pie menu", selectedKeyBinding.getTranslationKey() );
+            KeybindsGalorePlus.debugLog( "Activated {} from pie menu", selectedKeyBinding.getName() );
 
             ((KeyMappingAccessor) selectedKeyBinding).setIsDown( true );
             ((KeyMappingAccessor) selectedKeyBinding).setClickCount( 1 );
@@ -271,8 +266,9 @@ public class KeybindSelectorScreen extends Screen
 
     // These two callbacks work the same as handling it in tick(), plus we get differentiated mouse/keyboard handling
     // Previously, InputUtil.isKeyPressed would throw a GL error when called for a mouse code (0, 1, 2) and return a meaningless value
+    // TODO: now we need to handle it in tick()
 
-    @Override
+    /*@Override
     public boolean keyReleased( int keyCode, int scanCode, int modifiers )
     {
         if ( keyCode == this.conflictedKey.getValue() ) this.closePieMenu();
@@ -330,7 +326,7 @@ public class KeybindSelectorScreen extends Screen
         this.mouseDown = true;
 
         return super.mouseClicked( mouseX, mouseY, button );
-    }
+    }*/
 
     @Override
     // Don't pause the game when this screen is open

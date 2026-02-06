@@ -28,6 +28,7 @@ public class KeybindManager
      * Compatibility mods may add other bindings (e.g. from another mod's keybind manager) here,
      * but must not make changes to existing values.
      */
+    // TODO: remove this; we can use cvanilla's
     public static final Hashtable<InputConstants.Key, List<KeyMapping>> conflictTable = new Hashtable<>();
 
     public static final HashMap<Integer, KeyMapping> clickHoldKeys = new HashMap<>();
@@ -52,7 +53,7 @@ public class KeybindManager
             // Skip unbound keys — keys are usually only bound to KEY_UNKNOWN when they are "unbound"
             if ( physicalKey.getValue() == GLFW.GLFW_KEY_UNKNOWN ) continue;
 
-            //KeybindsGalorePlus.LOGGER.info( "Adding {} to list for physical key {}", keybinding.getTranslationKey(), physicalKey.getTranslationKey() );
+            //KeybindsGalorePlus.LOGGER.info( "Adding {} to list for physical key {}", keybinding.getName(), physicalKey.getName() );
 
             // Create a new list if the key doesn't have one
             conflictTable.computeIfAbsent( physicalKey, key -> new ArrayList<>() );
@@ -73,7 +74,7 @@ public class KeybindManager
         if ( Configurations.DEBUG )
         {
             KeybindsGalorePlus.LOGGER.info( "Dumping key conflict table" );
-            conflictTable.values().forEach( list -> list.forEach( binding -> KeybindsGalorePlus.LOGGER.info( "\t{} bound to physical key {}", binding.getTranslationKey(), ((KeyMappingAccessor) binding).getKey() ) ) );
+            conflictTable.values().forEach( list -> list.forEach( binding -> KeybindsGalorePlus.LOGGER.info( "\t{} bound to physical key {}", binding.getName(), ((KeyMappingAccessor) binding).getKey() ) ) );
         }
     }
 
@@ -134,7 +135,7 @@ public class KeybindManager
 
                 if ( clickHoldBinding != null )
                 {
-                    KeybindsGalorePlus.debugLog( "Activating {} (click-hold)", clickHoldBinding.getTranslationKey() );
+                    KeybindsGalorePlus.debugLog( "Activating {} (click-hold)", clickHoldBinding.getName() );
                     ((KeyMappingAccessor) clickHoldBinding).setIsDown( pressed );
                     ((KeyMappingAccessor) clickHoldBinding).setClickCount( pressed ? 1 : 0 );
                 }
@@ -171,7 +172,7 @@ public class KeybindManager
                 // Transfer key state to all bindings on the key
                 getConflicts( key ).forEach( binding ->
                 {
-                    KeybindsGalorePlus.debugLog( "\tVanilla fix, {} key {}", pressed ? "enabling" : "disabling", binding.getTranslationKey() );
+                    KeybindsGalorePlus.debugLog( "\tVanilla fix, {} key {}", pressed ? "enabling" : "disabling", binding.getName() );
 
                     if ( pressed )
                     {

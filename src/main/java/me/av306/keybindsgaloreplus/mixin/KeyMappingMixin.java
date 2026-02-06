@@ -25,9 +25,6 @@ public abstract class KeyMappingMixin
     @Shadow
     private InputConstants.Key key;
 
-    @Shadow @Final
-    private String translationKey;
-
     @Shadow private boolean isDown;
 
 
