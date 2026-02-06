@@ -1,8 +1,7 @@
 # KeybindsGalore Plus
 
 > [!WARNING]<br>
-> Updates to this mod are paused until 2027 as I prepare for national exams.
-> <br>Bugfixes will probably come around June/December, but I can't promise more than that :(
+> The 1.21.11 version is still a work-in-progress. Its estimated completion date is in March.
 
 > [!NOTE]<br>
 > This project is a fork of KeybindsGalore, originally by Cael and updated to 1.20 by HVB007.
@@ -10,14 +9,12 @@
 
 <br>
 
-A keybind conflict management and general quality-of-life mod!
+Have multiple mappings on a key? Choose which one to activate from a menu!
 
-- Provides a **pie menu** for conflicting keybinds
-- **Corrects vanilla conflict handling**, similar to [Keybinds Fix](https://www.curseforge.com/minecraft/mc-mods/keybind-fix)
-- Supports **mouse buttons**
-- **Fixes many bugs** and adds many improvements to the original mod
+- Choose the desired action from a **[pie menu](https://en.wikipedia.org/wiki/Pie_menu)**
+- Supports **mouse buttons**!
 - Supports **1.20.x** and **1.21.x**
-- Supports **Fabric** and **Forge/NeoForge (via Sinytra Connector)**
+- Supports **Fabric** and **NeoForge (via Sinytra Connector)**
 
 <div style="display: flex; justify-content: center; align-items: center;">
   <img src="https://github.com/AV306/KeybindsGalore-Plus/blob/14b7001f913c9bf089ef4fc41934c60dcf0db275/images/kbg_plus_demo.gif?raw=true" max-height=400 />
@@ -27,14 +24,20 @@ A keybind conflict management and general quality-of-life mod!
 
 ## How to Use
 
-KeybindsGalore+ will automatically detect conflicting keybinds!
+KeybindsGalore Plus is powered by the vanilla keybinds data.
 
-- **Pressing** a conflicted key *down* will **open the pie menu**
-- **Releasing** a conflicted key (when the pie menu is displayed) will **activate the highlighted action** and **close** the pie menu
-- **Clicking** on a section of the pie menu (without releasing the key) will **activate the highlighted action** and **deactivate** it when the key is **released**
+- **Pressing down** a key with multiple mappings **opens a pie menu**
+- **Releasing** the key (while the pie menu is displayed) will **activate the highlighted action** and **close** the pie menu
+- **Clicking** on a section of the pie menu, without releasing the key, **activates the highlighted action** for **as long as the key is held**
 
-NB: When the pie menu *opens*, all actions currently activated (e.g. holding a key down) will be deactivated.
+When the pie menu *opens*, all actions currently activated will be deactivated, identical to vanilla behaviour.
 <br>
+
+## Configuration options
+
+The configuration file is created at `<minecraft game directory>/config/keybindsgaloreplus_config.properties` if it does not exist.
+
+See [the example config file](https://github.com/AV306/KeybindsGalore-Plus/blob/1.21.11/src/main/resources/keybindsgaloreplus_config.properties) for reference.
 
 ## Modifications to Original
 
