@@ -9,9 +9,9 @@
 
 <br>
 
-Have multiple mappings on a key? Choose which one to activate from a menu!
+Too many keybinds? Bind them all to one key and activate one at a time from a menu!
 
-- Choose the desired action from a **[pie menu](https://en.wikipedia.org/wiki/Pie_menu)**
+- Choose actions from a **[pie menu](https://en.wikipedia.org/wiki/Pie_menu)**
 - Supports **mouse buttons**!
 - Supports **1.20.x** and **1.21.x**
 - Supports **Fabric** and **NeoForge (via Sinytra Connector)**
@@ -24,11 +24,11 @@ Have multiple mappings on a key? Choose which one to activate from a menu!
 
 ## How to Use
 
-KeybindsGalore Plus is powered by the vanilla keybinds data.
+KeybindsGalore Plus is powered by the vanilla keybinds data!
 
 - **Pressing down** a key with multiple mappings **opens a pie menu**
-- **Releasing** the key (while the pie menu is displayed) will **activate the highlighted action** and **close** the pie menu
-- **Clicking** on a section of the pie menu, without releasing the key, **activates the highlighted action** for **as long as the key is held**
+- **Releasing** the key while the pie menu is displayed will **activate the highlighted action** and **close** the pie menu
+- **Clicking** on a section of the pie menu, while holding the key, **activates the highlighted action** for **as long as the key is held**
 
 When the pie menu *opens*, all actions currently activated will be deactivated, identical to vanilla behaviour.
 <br>
@@ -43,10 +43,9 @@ See [the example config file](https://github.com/AV306/KeybindsGalore-Plus/blob/
 
 - Optimised conflict searching
 - Keybind labels now show their category along with their name
-- Customisable keybind labels (see [this issue](https://github.com/AV306/KeybindsGalore-Plus/issues/3))
+- Customisable keybind labels (see [here](https://github.com/AV306/KeybindsGalore-Plus/issues/3))
 - Label texts no longer run off the screen
 - Fully customisable pie menu
-- Allows compatibility with non-vanilla keybinds (insert your mod's keybinds into the [conflict table](https://github.com/AV306/KeybindsGalore-Plus/blob/1.21/src/main/java/me/av306/keybindsgaloreplus/KeybindManager.java) whenever convenient!)
 - **And more...**
 
 <br>
@@ -77,51 +76,18 @@ Bug reports and feature requests VERY welcome!
 
 ## Roadmap
 
-### 1.3.5
+### 1.6
 
-- Bugfixes
-
-### 1.4.0
-
-- Blacklist/whitelist toggle for ignored key list
+- Key repeat delay ([#28](https://github.com/AV306/KeybindsGalore-Plus/issues/28))
+- Deterministic keybind ordering in menu 
 - Per-keybind overrides in custom data for:
-  - Label text (category + name / name only / custom text)
+  - Label text format (category + name / name only / custom text)
   - sector colour
   - sector opacity
 - Removal of non-lazy conflict check
 
+### Future
+
+- AMECS support
+
 (need more features? make a [feature request](https://github.com/AV306/KeybindsGalore-Plus/issues)!)
-
-<br>
-
-## [[ Old README below ]]
-
-# KeybindsGalore_HVB007_1.20.x
-Updated to 1.20 by HVB007.
-
->Github : https://github.com/HVB007og/KeybindsGalore_HVB007_1.20.x 
->Fabric mod Which opens an popup when there are multiple actions bound to the same key in the Minecraft>controls>Keybinds settings. then choose one of the options to use.
-
->Changelog keybindsgalore-0.2-1.20:
-
-Works with 1.20.2
-
-Added Feature: Will not open the menu when pressing certain keys (Due to keys compatibility with other mods) as follows: 
-1.tab 
-2.caps lock 
-3.left shift 
-4.left control 
-5.space 
-6.left alt 
-7.w 
-8.a 
-9.s 
-10.d
-
-Future Feature: Add mod setting to configure the keys to disable.
-
->Does not support conflicting Keybinds not using the Minecraft Keybinds settings.
-
-Updated to 1.20.x by HVB007
-
-Updated version of keybindsgalore by Cael : https://github.com/CaelTheColher/KeybindsGalore
