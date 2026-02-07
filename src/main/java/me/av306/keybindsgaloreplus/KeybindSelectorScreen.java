@@ -97,10 +97,8 @@ public class KeybindSelectorScreen extends Screen
         this.maxExpandedRadius = this.maxRadius * Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
         this.cancelZoneRadius = maxRadius * Configurations.CANCEL_ZONE_SCALE;
 
-        if ( Configurations.DEBUG )
-        {
-            KeybindsGalorePlus.debugLog( "Centre: ({}, {})", this.centreX, this.centreY );
-        }
+
+        KeybindsGalorePlus.debugLog( "Scaled centre: ({}, {})", this.centreX, this.centreY );
     }
 
     @Override
@@ -127,7 +125,7 @@ public class KeybindSelectorScreen extends Screen
         context.guiRenderState.submitPicturesInPictureState( new KeybindSelectorElementRenderState(
                 tickDelta, numberOfSectors, sectorAngle, this.selectedSectorIndex,
                 this.mouseDown, this.ticksInScreen,
-                0, 0, this.minecraft.getWindow().getScreenWidth(), this.minecraft.getWindow().getScreenHeight(),
+                0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(),
                 null
         ) ); // FIXME: getWidth() vs getFrameBufferWidth()?
 
@@ -235,8 +233,6 @@ public class KeybindSelectorScreen extends Screen
         // super.tick();
         this.ticksInScreen++;
     }
-
-
 
     @Override
     public void onClose()
