@@ -1,5 +1,5 @@
 {
-  "category.keybindsgaloreplus.keybinds": "KeybindsGalore Plus",
+  "key.category.keybindsgaloreplus.keybinds": "KeybindsGalore Plus",
   "key.keybindsgaloreplus.reloadconfigs": "Reload config file",
   "key.keybindsgaloreplus.reloadkeystate": "Reload keybind state",
   "text.keybindsgaloreplus.configreloaded": "[KeybindsGalorePlus] Configs reloaded!",

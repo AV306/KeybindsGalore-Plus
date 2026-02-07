@@ -26,14 +26,15 @@ import net.minecraft.resources.Identifier;
 
 public class KeybindsGalorePlus implements ClientModInitializer
 {
-    public static ConfigManager configManager;
+    public static ConfigManager CONFIG_MANAGER;
     public static DataManager customDataManager;
 
     public static final Logger LOGGER = LoggerFactory.getLogger( "keybingsgaloreplus" );
 
-    private static KeyMapping configreloadKeybind;
-    private static KeyMapping keyStateReloadKeybind;
-    private static final KeyMapping.Category modKeybindCategory = new KeyMapping.Category( Identifier.parse( "category.keybindsgaloreplus.keybinds" ) );
+    private static KeyMapping CONFIG_RELOAD_KEYBIND;
+    // The final translation key will be "key.category.keybindsgaloreplus.keybinds"
+    private static final KeyMapping.Category MOD_KEYBIND_CATEGORY
+            = KeyMapping.Category.register( Identifier.fromNamespaceAndPath( "keybindsgaloreplus", "keybinds" ) );
 
     @Override
     public void onInitializeClient()
@@ -43,7 +44,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
         try
         {
             // Initialise ConfigManager and load config file
-            configManager = new ConfigManager(
+            CONFIG_MANAGER = new ConfigManager(
                 "KeybindsGalorePlus",    
                 FabricLoader.getInstance().getConfigDir(),
                 "keybindsgaloreplus_config.properties",
@@ -58,7 +59,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
             // (debug) Print all config fields
             if ( Configurations.DEBUG )
             {
-                this.configManager.printAllConfigs();
+                CONFIG_MANAGER.printAllConfigs();
             }
 
             // Initialise custom data manager and read data file
@@ -69,28 +70,21 @@ public class KeybindsGalorePlus implements ClientModInitializer
 
 
             // Set config reload key
-            configreloadKeybind = KeyBindingHelper.registerKeyBinding( new KeyMapping(
+            CONFIG_RELOAD_KEYBIND = KeyBindingHelper.registerKeyBinding( new KeyMapping(
                         "key.keybindsgaloreplus.reloadconfigs",
                         InputConstants.Type.KEYSYM,
                         GLFW.GLFW_KEY_UNKNOWN,
-                        modKeybindCategory
-            ) );
-
-            keyStateReloadKeybind = KeyBindingHelper.registerKeyBinding( new KeyMapping(
-                    "key.keybindsgaloreplus.reloadkeystate",
-                    InputConstants.Type.KEYSYM,
-                    GLFW.GLFW_KEY_UNKNOWN,
-                    modKeybindCategory
+                    MOD_KEYBIND_CATEGORY
             ) );
 
             // Bind action to config reload key
             ClientTickEvents.END_CLIENT_TICK.register( client ->
             {
-                while ( configreloadKeybind.consumeClick() )
+                while ( CONFIG_RELOAD_KEYBIND.consumeClick() )
                 {
                     try
                     {
-                        configManager.readConfigFile();
+                        CONFIG_MANAGER.readConfigFile();
                         customDataManager.readDataFile();
                     }
                     catch ( IOException firstIoe )
@@ -100,7 +94,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
                         return;
                     }
 
-                    if ( configManager.errorFlag ) client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.configerrors" ).withStyle( ChatFormatting.RED ), false );
+                    if ( CONFIG_MANAGER.errorFlag ) client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.configerrors" ).withStyle( ChatFormatting.RED ), false );
                     if ( customDataManager.hasCustomData ) client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.customdatafound" ), false );
 
                     client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.configreloaded" ), false );
@@ -108,15 +102,8 @@ public class KeybindsGalorePlus implements ClientModInitializer
                     if ( Configurations.DEBUG )
                     {
                         // Print all config fields
-                        this.configManager.printAllConfigs();                        
+                        CONFIG_MANAGER.printAllConfigs();
                     }
-                }
-
-                while ( keyStateReloadKeybind.consumeClick() )
-                {
-                    KeybindManager.findAllConflicts();
-                    client.player.displayClientMessage(
-                            Component.translatable( "text.keybindsgaloreplus.keystatereloaded" ), false );
                 }
             } );
 
@@ -127,9 +114,6 @@ public class KeybindsGalorePlus implements ClientModInitializer
             LOGGER.error( "(KBG+) IOException while reading config file on init!" );
             ioe.printStackTrace();
         }
-
-        // Find conflicts on first world join
-        ClientPlayConnectionEvents.JOIN.register( (handler, sender, client) -> KeybindManager.findAllConflicts() );
 
         // Register our fancy circle renderer
         SpecialGuiElementRegistry.register(

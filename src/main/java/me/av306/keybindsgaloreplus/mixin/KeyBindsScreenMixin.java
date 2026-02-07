@@ -1,5 +1,6 @@
 package me.av306.keybindsgaloreplus.mixin;
 
+import me.av306.keybindsgaloreplus.Configurations;
 import me.av306.keybindsgaloreplus.KeybindManager;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.OptionsSubScreen;
@@ -7,6 +8,8 @@ import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.Options;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
+
+import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.LOGGER;
 
 @Mixin( KeyBindsScreen.class )
 public abstract class KeyBindsScreenMixin extends OptionsSubScreen
@@ -19,9 +22,16 @@ public abstract class KeyBindsScreenMixin extends OptionsSubScreen
     @Override
     public void onClose()
     {
-        super.onClose();
-
         // Check for conflicting keybinds on screen close
-        KeybindManager.findAllConflicts();
+        if ( Configurations.DEBUG )
+        {
+            //LOGGER.info(
+            KeyMappingAccessor.getMap().forEach( (key1, keyMappings) ->
+            {
+                LOGGER.info( "{}:", key1.getName() );
+                keyMappings.forEach( keyMapping -> LOGGER.info( "\t{}", keyMapping.getName() ) );
+            } );
+        }
+        super.onClose();
     }
 }

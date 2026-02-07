@@ -14,11 +14,12 @@ import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
 import me.av306.keybindsgaloreplus.mixin.MinecraftAccessor;
 //import net.minecraft.client.gl.ShaderProgramKeys;
 import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderState;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.input.KeyEvent;
 
 import com.mojang.blaze3d.platform.InputConstants;
 
@@ -26,7 +27,7 @@ import net.minecraft.client.GameNarrator;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.Mth;
-
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -81,7 +82,7 @@ public class KeybindSelectorScreen extends Screen
 
         this.conflictedKey = key;
 
-        this.conflicts.addAll( KeybindManager.getConflicts( key ) );
+        this.conflicts.addAll( KeybindManager.getMappingsExcludingDebug( key ) );
     }
 
     @Override
@@ -103,7 +104,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
-    public void render( GuiGraphics context, int mouseX, int mouseY, float tickDelta )
+    public void render( @NonNull GuiGraphics context, int mouseX, int mouseY, float tickDelta )
     {
         // Angle of mouse, in radians from +X-axis, centred on the origin
         double mouseAngle = mouseAngle( this.centreX, this.centreY, mouseX, mouseY );
@@ -224,8 +225,24 @@ public class KeybindSelectorScreen extends Screen
         return (Mth.atan2(my - y, mx - x) + Math.PI * 2) % (Math.PI * 2);
     }
 
-    private void closePieMenu()
+
+    // ==================== Overrides ====================
+
+    @Override
+    public void tick()
     {
+        // There's literally nothing there. Avoid the jump instructions.
+        // super.tick();
+        this.ticksInScreen++;
+    }
+
+
+
+    @Override
+    public void onClose()
+    {
+        super.onClose();
+
         this.minecraft.setScreen( null );
 
         // Activate the selected binding
@@ -253,38 +270,37 @@ public class KeybindSelectorScreen extends Screen
         }
     }
 
-
-    // ==================== Overrides // ====================
-
-    @Override
-    public void tick()
-    {
-        // There's literally nothing there. Avoid the jump instructions.
-        // super.tick();
-        this.ticksInScreen++;
-    }
-
     // These two callbacks work the same as handling it in tick(), plus we get differentiated mouse/keyboard handling
-    // Previously, InputUtil.isKeyPressed would throw a GL error when called for a mouse code (0, 1, 2) and return a meaningless value
-    // TODO: now we need to handle it in tick()
+    // Previously, InputUtil.isKeyPressed would throw a GL error when called for a mouse code (0, 1, 2) and return a meaningless valu
 
-    /*@Override
-    public boolean keyReleased( int keyCode, int scanCode, int modifiers )
+
+    @Override
+    public boolean keyReleased( @NonNull KeyEvent keyEvent )
     {
-        if ( keyCode == this.conflictedKey.getValue() ) this.closePieMenu();
+        if ( InputConstants.getKey( keyEvent ) == this.conflictedKey )
+        {
+            this.onClose();
+            //return true;
+        }
 
-        return super.keyReleased( keyCode, scanCode, modifiers );
+        return super.keyReleased( keyEvent );
     }
 
     @Override
-    public boolean mouseReleased( double mouseX, double mouseY, int button )
+    public boolean mouseClicked( @NonNull MouseButtonEvent mouseButtonEvent, boolean bl )
     {
-        //this.mouseDown = false;
+        this.mouseDown = true;
 
-        if ( button == this.conflictedKey.getValue() )
+        return super.mouseClicked( mouseButtonEvent, bl );
+    }
+
+    @Override
+    public boolean mouseReleased( @NonNull MouseButtonEvent mouseButtonEvent )
+    {
+        if ( mouseButtonEvent.button() == this.conflictedKey.getValue() )
         {
             // Close menu and activate selection normally – click-hold not applicable
-            this.closePieMenu();
+            this.onClose();
         }
         else
         {
@@ -317,17 +333,8 @@ public class KeybindSelectorScreen extends Screen
             }
         }
 
-        return super.mouseReleased( mouseX, mouseY, button );
+        return super.mouseReleased( mouseButtonEvent );
     }
-
-    @Override
-    public boolean mouseClicked( double mouseX, double mouseY, int button )
-    {
-        this.mouseDown = true;
-
-        return super.mouseClicked( mouseX, mouseY, button );
-    }*/
-
     @Override
     // Don't pause the game when this screen is open
     // actually why not
@@ -336,7 +343,7 @@ public class KeybindSelectorScreen extends Screen
 
     //* >=1.20.2
     @Override
-    public void renderBackground( GuiGraphics context, int mouseX, int mouseY, float deltaTicks )
+    public void renderBackground( @NonNull GuiGraphics context, int mouseX, int mouseY, float deltaTicks )
     {
         if ( this.minecraft.level == null ) this.renderPanorama( context, deltaTicks );
 
