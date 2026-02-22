@@ -1,18 +1,44 @@
 package me.av306.keybindsgaloreplus;
 
+import me.av306.liteconfig.annotations.ConfigComment;
+
 import java.util.ArrayList;
 
+@ConfigComment( "Quick rundown of data types:" )
+@ConfigComment( "- float: \"floating-point\" number, can have decimal places. Use a period as the decimal separator, please, e.g. 3.14" )
+@ConfigComment( "- int: \"integers\", whole numbers (no decimals)" )
+@ConfigComment( "       Can also represent a color, in which case you can use hex notation:" )
+@ConfigComment( "       0x(RR)(GG)(BB) e.g. 0xEED202 for #EED202 (not case sensitive!)" )
+@ConfigComment( "- boolean: true/false" )
+@ConfigComment( "- hexadecimal (color): \"short\" value (0-255) represented by TWO hexadecimal (base-16) numbers., e.g. 0xFF" )
 public class Configurations
 {
+    @ConfigComment( "Debug mode -- enable this when reproducing your bug; disable normally" )
     public static boolean DEBUG = false;
 
     // Performance
-
-    public static boolean LAZY_CONFLICT_CHECK = true;
+    
+    @ConfigComment( "######################" )
+    @ConfigComment( "Performance options #" )
+    @ConfigComment( "#######################" )
+    @ConfigComment( "" )
+    @ConfigComment( "!!! NOTE: This option was removed in 1.4.0 !!!" )
+    @ConfigComment( "lazy_conflict_check=true" )
+    @ConfigComment( "" )
+    @ConfigComment( "How many vertices/facets the pie menu circle should have in total (int)" )
+    @ConfigComment( "I picked 60 because it's divisible by many possible sector numbers and gives reasonable results for others" )
+    @ConfigComment( "   Best not to change this, because the pie menu won't have *exactly* this many vertices (the code is complicated)" )
+    @ConfigComment( "   If you make it too low, you'll know because the edges of the menu will be very flat" )
+    @ConfigComment( "   Can *technically* help performance, but probably not much unless your hardware is VERY slow" )
     public static int CIRCLE_VERTICES = 120;
+
+    @ConfigComment( "If transparency should be enabled for the pie menu (boolean)" )
+    @ConfigComment( "Can slightly increase performance by avoiding blend calculations" )
     public static boolean PIE_MENU_BLEND = false;
+
+    // TODO: the rest of the comments
     public static boolean DARKENED_BACKGROUND = true;
-    public static final boolean BLUR_BACKGROUND = true;
+    public static boolean BLUR_BACKGROUND = true;
     public static boolean LABEL_TEXT_SHADOW = false;
 
     // Behaviour
@@ -21,8 +47,6 @@ public class Configurations
     // Impl as list of ints to make config easier
     public static ArrayList<Integer> IGNORED_KEYS = new ArrayList<>();
     public static boolean INVERT_IGNORED_KEYS_LIST = false;
-    public static boolean USE_KEYBIND_FIX = true;
-
 
     // Pie menu customisation
 

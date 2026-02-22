@@ -31,6 +31,7 @@ import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 // FIXME: pretty much all of this goes into KeybindSelectorElementRenderer
@@ -51,10 +52,7 @@ public class KeybindSelectorScreen extends Screen
 
     private boolean isFirstFrame = true;
 
-    private MultiBufferSource.BufferSource vertexConsumerProvider;
-
-    /** This is probably not going to change while the screen is open, so maybe this optimisation helps? */
-    private final ArrayList<KeyMapping> conflicts = new ArrayList<>();
+    private List<KeyMapping> conflicts;
 
     /*public KeybindSelectorScreen()
     {
@@ -75,14 +73,13 @@ public class KeybindSelectorScreen extends Screen
         }
     }*/
 
-    public KeybindSelectorScreen( InputConstants.Key key )
+    public KeybindSelectorScreen( InputConstants.Key key, List<KeyMapping> mappings )
     {
         //this();
         super( GameNarrator.NO_TITLE );
 
         this.conflictedKey = key;
-
-        this.conflicts.addAll( KeybindManager.getMappingsExcludingDebug( key ) );
+        this.conflicts = mappings;
     }
 
     @Override
@@ -97,8 +94,7 @@ public class KeybindSelectorScreen extends Screen
         this.maxExpandedRadius = this.maxRadius * Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
         this.cancelZoneRadius = maxRadius * Configurations.CANCEL_ZONE_SCALE;
 
-
-        KeybindsGalorePlus.debugLog( "Scaled centre: ({}, {})", this.centreX, this.centreY );
+        //KeybindsGalorePlus.debugLog( "Scaled centre: ({}, {})", this.centreX, this.centreY );
     }
 
     @Override

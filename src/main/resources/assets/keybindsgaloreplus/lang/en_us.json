@@ -2,10 +2,12 @@
   "key.category.keybindsgaloreplus.keybinds": "KeybindsGalore Plus",
   "key.keybindsgaloreplus.reloadconfigs": "Reload config file",
   "key.keybindsgaloreplus.reloadkeystate": "Reload keybind state",
-  "text.keybindsgaloreplus.configreloaded": "[KeybindsGalorePlus] Configs reloaded!",
+  "text.keybindsgaloreplus.configfileloaded": "[KeybindsGalorePlus] Config file loaded!",
   "text.keybindsgaloreplus.configerrors": "[KeybindsGalorePlus] Errors found in config file! (details in log file)",
   "text.keybindsgaloreplus.customdatafound": "[KeybindsGalorePlus] Custom keybind data loaded!",
   "text.keybindsgaloreplus.configreloadfail": "[KeybindsGalorePlus] Failed to reload configs: %s",
   "text.keybindsgaloreplus.configreloadfailagain": "[KeybindsGalorePlus] Failed to create a new config file! Please manually copy one over from:",
-  "text.keybindsgaloreplus.keystatereloaded": "[KeybindsGalorePlus] Keybind state reloaded!"
+  "text.keybindsgaloreplus.keystatereloaded": "[KeybindsGalorePlus] Keybind state reloaded!",
+  "text.keybindsgaloreplus.configfilecreated": "No config file found; created default one",
+  "text.keybindsgaloreplus.configfileerror": "Error in config file: %s"
 }

@@ -3,13 +3,14 @@ package me.av306.keybindsgaloreplus;
 import java.io.IOException;
 import java.net.URI;
 
+import me.av306.liteconfig.ConfigManager;
+import me.av306.liteconfig.exceptions.InvalidConfigurationEntryException;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mojang.blaze3d.platform.InputConstants;
 
-import me.av306.keybindsgaloreplus.configmanager.ConfigManager;
 import me.av306.keybindsgaloreplus.customdata.DataManager;
 import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer;
 import net.fabricmc.api.ClientModInitializer;
@@ -41,79 +42,91 @@ public class KeybindsGalorePlus implements ClientModInitializer
     {
         LOGGER.info( "KeybindsGalore Plus initialising..." );
 
+        // Initialise ConfigManager and load config file
+        CONFIG_MANAGER = new ConfigManager(
+            FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus_config.properties" ),
+            Configurations.class,
+            null
+        );
+
+        KeybindsGalorePlus.LOGGER.info( "Loading configuration file..." );
         try
         {
-            // Initialise ConfigManager and load config file
-            CONFIG_MANAGER = new ConfigManager(
-                "KeybindsGalorePlus",    
-                FabricLoader.getInstance().getConfigDir(),
-                "keybindsgaloreplus_config.properties",
-                Configurations.class,
-                null
-            );
-
-            // There's no good, easy way to enable DEBUG level, so I'm just gonna
-            // cram a bunch of if statements around
-            LOGGER.info( "Debug mode: {}", Configurations.DEBUG );
-
-            // (debug) Print all config fields
-            if ( Configurations.DEBUG )
-            {
-                CONFIG_MANAGER.printAllConfigs();
-            }
-
-            // Initialise custom data manager and read data file
-            customDataManager = new DataManager(
-                    FabricLoader.getInstance().getConfigDir(),
-                    "keybindsgaloreplus_customdata.data"
-            );
-
-
-            // Set config reload key
-            CONFIG_RELOAD_KEYBIND = KeyBindingHelper.registerKeyBinding( new KeyMapping(
-                        "key.keybindsgaloreplus.reloadconfigs",
-                        InputConstants.Type.KEYSYM,
-                        GLFW.GLFW_KEY_UNKNOWN,
-                    MOD_KEYBIND_CATEGORY
-            ) );
-
-            // Bind action to config reload key
-            ClientTickEvents.END_CLIENT_TICK.register( client ->
-            {
-                while ( CONFIG_RELOAD_KEYBIND.consumeClick() )
-                {
-                    try
-                    {
-                        CONFIG_MANAGER.readConfigFile();
-                        customDataManager.readDataFile();
-                    }
-                    catch ( IOException firstIoe )
-                    {
-                        client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.configreloadfail", firstIoe.getMessage() ), false );
-
-                        return;
-                    }
-
-                    if ( CONFIG_MANAGER.errorFlag ) client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.configerrors" ).withStyle( ChatFormatting.RED ), false );
-                    if ( customDataManager.hasCustomData ) client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.customdatafound" ), false );
-
-                    client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.configreloaded" ), false );
-
-                    if ( Configurations.DEBUG )
-                    {
-                        // Print all config fields
-                        CONFIG_MANAGER.printAllConfigs();
-                    }
-                }
-            } );
-
-
+            if ( CONFIG_MANAGER.deserialiseConfigurationFileOrElseCreateNew() )
+                KeybindsGalorePlus.LOGGER.info( "Created new configuration file!" );
+            else KeybindsGalorePlus.LOGGER.info( "Loaded existing configuration file!" );
         }
-        catch ( IOException ioe )
+        catch ( IOException e )
         {
-            LOGGER.error( "(KBG+) IOException while reading config file on init!" );
-            ioe.printStackTrace();
+            KeybindsGalorePlus.LOGGER.error( "Failed to load configuration file: {}", e.getLocalizedMessage() );
+            KeybindsGalorePlus.LOGGER.warn( "Will use default configurations" );
         }
+
+        // There's no good, easy way to enable DEBUG level, so I'm just gonna
+        // cram a bunch of if statements around
+        LOGGER.info( "Debug mode: {}", Configurations.DEBUG );
+
+        // (debug) Print all config fields
+        if ( Configurations.DEBUG )
+        {
+            CONFIG_MANAGER.printAllConfigs();
+        }
+
+        // Initialise custom data manager and read data file
+        customDataManager = new DataManager(
+                FabricLoader.getInstance().getConfigDir(),
+                "keybindsgaloreplus_customdata.data"
+        );
+
+        // Set config reload key
+        CONFIG_RELOAD_KEYBIND = KeyBindingHelper.registerKeyBinding( new KeyMapping(
+                    "key.keybindsgaloreplus.reloadconfigs",
+                    InputConstants.Type.KEYSYM,
+                    GLFW.GLFW_KEY_UNKNOWN,
+                MOD_KEYBIND_CATEGORY
+        ) );
+
+        // Bind action to config reload key
+        ClientTickEvents.END_CLIENT_TICK.register( client ->
+        {
+            while ( CONFIG_RELOAD_KEYBIND.consumeClick() )
+            {
+                try
+                {
+                    if ( CONFIG_MANAGER.deserialiseConfigurationFileOrElseCreateNew() )
+                    {
+                        client.player.displayClientMessage(
+                                Component.translatable( "text.keybindsgaloreplus.configfilecreated" ), false );
+                    }
+                    else client.player.displayClientMessage(
+                            Component.translatable( "text.keybindsgaloreplus.configfileloaded" ), false );
+                }
+                catch ( IOException e )
+                {
+                    client.player.displayClientMessage(
+                            Component.translatable( "text.keybindsgaloreplus.configreloadfail", e.getMessage() ),
+                            false
+                    );
+                }
+                catch ( InvalidConfigurationEntryException | NumberFormatException e )
+                {
+                    client.player.displayClientMessage(
+                            Component.translatable( "text.keybindsgaloreplus.configfileerror", e.getMessage() )
+                                    .withStyle( ChatFormatting.RED ),
+                            false
+                    );
+                }
+
+                customDataManager.readDataFile();
+                if ( customDataManager.hasCustomData ) client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.customdatafound" ), false );
+
+                if ( Configurations.DEBUG )
+                {
+                    // Print all config fields
+                    CONFIG_MANAGER.printAllConfigs();
+                }
+            }
+        } );
 
         // Register our fancy circle renderer
         SpecialGuiElementRegistry.register(

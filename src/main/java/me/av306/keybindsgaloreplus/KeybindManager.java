@@ -43,25 +43,37 @@ public class KeybindManager
      */
     public static boolean hasConflictsExcludingDebug( InputConstants.Key key )
     {
-        return getMappingsExcludingDebug( key ).size() > 1;
+        return getMappingsForContext( key ).size() > 1;
     }
 
     /**
      * Initializes and open the pie menu for the given conflicted key
      */
-    public static void openConflictMenu( InputConstants.Key key )
+    public static void openConflictMenu( InputConstants.Key key, List<KeyMapping> mappings )
     {
-        KeybindSelectorScreen screen = new KeybindSelectorScreen( key );   
+        KeybindSelectorScreen screen = new KeybindSelectorScreen( key, mappings );
         Minecraft.getInstance().setScreen( screen );
     }
 
     /**
      * Shortcut method to get conflicts on a key, excluding debug
      */
-    public static List<KeyMapping> getMappingsExcludingDebug( InputConstants.Key key )
+    public static List<KeyMapping> getMappingsForContext( InputConstants.Key key )
     {
+        // Stream-based method takes 7-65 us... good enough?
+        // https://stackoverflow.com/questions/24054773/java-8-streams-multiple-filters-vs-complex-condition
+        // https://stackoverflow.com/questions/78460866/improve-response-time-java-stream-filter
         return KeyMappingAccessor.getMap().getOrDefault( key, new ArrayList<>() ).stream()
                 .filter( keyMapping -> keyMapping.getCategory() != KeyMapping.Category.DEBUG )
+                .filter( keyMapping ->
+                        (Minecraft.getInstance().player.gameMode().isSurvival()
+                                && keyMapping.getCategory() != KeyMapping.Category.CREATIVE
+                                && keyMapping.getCategory() != KeyMapping.Category.SPECTATOR)
+                        || (Minecraft.getInstance().player.gameMode().isCreative()
+                                && keyMapping.getCategory() != KeyMapping.Category.SPECTATOR)
+                        || (Minecraft.getInstance().player.gameMode().isBlockPlacingRestricted()
+                                && keyMapping.getCategory() != KeyMapping.Category.CREATIVE)
+                )
                 .toList();
     }
 
@@ -73,7 +85,8 @@ public class KeybindManager
      */
     public static void handleKeyPress( InputConstants.Key key, boolean pressed, CallbackInfo ci )
     {
-        if ( hasConflictsExcludingDebug( key ) )
+        List<KeyMapping> mappings = getMappingsForContext( key );
+        if ( mappings.size() > 1 )
         {
             if ( !isIgnoredKey( key ) )
             {
@@ -107,7 +120,7 @@ public class KeybindManager
                         // Changing Screens (which this method does) resets all bindings to "unpressed",
                         // so zoom mods should work absolutely fine with us :)
                         KeybindsGalorePlus.debugLog( "\tOpening pie menu" );
-                        openConflictMenu( key );
+                        openConflictMenu( key, mappings );
                     }
                     // Conflicts to handle, but key was released -- do nothing
                 }

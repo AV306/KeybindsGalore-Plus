@@ -26,7 +26,7 @@ public class KeybindSelectorElementRenderer extends PictureInPictureRenderer<Key
         int centreY = (state.y1() - state.y0()) / 2;
 
         //KeybindsGalorePlus.debugLog( "Absolute size: ({}, {})", s, centreY );
-        KeybindsGalorePlus.debugLog( "Absolute centre: ({}, {})", centreX, centreY );
+        //KeybindsGalorePlus.debugLog( "Absolute centre: ({}, {})", centreX, centreY );
 
         int numberOfSectors = state.numberOfSectors();
         float sectorAngle = state.sectorAngle();
