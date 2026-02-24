@@ -23,6 +23,7 @@ public class KeybindManager
     // - Blender (AV306)
 
     public static final HashMap<Integer, KeyMapping> clickHoldKeys = new HashMap<>();
+    public static final HashMap<KeyMapping, Integer> clickHoldRepeatCooldown = new HashMap<>();
 
     /**
      * Does a given key NOT open a pie menu?
@@ -85,10 +86,11 @@ public class KeybindManager
      */
     public static void handleKeyPress( InputConstants.Key key, boolean pressed, CallbackInfo ci )
     {
-        List<KeyMapping> mappings = getMappingsForContext( key );
-        if ( mappings.size() > 1 )
+        KeybindsGalorePlus.debugLog( key.getName() + " pressed: " + pressed );
+        if ( !isIgnoredKey( key ) )
         {
-            if ( !isIgnoredKey( key ) )
+            List<KeyMapping> mappings = getMappingsForContext( key );
+            if ( mappings.size() > 1 )
             {
                 ci.cancel();
                 if ( isClickHoldKey( key ) )
@@ -126,9 +128,8 @@ public class KeybindManager
                 }
             }
             // else {}
-            // Ignored key -- proceed as per vanilla
+            // No conflicts -- proceed as per vanilla
         }
-        // else {}
-        // No conflicts -- proceed as per vanilla
+        // Ignored key -- proceed as per vanilla
     }
 }

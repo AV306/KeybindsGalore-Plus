@@ -44,13 +44,14 @@ public class KeybindsGalorePlus implements ClientModInitializer
         LOGGER.info( "KeybindsGalore Plus initialising..." );
 
         // Check for old configuration file and migrate (?)
-        if ( Files.exists( FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus_config.properties" ) )
+        if ( Files.exists( FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus_config.properties" ) ) )
         {
-            LOGGER.info( "Found old config file. Will migrate it to the new format..." );
+            LOGGER.info( "Found old config file; will migrate it to the new format." );
             try
             {
                 var oldConfigPath = FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus_config.properties" );
                 var newConfigPath = FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus.properties" );
+
                 var lines = Files.readAllLines( oldConfigPath );
                 
                 for ( int i = 0; i < lines.size(); i++ )

@@ -63,4 +63,12 @@ public abstract class KeyMappingMixin
 //        // Not calling handleKeyPress may cause https://github.com/AV306/KeybindsGalore-Plus/issues/10 though
 //        //KeybindManager.handleKeyPress( this.boundKey, pressed, ci );
 //    }
+
+
+    @Inject( method = "setDown", at = @At( "HEAD" ), cancellable = true )
+    private void onSetDown( boolean down, CallbackInfo ci )
+    {
+        if ( KeybindManager.isClickHoldKey( ((KeyMappingAccessor) this).getKey() ) )
+            ci.cancel();
+    }
 }
