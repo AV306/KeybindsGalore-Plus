@@ -1,8 +1,14 @@
 package me.av306.keybindsgaloreplus;
 
 import me.av306.liteconfig.annotations.ConfigComment;
+import me.av306.liteconfig.annotations.IgnoreConfig;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.spongepowered.asm.launch.GlobalProperties.Keys;
+
+import com.mojang.blaze3d.systems.RenderPass.Draw;
 
 @ConfigComment( "Quick rundown of data types:" )
 @ConfigComment( "- float: \"floating-point\" number, can have decimal places. Use a period as the decimal separator, please, e.g. 3.14" )
@@ -18,8 +24,8 @@ public class Configurations
 
     // Performance
     
-    @ConfigComment( "######################" )
-    @ConfigComment( "Performance options #" )
+    @ConfigComment( "#######################" )
+    @ConfigComment( "# Performance options #" )
     @ConfigComment( "#######################" )
     @ConfigComment( "" )
     @ConfigComment( "!!! NOTE: This option was removed in 1.4.0 !!!" )
@@ -34,18 +40,39 @@ public class Configurations
 
     @ConfigComment( "If transparency should be enabled for the pie menu (boolean)" )
     @ConfigComment( "Can slightly increase performance by avoiding blend calculations" )
-    public static boolean PIE_MENU_BLEND = false;
+    public static boolean PIE_MENU_BLEND = true;
 
-    // TODO: the rest of the comments
+    @ConfigComment( "Whether there should be a darkened background on the pie menu screen (boolean)" )
+    @ConfigComment( "May have a decent impact on performance, because of post-processing" )
     public static boolean DARKENED_BACKGROUND = true;
+
+    // FIXME: currently unused?
+    @IgnoreConfig
     public static boolean BLUR_BACKGROUND = true;
+
+    @ConfigComment( "Draw label texts with shadow (boolean)" )
+    @ConfigComment( "Disabling this may increase performance" )
     public static boolean LABEL_TEXT_SHADOW = false;
 
     // Behaviour
+
+    @ConfigComment( "#####################" )
+    @ConfigComment( "# Behaviour options #" )
+    @ConfigComment( "#####################" )
+    @ConfigComment( "" )
+    @ConfigComment( "Attack workaround (boolean)" )
+    @ConfigComment( "Makes Attack/Break work properly on the pie menu" )
+    @ConfigComment( "(messes with the attack cooldown; may cause problems)" )
+    @ConfigComment( "(IMPORTANT) Leave this as \"true\" if you're using EpicFight!" )
     public static boolean ENABLE_ATTACK_WORKAROUND = true;
 
-    // Impl as list of ints to make config easier
-    public static ArrayList<Integer> IGNORED_KEYS = new ArrayList<>();
+    @ConfigComment( "!!! NOTE: Changed from \"skipped_keys\" !!!" )
+    @ConfigComment( "Keys that should not open a pie menu (list of keycode ints)" )
+    @ConfigComment( "See https://www.glfw.org/docs/3.4/group__keys.html for keycodes" )
+    @ConfigComment( "Defaults to WASD" )
+    public static ArrayList<Integer> IGNORED_KEYS = new ArrayList<>( Arrays.asList( 87, 65, 83, 68 ) );
+
+    @ConfigComment( "Makes the mod ignore all keys except those in \"ignored_keys\"")
     public static boolean INVERT_IGNORED_KEYS_LIST = false;
 
     // Pie menu customisation

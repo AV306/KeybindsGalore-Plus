@@ -2,6 +2,7 @@ package me.av306.keybindsgaloreplus;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
 
 import me.av306.liteconfig.ConfigManager;
 import me.av306.liteconfig.exceptions.InvalidConfigurationEntryException;
@@ -42,9 +43,50 @@ public class KeybindsGalorePlus implements ClientModInitializer
     {
         LOGGER.info( "KeybindsGalore Plus initialising..." );
 
+        // Check for old configuration file and migrate (?)
+        if ( Files.exists( FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus_config.properties" ) )
+        {
+            LOGGER.info( "Found old config file. Will migrate it to the new format..." );
+            try
+            {
+                var oldConfigPath = FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus_config.properties" );
+                var newConfigPath = FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus.properties" );
+                var lines = Files.readAllLines( oldConfigPath );
+                
+                for ( int i = 0; i < lines.size(); i++ )
+                {
+                    String line = lines.get( i );
+
+                    if ( !line.startsWith( "#" ) && line.contains( "=" ) )
+                    {
+                        String[] parts = line.split( "=", 2 );
+                        if ( parts.length == 2 )
+                        {
+                            String newLine = parts[0].toUpperCase() + "=" + parts[1];
+                            LOGGER.info( "Migrating config entry: {} -> {}", line, newLine );
+                            lines.set( i, newLine );
+                        }
+                        else
+                        {
+                            LOGGER.warn( "Skipping invalid config line during migration: {}", line );
+                        }
+                    }
+                }
+                
+                Files.write( newConfigPath, lines );
+                Files.delete( oldConfigPath );
+
+                LOGGER.info( "Successfully migrated old configuration file!" );
+            }
+            catch ( IOException e )
+            {
+                LOGGER.warn( "Failed to migrate old configuration file: {}", e.getLocalizedMessage() );
+            }
+        }
+
         // Initialise ConfigManager and load config file
         CONFIG_MANAGER = new ConfigManager(
-            FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus_config.properties" ),
+            FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus.properties" ),
             Configurations.class,
             null
         );
@@ -59,7 +101,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
         catch ( IOException e )
         {
             KeybindsGalorePlus.LOGGER.error( "Failed to load configuration file: {}", e.getLocalizedMessage() );
-            KeybindsGalorePlus.LOGGER.warn( "Will use default configurations" );
+            KeybindsGalorePlus.LOGGER.warn( "Will use default configurations." );
         }
 
         // There's no good, easy way to enable DEBUG level, so I'm just gonna
