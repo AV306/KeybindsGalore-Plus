@@ -4,6 +4,8 @@ import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyboardHandler;
+import net.minecraft.client.MouseHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,7 +28,16 @@ public abstract class KeyMappingMixin
     @Inject( method = "set", at = @At( "HEAD" ), cancellable = true )
     private static void setKeyPressed( InputConstants.Key key, boolean pressed, CallbackInfo ci ) throws Exception
     {
-        KeybindsGalorePlus.debugLog( "setKeyPressed( {}, {} ) called", key.getName(), pressed );
+        // KeyboardHandler L583 calls this with "true" during regular gameplay
+        // L548 calls this with false
+        // L515 does the stupid click-hold bug
+        // as best as I can tell, a duplicate key pressed event is sent to the screen on click-hold (L512),
+        // which the screen then interprets as telling it to close => screen set to null => mouse grabbed (and screen set to null again
+        // then the rest of the KeyboardHandler keyPress handler (L515) (for the same pressed event) calls set( false )
+        // Could this duplicate event be the hardware key repeat???
+        KeybindsGalorePlus.debugLog( "set( key: {}, pressed: {} ) called", key.getName(), pressed );
+
+        Thread.dumpStack();
 
         // Handle key
         KeybindManager.handleKeyPress( key, pressed, ci );
@@ -68,7 +79,7 @@ public abstract class KeyMappingMixin
     @Inject( method = "setDown", at = @At( "HEAD" ), cancellable = true )
     private void onSetDown( boolean down, CallbackInfo ci )
     {
-        if ( KeybindManager.isClickHoldKey( ((KeyMappingAccessor) this).getKey() ) )
-            ci.cancel();
+        //if ( KeybindManager.isClickHoldKey( ((KeyMappingAccessor) this).getKey() ) )
+        //    ci.cancel();
     }
 }

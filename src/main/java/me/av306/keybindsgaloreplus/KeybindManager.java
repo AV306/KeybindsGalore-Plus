@@ -1,6 +1,7 @@
 package me.av306.keybindsgaloreplus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -64,7 +65,9 @@ public class KeybindManager
         // Stream-based method takes 7-65 us... good enough?
         // https://stackoverflow.com/questions/24054773/java-8-streams-multiple-filters-vs-complex-condition
         // https://stackoverflow.com/questions/78460866/improve-response-time-java-stream-filter
-        return KeyMappingAccessor.getMap().getOrDefault( key, new ArrayList<>() ).stream()
+        //if ( Minecraft.getInstance().player == null ) return Collections.emptyList();
+
+        /*else*/ return KeyMappingAccessor.getMap().getOrDefault( key, new ArrayList<>() ).stream()
                 .filter( keyMapping -> keyMapping.getCategory() != KeyMapping.Category.DEBUG )
                 .filter( keyMapping ->
                         (Minecraft.getInstance().player.gameMode().isSurvival()
@@ -96,18 +99,24 @@ public class KeybindManager
                 if ( isClickHoldKey( key ) )
                 {
                     // TODO: cooldown
+                    if ( Minecraft.getInstance().screen != null ) return;
 
                     KeyMapping clickHoldBinding = clickHoldKeys.get( key.getValue() );
 
                     if ( clickHoldBinding != null )
                     {
-                        KeybindsGalorePlus.debugLog( "Activating {} (click-hold)", clickHoldBinding.getName() );
+                        // Transfer the pressed state to the mapping (whether pressed or not)
+                        KeybindsGalorePlus.debugLog( "Setting {} to {} (click-hold)",
+                                clickHoldBinding.getName(), pressed ? "pressed" : "released" );
                         ((KeyMappingAccessor) clickHoldBinding).setIsDown( pressed );
                         ((KeyMappingAccessor) clickHoldBinding).setClickCount( pressed ? 1 : 0 );
                     }
 
                     if ( !pressed )
                     {
+                        // If the click-hold key was released, remove it from the list (after transferring the state)
+                        // For GUIs, flow reaches here immediately after the screen opens, even if the key is still held
+                        // Call stack indicates it's from line KeyboardHandler L515
                         KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
                         clickHoldKeys.remove( key.getValue() );
                     }

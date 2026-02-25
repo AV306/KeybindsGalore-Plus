@@ -6,10 +6,13 @@ import me.av306.keybindsgaloreplus.KeybindSelectorScreen;
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.platform.WindowEventHandler;
+import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.Options;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
+import org.lwjgl.system.CallbackI;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -73,4 +76,10 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
     // I'm guessing that there isn't enough time for a handleBlockBreaking( false ) call when the pie menu screen is closed and the attack key is set to pressed
     // So the workaround is to set attackCooldown = 0 in the pie menu screen!
 
+    @Inject( method = "setScreen", at = @At( "HEAD" ) )
+    public void onSetScreen( Screen screen, CallbackInfo ci )
+    {
+        KeybindsGalorePlus.LOGGER.info( "screen set to {} by the following stack trace:", screen == null ? "null" : screen.getTitle().getString() );
+        Thread.dumpStack();
+    }
 }
