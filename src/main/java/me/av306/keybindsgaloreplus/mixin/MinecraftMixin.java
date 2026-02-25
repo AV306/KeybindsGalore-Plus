@@ -68,6 +68,13 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
 //        KeybindsGalorePlus.debugLog( "attack cooldown: {} breaking: {}", this.attackCooldown, breaking );
 //    }
 
+//    @Inject( method = "setScreen", at = @At( "HEAD" ) )
+//    public void onSetScreen( Screen screen, CallbackInfo ci )
+//    {
+//        KeybindsGalorePlus.LOGGER.info( "screen set to {} by the following stack trace:", screen == null ? "null" : screen.getTitle().getString() );
+//        Thread.dumpStack();
+//    }
+
     // Some notes (TODO: add to Yarn mappings?)
     // doAttack() returns true if and only if attacking the block broke it (the block turned into air)
     // bl3 is approximately "block breaking finished"
@@ -75,11 +82,4 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
     // The problem here was that attack cooldown is set to 10000 every tick that a screen is shown, and is only reset when handleBlockBreaking( false ) is called
     // I'm guessing that there isn't enough time for a handleBlockBreaking( false ) call when the pie menu screen is closed and the attack key is set to pressed
     // So the workaround is to set attackCooldown = 0 in the pie menu screen!
-
-    @Inject( method = "setScreen", at = @At( "HEAD" ) )
-    public void onSetScreen( Screen screen, CallbackInfo ci )
-    {
-        //KeybindsGalorePlus.LOGGER.info( "screen set to {} by the following stack trace:", screen == null ? "null" : screen.getTitle().getString() );
-        //Thread.dumpStack();
-    }
 }

@@ -65,9 +65,8 @@ public class KeybindManager
         // Stream-based method takes 7-65 us... good enough?
         // https://stackoverflow.com/questions/24054773/java-8-streams-multiple-filters-vs-complex-condition
         // https://stackoverflow.com/questions/78460866/improve-response-time-java-stream-filter
-        //if ( Minecraft.getInstance().player == null ) return Collections.emptyList();
-
-        /*else*/ return KeyMappingAccessor.getMap().getOrDefault( key, new ArrayList<>() ).stream()
+        if ( Minecraft.getInstance().player == null ) return Collections.emptyList();
+        else return KeyMappingAccessor.getMap().getOrDefault( key, new ArrayList<>() ).stream()
                 .filter( keyMapping -> keyMapping.getCategory() != KeyMapping.Category.DEBUG )
                 .filter( keyMapping ->
                         (Minecraft.getInstance().player.gameMode().isSurvival()
@@ -92,15 +91,13 @@ public class KeybindManager
         KeybindsGalorePlus.debugLog( key.getName() + " pressed: " + pressed );
         if ( !isIgnoredKey( key ) )
         {
-            KeybindsGalorePlus.debugLog( "Not ignored key" );
             List<KeyMapping> mappings = getMappingsForContext( key );
             if ( mappings.size() > 1 )
             {
-                KeybindsGalorePlus.debugLog( "Has conflicts" );
                 ci.cancel();
                 if ( isClickHoldKey( key ) )
                 {
-                    KeybindsGalorePlus.debugLog( "Is click-hold key" );
+                    //KeybindsGalorePlus.debugLog( "Is click-hold key" );
                     // TODO: cooldown
                     if ( Minecraft.getInstance().screen != null ) return;
 
@@ -129,7 +126,7 @@ public class KeybindManager
                 }
                 else
                 {
-                    KeybindsGalorePlus.debugLog( "Pie menu key" );
+                    //KeybindsGalorePlus.debugLog( "Pie menu key" );
                     // Key has conflicts, and shouldn't be ignored
                     if ( pressed )
                     {
@@ -152,10 +149,10 @@ public class KeybindManager
                         openConflictMenu( key, mappings );
                     }
                     // Conflicts to handle, but key was released -- do nothing
-                    else KeybindsGalorePlus.debugLog( "pie menu key released" );
+                    //else KeybindsGalorePlus.debugLog( "pie menu key released" );
                 }
             }
-            else KeybindsGalorePlus.debugLog( "No conflicts" );
+            //else KeybindsGalorePlus.debugLog( "No conflicts on key, using vanilla behaviour" );
             // No conflicts -- proceed as per vanilla
         }
         // Ignored key -- proceed as per vanilla

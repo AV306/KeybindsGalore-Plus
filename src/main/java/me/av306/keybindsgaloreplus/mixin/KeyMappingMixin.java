@@ -29,16 +29,14 @@ public abstract class KeyMappingMixin
     @Inject( method = "set", at = @At( "HEAD" ), cancellable = true )
     private static void setKeyPressed( InputConstants.Key key, boolean pressed, CallbackInfo ci ) throws Exception
     {
-        // KeyboardHandler L583 calls this with "true" during regular gameplay
-        // L548 calls this with false
-        // L515 does the stupid click-hold bug
-        // as best as I can tell, a duplicate key pressed event is sent to the screen on click-hold (L512),
+        // KeyboardHandler L583 calls this with "true" during regular gameplay;
+        // L548 calls this with false;
+        // L515 causes the click-hold gui bug.
+        // As best as I can tell, a duplicate key pressed event is sent to the screen on click-hold (L512),
         // which the screen then interprets as telling it to close => screen set to null => mouse grabbed (and screen set to null again
-        // then the rest of the KeyboardHandler keyPress handler (L515) (for the same pressed event) calls set( false )
-        // Could this duplicate event be the hardware key repeat???
+        // then the rest of the KeyboardHandler keyPress handler (L515) (for the same pressed event) calls set( false ).
+        // This duplicate event is most likely the hardware key repeat.
         KeybindsGalorePlus.debugLog( "set( key: {}, pressed: {} ) called", key.getName(), pressed );
-
-        //Thread.dumpStack();
 
         // Handle key
         KeybindManager.handleKeyPress( key, pressed, ci );
@@ -77,21 +75,22 @@ public abstract class KeyMappingMixin
 //    }
 
 
-    @Inject( method = "setDown", at = @At( "HEAD" ), cancellable = true )
-    private void onSetDown( boolean down, CallbackInfo ci )
-    {
-        KeybindsGalorePlus.LOGGER.info( "{} setDown {} from below stacktrace:", ((KeyMapping) (Object) this).getName(), down );
-        //Thread.dumpStack();
-    }
+//    @Inject( method = "setDown", at = @At( "HEAD" ) )
+//    private void onSetDown( boolean down, CallbackInfo ci )
+//    {
+//        KeybindsGalorePlus.LOGGER.info( "{} setDown {} from below stacktrace:", ((KeyMapping) (Object) this).getName(), down );
+//        Thread.dumpStack();
+//    }
 
     @WrapWithCondition(
             method = "setAll",
             at = @At( value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;setDown(Z)V" )
     )
-    private static boolean setAllExceptNonConflictingKeys( KeyMapping keyMapping, boolean down )
+    private static boolean setAllNonConflictingKeys( KeyMapping keyMapping, boolean down )
     {
-        // FIXME: expensive?
+        // Only called in MouseHandler.grabMouse() so cost should be fine
         // This stops all our conflicted keymappings from being activated when screens close (See KeybindManager)
-        return !KeybindManager.hasConflictsExcludingDebug( ((KeyMappingAccessor) keyMapping).getKey() );
+        InputConstants.Key targetKey = ((KeyMappingAccessor) keyMapping).getKey();
+        return KeybindManager.isIgnoredKey( targetKey ) || !KeybindManager.hasConflictsExcludingDebug( targetKey );
     }
 }

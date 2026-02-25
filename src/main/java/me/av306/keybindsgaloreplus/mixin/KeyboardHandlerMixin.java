@@ -30,7 +30,7 @@ public class KeyboardHandlerMixin
         // We only get key-down events because keyPress handler filters them for us
         if ( KeybindManager.isClickHoldKey( InputConstants.getKey( keyEvent ) ) )
         {
-            KeybindsGalorePlus.debugLog( "\tBlocking hardware key repeat in Screen" );
+            KeybindsGalorePlus.debugLog( "\tBlocking hardware key repeat in screen" );
             return false;
         }
         else return original.call( instance, keyEvent );
