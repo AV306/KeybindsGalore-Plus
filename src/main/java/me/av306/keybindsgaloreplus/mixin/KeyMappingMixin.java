@@ -1,5 +1,6 @@
 package me.av306.keybindsgaloreplus.mixin;
 
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 
 import net.minecraft.client.KeyMapping;
@@ -37,7 +38,7 @@ public abstract class KeyMappingMixin
         // Could this duplicate event be the hardware key repeat???
         KeybindsGalorePlus.debugLog( "set( key: {}, pressed: {} ) called", key.getName(), pressed );
 
-        Thread.dumpStack();
+        //Thread.dumpStack();
 
         // Handle key
         KeybindManager.handleKeyPress( key, pressed, ci );
@@ -79,7 +80,18 @@ public abstract class KeyMappingMixin
     @Inject( method = "setDown", at = @At( "HEAD" ), cancellable = true )
     private void onSetDown( boolean down, CallbackInfo ci )
     {
-        //if ( KeybindManager.isClickHoldKey( ((KeyMappingAccessor) this).getKey() ) )
-        //    ci.cancel();
+        KeybindsGalorePlus.LOGGER.info( "{} setDown {} from below stacktrace:", ((KeyMapping) (Object) this).getName(), down );
+        //Thread.dumpStack();
+    }
+
+    @WrapWithCondition(
+            method = "setAll",
+            at = @At( value = "INVOKE", target = "Lnet/minecraft/client/KeyMapping;setDown(Z)V" )
+    )
+    private static boolean setAllExceptNonConflictingKeys( KeyMapping keyMapping, boolean down )
+    {
+        // FIXME: expensive?
+        // This stops all our conflicted keymappings from being activated when screens close (See KeybindManager)
+        return !KeybindManager.hasConflictsExcludingDebug( ((KeyMappingAccessor) keyMapping).getKey() );
     }
 }

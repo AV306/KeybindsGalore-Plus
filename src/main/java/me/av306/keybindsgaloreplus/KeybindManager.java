@@ -92,12 +92,15 @@ public class KeybindManager
         KeybindsGalorePlus.debugLog( key.getName() + " pressed: " + pressed );
         if ( !isIgnoredKey( key ) )
         {
+            KeybindsGalorePlus.debugLog( "Not ignored key" );
             List<KeyMapping> mappings = getMappingsForContext( key );
             if ( mappings.size() > 1 )
             {
+                KeybindsGalorePlus.debugLog( "Has conflicts" );
                 ci.cancel();
                 if ( isClickHoldKey( key ) )
                 {
+                    KeybindsGalorePlus.debugLog( "Is click-hold key" );
                     // TODO: cooldown
                     if ( Minecraft.getInstance().screen != null ) return;
 
@@ -106,8 +109,11 @@ public class KeybindManager
                     if ( clickHoldBinding != null )
                     {
                         // Transfer the pressed state to the mapping (whether pressed or not)
-                        KeybindsGalorePlus.debugLog( "Setting {} to {} (click-hold)",
-                                clickHoldBinding.getName(), pressed ? "pressed" : "released" );
+                        if ( Configurations.DEBUG ) KeybindsGalorePlus.LOGGER.info(
+                                "Setting {} to {} for mapping (click-hold)",
+                                clickHoldBinding.getName(), pressed ? "pressed" : "released"
+                        );
+
                         ((KeyMappingAccessor) clickHoldBinding).setIsDown( pressed );
                         ((KeyMappingAccessor) clickHoldBinding).setClickCount( pressed ? 1 : 0 );
                     }
@@ -115,14 +121,15 @@ public class KeybindManager
                     if ( !pressed )
                     {
                         // If the click-hold key was released, remove it from the list (after transferring the state)
-                        // For GUIs, flow reaches here immediately after the screen opens, even if the key is still held
-                        // Call stack indicates it's from line KeyboardHandler L515
+                        // For GUIs (without the click-hold bug fix), flow reaches here immediately after the screen opens,
+                        // even if the key is still held. Call stack indicates it's from line KeyboardHandler L515
                         KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
                         clickHoldKeys.remove( key.getValue() );
                     }
                 }
                 else
                 {
+                    KeybindsGalorePlus.debugLog( "Pie menu key" );
                     // Key has conflicts, and shouldn't be ignored
                     if ( pressed )
                     {
@@ -131,12 +138,24 @@ public class KeybindManager
                         // Changing Screens (which this method does) resets all bindings to "unpressed",
                         // so zoom mods should work absolutely fine with us :)
                         KeybindsGalorePlus.debugLog( "\tOpening pie menu" );
+
+                        // When any screen is closed and mouse is grabbed, and we're NOT on macOS,
+                        // all keymapping states are updated to match the real keyboard
+                        // (MouseHandler.grabMouse() -> KeyMapping.setAll())
+                        // This causes all our conflicting mkeymappings to activate,
+                        // which we obviously don't want.
+                        // This actually doesn't manifest unless exiting a gui opened by click-hold.
+                        // Notable instances when screens are closed:
+                        // - click-hold closing of pie menu
+                        // - GUI closing
+                        // The fix is to
                         openConflictMenu( key, mappings );
                     }
                     // Conflicts to handle, but key was released -- do nothing
+                    else KeybindsGalorePlus.debugLog( "pie menu key released" );
                 }
             }
-            // else {}
+            else KeybindsGalorePlus.debugLog( "No conflicts" );
             // No conflicts -- proceed as per vanilla
         }
         // Ignored key -- proceed as per vanilla

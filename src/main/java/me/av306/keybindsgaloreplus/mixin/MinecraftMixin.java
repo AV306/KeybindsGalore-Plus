@@ -79,7 +79,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
     @Inject( method = "setScreen", at = @At( "HEAD" ) )
     public void onSetScreen( Screen screen, CallbackInfo ci )
     {
-        KeybindsGalorePlus.LOGGER.info( "screen set to {} by the following stack trace:", screen == null ? "null" : screen.getTitle().getString() );
-        Thread.dumpStack();
+        //KeybindsGalorePlus.LOGGER.info( "screen set to {} by the following stack trace:", screen == null ? "null" : screen.getTitle().getString() );
+        //Thread.dumpStack();
     }
 }
