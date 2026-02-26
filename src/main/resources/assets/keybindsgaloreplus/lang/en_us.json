@@ -2,12 +2,17 @@
   "key.category.keybindsgaloreplus.keybinds": "KeybindsGalore Plus",
   "key.keybindsgaloreplus.reloadconfigs": "Reload config file",
   "key.keybindsgaloreplus.reloadkeystate": "Reload keybind state",
-  "text.keybindsgaloreplus.configfileloaded": "[KeybindsGalorePlus] Config file loaded!",
-  "text.keybindsgaloreplus.configerrors": "[KeybindsGalorePlus] Errors found in config file! (details in log file)",
-  "text.keybindsgaloreplus.customdatafound": "[KeybindsGalorePlus] Custom keybind data loaded!",
-  "text.keybindsgaloreplus.configreloadfail": "[KeybindsGalorePlus] Failed to reload configs: %s",
-  "text.keybindsgaloreplus.configreloadfailagain": "[KeybindsGalorePlus] Failed to create a new config file! Please manually copy one over from:",
+
+  "text.keybindsgaloreplus.configurations.load.success": "[KeybindsGalorePlus] Configurations reloaded successfully!",
+  "text.keybindsgaloreplus.configurations.load.created_new": "[KeybindsGalorePlus] Created new configuration file from default values!",
+  "text.keybindsgaloreplus.configurations.load.fail.ioexception": "[KeybindsGalorePlus] IOException while reloading configurations: ",
+  "text.keybindsgaloreplus.configurations.load.fail.invalid_entry": "[KeybindsGalorePlus] Invalid configuration entry: ",
+
+  "text.keybindsgaloreplus.debugmode.enabled": "[KeybindsGalorePlus] Debug mode enabled. Your log file will get very verbose.",
+
+  "text.keybindsgaloreplus.customdata.found": "[KeybindsGalorePlus] Custom keybind data loaded!",
+
   "text.keybindsgaloreplus.keystatereloaded": "[KeybindsGalorePlus] Keybind state reloaded!",
-  "text.keybindsgaloreplus.configfilecreated": "No config file found; created default one",
-  "text.keybindsgaloreplus.configfileerror": "Error in config file: %s"
+
+  "keybindsgaloreplus.conflict_selector_title": "Conflict selector for key: %s"
 }

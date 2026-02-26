@@ -38,6 +38,8 @@ public class KeybindsGalorePlus implements ClientModInitializer
     private static final KeyMapping.Category MOD_KEYBIND_CATEGORY
             = KeyMapping.Category.register( Identifier.fromNamespaceAndPath( "keybindsgaloreplus", "keybinds" ) );
 
+    public static ChatFormatting ERROR_FORMATTING = ChatFormatting.RED;
+
     @Override
     public void onInitializeClient()
     {
@@ -139,33 +141,38 @@ public class KeybindsGalorePlus implements ClientModInitializer
                     if ( CONFIG_MANAGER.deserialiseConfigurationFileOrElseCreateNew() )
                     {
                         client.player.displayClientMessage(
-                                Component.translatable( "text.keybindsgaloreplus.configfilecreated" ), false );
+                                Component.translatable( "text.keybindsgaloreplus.configurations.load.created_new" ), false );
                     }
                     else client.player.displayClientMessage(
-                            Component.translatable( "text.keybindsgaloreplus.configfileloaded" ), false );
+                            Component.translatable( "text.keybindsgaloreplus.configurations.load.success" ), false );
                 }
                 catch ( IOException e )
                 {
                     client.player.displayClientMessage(
-                            Component.translatable( "text.keybindsgaloreplus.configreloadfail", e.getMessage() ),
+                            Component.translatable( "text.keybindsgaloreplus.configurations.load.fail.ioexception" )
+                                    .withStyle( ERROR_FORMATTING )
+                                    .append( Component.literal( e.getLocalizedMessage() ) ),
                             false
                     );
                 }
                 catch ( InvalidConfigurationEntryException | NumberFormatException e )
                 {
                     client.player.displayClientMessage(
-                            Component.translatable( "text.keybindsgaloreplus.configfileerror", e.getMessage() )
-                                    .withStyle( ChatFormatting.RED ),
+                            Component.translatable( "text.keybindsgaloreplus.configurations.load.fail.invalid_entry" )
+                                    .withStyle( ERROR_FORMATTING )
+                                    .append( Component.literal( e.getLocalizedMessage() ) ),
                             false
                     );
                 }
 
                 customDataManager.readDataFile();
-                if ( customDataManager.hasCustomData ) client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.customdatafound" ), false );
+                if ( customDataManager.hasCustomData )
+                    client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.customdata.found" ), false );
 
                 if ( Configurations.DEBUG )
                 {
-                    // Print all config fields
+                    client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.debugmode.enabled" ), false );
+                    // Log all config fields in debug mode
                     CONFIG_MANAGER.printAllConfigs();
                 }
             }
