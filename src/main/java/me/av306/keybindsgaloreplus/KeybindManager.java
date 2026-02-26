@@ -112,7 +112,7 @@ public class KeybindManager
                     {
                         // Transfer the pressed state to the mapping (whether pressed or not)
                         if ( Configurations.DEBUG ) KeybindsGalorePlus.LOGGER.info(
-                                "Setting {} to {} for mapping (click-hold)",
+                                "Setting mapping {} to {} (click-hold)",
                                 clickHoldMapping.getName(), pressed ? "pressed" : "released"
                         );
 

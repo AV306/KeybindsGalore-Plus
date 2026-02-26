@@ -307,7 +307,7 @@ public class KeybindSelectorScreen extends Screen
 
                 // Clicked on a sector; add its binding to the click-hold map
                 //KeybindsGalorePlus.debugLog( "Activated sector {} (key {}) (click-hold) via pie menu", this.selectedSectorIndex, this.conflictedKey.getCategory() );
-                KeybindsGalorePlus.debugLog( "Pie menu closed with click-hold" );
+                KeybindsGalorePlus.debugLog( "Pie menu closed with click-hold for {}", binding.getName() );
                 KeybindManager.clickHoldKeys.put( this.conflictedKey.getValue(), binding );
 
                 // Key events are generated repeatedly for keyboard keys held down, but not for mouse buttons,
@@ -320,8 +320,9 @@ public class KeybindSelectorScreen extends Screen
                 KeybindsGalorePlus.debugLog( "Pie menu closed via click-hold with no selection" );
                 
                 // No sector clicked; add null to the click-hold map to signal a cancel
-                // FIXME: does this line even do anythiing?
-                //KeybindManager.clickHoldKeys.put( this.conflictedKey.getValue(), null );
+                // This is technically unnecessary but just adds a way to release click-hold
+                // in case it gets stuck
+                KeybindManager.clickHoldKeys.put( this.conflictedKey.getValue(), null );
             }
         }
 
