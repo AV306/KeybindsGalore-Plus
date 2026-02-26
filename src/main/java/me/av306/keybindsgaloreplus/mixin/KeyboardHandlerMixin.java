@@ -7,10 +7,8 @@ import me.av306.keybindsgaloreplus.Configurations;
 import me.av306.keybindsgaloreplus.KeybindManager;
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 import net.minecraft.client.KeyboardHandler;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.server.dialog.Input;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -28,6 +26,7 @@ public class KeyboardHandlerMixin
     public boolean wrapScreenKeyPressed( Screen instance, KeyEvent keyEvent, Operation<Boolean> original )
     {
         // We only get key-down events because keyPress handler filters them for us
+        // Stop hardware repeat events from closing a screen opened by click-hold
         if ( KeybindManager.isClickHoldKey( InputConstants.getKey( keyEvent ) ) )
         {
             KeybindsGalorePlus.debugLog( "\tBlocking hardware key repeat in screen" );
@@ -45,7 +44,8 @@ public class KeyboardHandlerMixin
     )
     public boolean wrapScreenKeyReleased( Screen instance, KeyEvent keyEvent, Operation<Boolean> original )
     {
-        // LET'S GOOOOOOO IT WORKS
+        // Clear the click-hold state on (ANY) key release in the screen, because screens
+        // consume all the key events while they're open
         if ( KeybindManager.isClickHoldKey( InputConstants.getKey( keyEvent ) ) )
         {
             if ( Configurations.DEBUG )

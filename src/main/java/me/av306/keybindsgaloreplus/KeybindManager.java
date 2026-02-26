@@ -16,15 +16,7 @@ import net.minecraft.client.Minecraft;
 
 public class KeybindManager
 {
-    // To HBV007og:
-    // I can't thank you enough for all the comments in the code,
-    // I was worried I'd have to actually understand every line in every file
-    // to do anything!
-    // I hope you have fun on your modding/programming travels! :D
-    // - Blender (AV306)
-
     public static final HashMap<Integer, KeyMapping> clickHoldKeys = new HashMap<>();
-    public static final HashMap<KeyMapping, Integer> clickHoldRepeatCooldown = new HashMap<>();
 
     /**
      * Does a given key NOT open a pie menu?
@@ -39,11 +31,16 @@ public class KeybindManager
         return clickHoldKeys.containsKey( key.getValue() );
     }
 
+    public static void clearClickHoldKey( InputConstants.Key key )
+    {
+        clickHoldKeys.remove( key.getValue() );
+    }
+
     /**
      * Checks if there is a binding conflict on this key, excluding debug keys
      * @param key: The key to check
      */
-    public static boolean hasConflictsExcludingDebug( InputConstants.Key key )
+    public static boolean hasConflicts( InputConstants.Key key )
     {
         return getMappingsForContext( key ).size() > 1;
     }
@@ -65,7 +62,12 @@ public class KeybindManager
         // Stream-based method takes 7-65 us... good enough?
         // https://stackoverflow.com/questions/24054773/java-8-streams-multiple-filters-vs-complex-condition
         // https://stackoverflow.com/questions/78460866/improve-response-time-java-stream-filter
+        // I get a noticeable FPS drop on the first frame of the menu opening...
+        // We could possibly optimise by caching each gamemode context's mapping list when the keybind menu closes
+        // or if we're daring, have only one cache and update it when gamemode changes (but that involves more hooks)
+        // Neither method is sustainable if we want to add more contexts :/
         if ( Minecraft.getInstance().player == null ) return Collections.emptyList();
+
         else return KeyMappingAccessor.getMap().getOrDefault( key, new ArrayList<>() ).stream()
                 .filter( keyMapping -> keyMapping.getCategory() != KeyMapping.Category.DEBUG )
                 .filter( keyMapping ->
@@ -88,45 +90,48 @@ public class KeybindManager
      */
     public static void handleKeyPress( InputConstants.Key key, boolean pressed, CallbackInfo ci )
     {
-        KeybindsGalorePlus.debugLog( key.getName() + " pressed: " + pressed );
+        //KeybindsGalorePlus.debugLog( key.getName() + " pressed: " + pressed );
+
         if ( !isIgnoredKey( key ) )
         {
             List<KeyMapping> mappings = getMappingsForContext( key );
+
             if ( mappings.size() > 1 )
             {
+                // Has conflicts -- open pie menu and cancel original method
                 ci.cancel();
+
                 if ( isClickHoldKey( key ) )
                 {
                     //KeybindsGalorePlus.debugLog( "Is click-hold key" );
-                    // TODO: cooldown
-                    if ( Minecraft.getInstance().screen != null ) return;
+                    //if ( Minecraft.getInstance().screen != null ) return;
 
-                    KeyMapping clickHoldBinding = clickHoldKeys.get( key.getValue() );
+                    KeyMapping clickHoldMapping = clickHoldKeys.get( key.getValue() );
 
-                    if ( clickHoldBinding != null )
+                    if ( clickHoldMapping != null )
                     {
                         // Transfer the pressed state to the mapping (whether pressed or not)
                         if ( Configurations.DEBUG ) KeybindsGalorePlus.LOGGER.info(
                                 "Setting {} to {} for mapping (click-hold)",
-                                clickHoldBinding.getName(), pressed ? "pressed" : "released"
+                                clickHoldMapping.getName(), pressed ? "pressed" : "released"
                         );
 
-                        ((KeyMappingAccessor) clickHoldBinding).setIsDown( pressed );
-                        ((KeyMappingAccessor) clickHoldBinding).setClickCount( pressed ? 1 : 0 );
+                        ((KeyMappingAccessor) clickHoldMapping).setIsDown( pressed );
+                        ((KeyMappingAccessor) clickHoldMapping).setClickCount( pressed ? 1 : 0 );
                     }
 
                     if ( !pressed )
                     {
                         // If the click-hold key was released, remove it from the list (after transferring the state)
-                        // For GUIs (without the click-hold bug fix), flow reaches here immediately after the screen opens,
-                        // even if the key is still held. Call stack indicates it's from line KeyboardHandler L515
+                        // For GUIs (without the click-hold bug fix), flow reaches here 
+                        // Ok, I'm not entirely sure why flow goes here (hardware repeat also sends release events?)
+
                         KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
                         clickHoldKeys.remove( key.getValue() );
                     }
                 }
                 else
                 {
-                    //KeybindsGalorePlus.debugLog( "Pie menu key" );
                     // Key has conflicts, and shouldn't be ignored
                     if ( pressed )
                     {
@@ -148,11 +153,9 @@ public class KeybindManager
                         // The fix is to
                         openConflictMenu( key, mappings );
                     }
-                    // Conflicts to handle, but key was released -- do nothing
-                    //else KeybindsGalorePlus.debugLog( "pie menu key released" );
+                    // Conflicts to handle, but key was released -- do nothing; the screen handles it
                 }
             }
-            //else KeybindsGalorePlus.debugLog( "No conflicts on key, using vanilla behaviour" );
             // No conflicts -- proceed as per vanilla
         }
         // Ignored key -- proceed as per vanilla

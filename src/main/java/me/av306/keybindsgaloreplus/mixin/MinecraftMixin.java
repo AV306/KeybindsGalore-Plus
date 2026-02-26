@@ -1,25 +1,12 @@
 package me.av306.keybindsgaloreplus.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
-import me.av306.keybindsgaloreplus.KeybindSelectorScreen;
-import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.platform.WindowEventHandler;
-import net.minecraft.client.MouseHandler;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.Options;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
-import org.lwjgl.system.CallbackI;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin( Minecraft.class )
 public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler

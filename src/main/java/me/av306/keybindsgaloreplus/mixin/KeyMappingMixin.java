@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import me.av306.keybindsgaloreplus.KeybindManager;
 
-@Mixin( value = KeyMapping.class )
+@Mixin( KeyMapping.class )
 public abstract class KeyMappingMixin
 {
     @Shadow
@@ -31,7 +31,7 @@ public abstract class KeyMappingMixin
     {
         // KeyboardHandler L583 calls this with "true" during regular gameplay;
         // L548 calls this with false;
-        // L515 causes the click-hold gui bug.
+        // L515 calls this with false (related to the click-hold gui bug.)
         // As best as I can tell, a duplicate key pressed event is sent to the screen on click-hold (L512),
         // which the screen then interprets as telling it to close => screen set to null => mouse grabbed (and screen set to null again
         // then the rest of the KeyboardHandler keyPress handler (L515) (for the same pressed event) calls set( false ).
@@ -51,29 +51,13 @@ public abstract class KeyMappingMixin
     {
         KeybindsGalorePlus.debugLog( "onKeyPressed( {} ) called", key.getName() );
 
-        if ( KeybindManager.hasConflictsExcludingDebug( key ) /*&& !KeybindManager.isSkippedKey( key )*/ )
+        if ( KeybindManager.hasConflicts( key ) /*&& !KeybindManager.isSkippedKey( key )*/ )
         {
             KeybindsGalorePlus.debugLog( "\tCancelling sub-tick accumulation" );
 
             ci.cancel(); // Cancel, because we've sorted out sub-tick presses (by setting it to 1)
         }
     }
-
-
-    // Very thankfully, this is gone now!
-    // Theoretically, this should be called ALL THE TIME
-    // which it *is*, but ONLY IN A NON-DEV ENVIRONMENT, somehow
-//    @Inject( method = "setPressed", at = @At( "HEAD" ), cancellable = true )
-//    private void setPressed( boolean pressed, CallbackInfo ci )
-//    {
-//        //KeybindsGalorePlus.debugLog( "setPressed( {} ) called for keybind {} on physical key {}", pressed, this.translationKey, this.boundKey.getTranslationKey() );
-//
-//        // I can't demonstrate that this actually causes issues (setPressed( true ) only happened for the mouse when I tried)
-//        // but it has potential for duplicating the handleKeyPress call, since setKeyPressed is *supposed* to call setPressed...
-//        // Not calling handleKeyPress may cause https://github.com/AV306/KeybindsGalore-Plus/issues/10 though
-//        //KeybindManager.handleKeyPress( this.boundKey, pressed, ci );
-//    }
-
 
 //    @Inject( method = "setDown", at = @At( "HEAD" ) )
 //    private void onSetDown( boolean down, CallbackInfo ci )
@@ -89,8 +73,15 @@ public abstract class KeyMappingMixin
     private static boolean setAllNonConflictingKeys( KeyMapping keyMapping, boolean down )
     {
         // Only called in MouseHandler.grabMouse() so cost should be fine
-        // This stops all our conflicted keymappings from being activated when screens close (See KeybindManager)
+        // Prevent conflicted keymappings from being (re-)set to match physical key state
+        // when screens close and key states are restored (See KeybindManager)
         InputConstants.Key targetKey = ((KeyMappingAccessor) keyMapping).getKey();
-        return KeybindManager.isIgnoredKey( targetKey ) || !KeybindManager.hasConflictsExcludingDebug( targetKey );
+        return KeybindManager.isIgnoredKey( targetKey ) // Allow mappings on ignored keys to be updated
+                || !KeybindManager.hasConflicts( targetKey ) // Prevent mappings on conflicted keys from being updated
+                || KeybindManager.clickHoldKeys.containsValue( keyMapping ); // Allow mappings on click-hold keys to be updated (see below)
+
+        // For click-hold keys, we could technically rely on hardware repeat to call set() and update the desired keymapping
+        // but since vanilla doesn't do that (when mouse is grabbed, all keymappings are updated to match
+        // physical key state though they could also have waited for hardware repeats), we shan't either
     }
 }

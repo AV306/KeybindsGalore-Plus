@@ -12,11 +12,9 @@ import static me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer.
 
 import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
 import me.av306.keybindsgaloreplus.mixin.MinecraftAccessor;
-//import net.minecraft.client.gl.ShaderProgramKeys;
 import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderState;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.KeyMapping;
@@ -76,7 +74,8 @@ public class KeybindSelectorScreen extends Screen
     public KeybindSelectorScreen( InputConstants.Key key, List<KeyMapping> mappings )
     {
         //this();
-        super( GameNarrator.NO_TITLE );
+        super( Component.translatable( "keybindsgaloreplus.conflict_selector_title",
+                key.getDisplayName() ) );
 
         this.conflictedKey = key;
         this.conflicts = mappings;
@@ -291,14 +290,16 @@ public class KeybindSelectorScreen extends Screen
     {
         if ( mouseButtonEvent.button() == this.conflictedKey.getValue() )
         {
-            // Close menu and activate selection normally – click-hold not applicable
+            // Close menu and activate selection normally - click-hold not applicable
             this.onClose();
         }
         else
         {
             // Click-hold selected binding
             this.minecraft.setScreen( null );
-            KeyMapping.releaseAll(); // This stops the other actions from triggering. Not sure why they do in the first place, though.
+
+            // FIXME: this line shouldn't be needed now that the root cauase (click-hold bug) is fixed
+            //KeyMapping.releaseAll(); // This stops the other actions from triggering. Not sure why they do in the first place, though.
 
             if ( this.selectedSectorIndex != -1 )
             {
@@ -307,10 +308,7 @@ public class KeybindSelectorScreen extends Screen
                 // Clicked on a sector; add its binding to the click-hold map
                 //KeybindsGalorePlus.debugLog( "Activated sector {} (key {}) (click-hold) via pie menu", this.selectedSectorIndex, this.conflictedKey.getCategory() );
                 KeybindsGalorePlus.debugLog( "Pie menu closed with click-hold" );
-                KeybindManager.clickHoldKeys.put(
-                        this.conflictedKey.getValue(),
-                        binding
-                );
+                KeybindManager.clickHoldKeys.put( this.conflictedKey.getValue(), binding );
 
                 // Key events are generated repeatedly for keyboard keys held down, but not for mouse buttons,
                 // so we have to make one manually
@@ -320,20 +318,19 @@ public class KeybindSelectorScreen extends Screen
             else
             {
                 KeybindsGalorePlus.debugLog( "Pie menu closed via click-hold with no selection" );
+                
                 // No sector clicked; add null to the click-hold map to signal a cancel
-                KeybindManager.clickHoldKeys.put( this.conflictedKey.getValue(), null );
+                // FIXME: does this line even do anythiing?
+                //KeybindManager.clickHoldKeys.put( this.conflictedKey.getValue(), null );
             }
         }
 
         return super.mouseReleased( mouseButtonEvent );
     }
+
     @Override
-    // Don't pause the game when this screen is open
-    // actually why not
     public boolean isPauseScreen() { return false; }
 
-
-    //* >=1.20.2
     @Override
     public void renderBackground( @NonNull GuiGraphics context, int mouseX, int mouseY, float deltaTicks )
     {
@@ -342,15 +339,4 @@ public class KeybindSelectorScreen extends Screen
         if ( Configurations.BLUR_BACKGROUND ) this.renderBlurredBackground( context );
         if ( Configurations.DARKENED_BACKGROUND ) this.renderMenuBackground( context );
     }
-
-    //* <1.20.2
-    // Annoyingly, we can have the method in >1.20.2 but not the super call :(
-    //@Override
-    // public void renderBackground( DrawContext context ) //* <1.20.2
-    // {
-    //     //* // ===== Version dependent =====
-    //     // Remove the darkened background if needed
-    //     // This can help performance, as with all post-processing
-    //     if ( Configurations.DARKENED_BACKGROUND ) super.renderBackground( context ); //* <1.20.2
-    // }
 }
