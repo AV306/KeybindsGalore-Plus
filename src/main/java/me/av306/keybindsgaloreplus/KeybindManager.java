@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.mojang.blaze3d.platform.InputConstants;
@@ -16,7 +17,8 @@ import net.minecraft.client.Minecraft;
 
 public class KeybindManager
 {
-    public static final HashMap<Integer, KeyMapping> clickHoldKeys = new HashMap<>();
+    public static final HashMap<InputConstants.Key, KeyMapping> clickHoldKeys = new HashMap<>();
+    public static final HashMap<InputConstants.Key, Integer> clickHoldKeysCooldowns = new HashMap<>();
 
     /**
      * Does a given key NOT open a pie menu?
@@ -28,12 +30,18 @@ public class KeybindManager
 
     public static boolean isClickHoldKey( InputConstants.Key key )
     {
-        return clickHoldKeys.containsKey( key.getValue() );
+        return clickHoldKeys.containsKey( key );
+    }
+
+    public static void registerClickHoldKey( InputConstants.Key key, @Nullable KeyMapping keyMapping )
+    {
+        clickHoldKeys.put( key, keyMapping );
+        clickHoldKeysCooldowns.put( key, Configurations.CLICK_HOLD_REPEAT_COOLDOWN );
     }
 
     public static void clearClickHoldKey( InputConstants.Key key )
     {
-        clickHoldKeys.remove( key.getValue() );
+        clickHoldKeys.remove( key );
     }
 
     /**
@@ -106,9 +114,9 @@ public class KeybindManager
                 //KeybindsGalorePlus.debugLog( "Is click-hold key" );
                 //if ( Minecraft.getInstance().screen != null ) return;
 
-                KeyMapping clickHoldMapping = clickHoldKeys.get( key.getValue() );
+                KeyMapping clickHoldMapping = clickHoldKeys.get( key );
 
-                if ( clickHoldMapping != null )
+                if ( clickHoldMapping != null && clickHoldKeysCooldowns.get( key ) == 0 )
                 {
                     // Transfer the pressed state to the mapping (whether pressed or not)
                     if ( Configurations.DEBUG ) KeybindsGalorePlus.LOGGER.info(
@@ -127,7 +135,7 @@ public class KeybindManager
                     // Ok, I'm not entirely sure why flow goes here (hardware repeat also sends release events?)
 
                     KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
-                    clickHoldKeys.remove( key.getValue() );
+                    clickHoldKeys.remove( key );
                 }
             }
             else

@@ -21,14 +21,12 @@ import net.minecraft.client.KeyMapping;
 
 import com.mojang.blaze3d.platform.InputConstants;
 
-import net.minecraft.client.GameNarrator;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -313,16 +311,16 @@ public class KeybindSelectorScreen extends Screen
                 // Clicked on a sector; add its binding to the click-hold map
                 //KeybindsGalorePlus.debugLog( "Activated sector {} (key {}) (click-hold) via pie menu", this.selectedSectorIndex, this.conflictedKey.getCategory() );
                 KeybindsGalorePlus.debugLog( "Pie menu closed with click-hold for {}", binding.getName() );
-                KeybindManager.clickHoldKeys.put( this.conflictedKey.getValue(), binding );
+                KeybindManager.registerClickHoldKey( this.conflictedKey, binding );
 
                 // Key events are generated repeatedly for keyboard keys held down, but not for mouse buttons,
                 // so we have to make one manually
                 // Should be unnecessary now that the KeyMapping.setAll() call in when mouse is grabbed after we close
                 // is fixed to set ONLY our desired mapping to match physical key state (pressed),
 
-                // FIXME: apparently untrue
-                if ( this.conflictedKey.getValue() <= GLFW.GLFW_MOUSE_BUTTON_LAST )
-                    binding.setDown( true );
+                // FIXME: still required for mouse mappings, which don't get setAll()
+                //if ( this.conflictedKey.getValue() <= GLFW.GLFW_MOUSE_BUTTON_LAST )
+                binding.setDown( true );
             }
             else
             {
@@ -330,7 +328,7 @@ public class KeybindSelectorScreen extends Screen
                 
                 // No sector clicked; add null to the click-hold map to signal a cancel
                 // This prevents the pie menu from opening again till the key is released
-                KeybindManager.clickHoldKeys.put( this.conflictedKey.getValue(), null );
+                KeybindManager.clickHoldKeys.put( this.conflictedKey, null );
             }
         }
 

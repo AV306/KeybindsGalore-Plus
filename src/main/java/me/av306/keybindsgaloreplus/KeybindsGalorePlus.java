@@ -134,6 +134,12 @@ public class KeybindsGalorePlus implements ClientModInitializer
         // Bind action to config reload key
         ClientTickEvents.END_CLIENT_TICK.register( client ->
         {
+            KeybindManager.clickHoldKeysCooldowns.replaceAll( ((key, cooldown) ->
+            {
+                if ( cooldown > 0 ) return cooldown - 1;
+                else return cooldown;
+            } ) );
+
             while ( CONFIG_RELOAD_KEYBIND.consumeClick() )
             {
                 try

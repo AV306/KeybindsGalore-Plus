@@ -16,6 +16,7 @@ import java.util.Arrays;
 @ConfigComment( "- hexadecimal (color): \"short\" value (0-255) represented by TWO hexadecimal (base-16) numbers., e.g. 0xFF" )
 public class Configurations
 {
+    public static final int CLICK_HOLD_REPEAT_COOLDOWN = 20;
     @ConfigComment( "Debug mode -- enable this when reproducing your bug; disable normally" )
     public static boolean DEBUG = false;
 

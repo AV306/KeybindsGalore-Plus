@@ -54,7 +54,7 @@ public class KeyboardHandlerMixin
                         InputConstants.getKey( keyEvent ).getName(), instance.getTitle().getString() );
             }
 
-            KeybindManager.clickHoldKeys.remove( keyEvent.key() );
+            KeybindManager.clickHoldKeys.remove( InputConstants.getKey( keyEvent ) );
         }
 
         return original.call( instance, keyEvent );
