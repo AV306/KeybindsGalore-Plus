@@ -229,11 +229,10 @@ public class KeybindSelectorScreen extends Screen
         this.ticksInScreen++;
     }
 
-    @Override
-    public void onClose()
+    public void closePieMenu()
     {
-        super.onClose();
-
+        // Nulling the screen also causes all keymappings to be directly set to match physical keyboard state,
+        // so this must be done before our overrides
         this.minecraft.setScreen( null );
 
         // Activate the selected binding
@@ -243,12 +242,14 @@ public class KeybindSelectorScreen extends Screen
 
             KeybindsGalorePlus.debugLog( "Activated {} from pie menu", selectedKeyBinding.getName() );
 
+            // Technically, we could use the public setDown method, but I'd rather not,
+            // in case Mojang adds extra stuff to it
             ((KeyMappingAccessor) selectedKeyBinding).setIsDown( true );
             ((KeyMappingAccessor) selectedKeyBinding).setClickCount( 1 );
             //((KeyBindingAccessor) bind).invokeSetPressed( true );
 
             // Attack workaround (very hacky)
-            // Abusable??? (FIXME)
+            // Abusable??? Might trigger anticheat??? FIXME
             if ( selectedKeyBinding.same( this.minecraft.options.keyAttack ) && Configurations.ENABLE_ATTACK_WORKAROUND )
             {
                 KeybindsGalorePlus.debugLog( "\tAttack workaround enabled" );
@@ -270,7 +271,7 @@ public class KeybindSelectorScreen extends Screen
     {
         if ( InputConstants.getKey( keyEvent ) == this.conflictedKey )
         {
-            this.onClose();
+            this.closePieMenu();
             //return true;
         }
 
@@ -291,14 +292,18 @@ public class KeybindSelectorScreen extends Screen
         if ( mouseButtonEvent.button() == this.conflictedKey.getValue() )
         {
             // Close menu and activate selection normally - click-hold not applicable
-            this.onClose();
+            this.closePieMenu();
         }
         else
         {
             // Click-hold selected binding
+
+            // Null the screen (keymappings are updated to match physical state as a side effect,
+            // so all conflicts on this key will be set to "down"
             this.minecraft.setScreen( null );
 
-            // FIXME: this line shouldn't be needed now that the root cauase (click-hold bug) is fixed
+            // This line unsets the conflicts on this key (see above), but isn't needed now that the root cause
+            // (call to KeyMapping.setAll() when mouse is grabbed) is fixed to ignore conflicts
             //KeyMapping.releaseAll(); // This stops the other actions from triggering. Not sure why they do in the first place, though.
 
             if ( this.selectedSectorIndex != -1 )
@@ -312,6 +317,10 @@ public class KeybindSelectorScreen extends Screen
 
                 // Key events are generated repeatedly for keyboard keys held down, but not for mouse buttons,
                 // so we have to make one manually
+                // Should be unnecessary now that the KeyMapping.setAll() call in when mouse is grabbed after we close
+                // is fixed to set ONLY our desired mapping to match physical key state (pressed),
+
+                // FIXME: apparently untrue
                 if ( this.conflictedKey.getValue() <= GLFW.GLFW_MOUSE_BUTTON_LAST )
                     binding.setDown( true );
             }
@@ -320,8 +329,7 @@ public class KeybindSelectorScreen extends Screen
                 KeybindsGalorePlus.debugLog( "Pie menu closed via click-hold with no selection" );
                 
                 // No sector clicked; add null to the click-hold map to signal a cancel
-                // This is technically unnecessary but just adds a way to release click-hold
-                // in case it gets stuck
+                // This prevents the pie menu from opening again till the key is released
                 KeybindManager.clickHoldKeys.put( this.conflictedKey.getValue(), null );
             }
         }

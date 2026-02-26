@@ -72,16 +72,22 @@ public abstract class KeyMappingMixin
     )
     private static boolean setAllNonConflictingKeys( KeyMapping keyMapping, boolean down )
     {
+        // FIXME: might be better to wrap shouldSetOnIngameFocus
         // Only called in MouseHandler.grabMouse() so cost should be fine
         // Prevent conflicted keymappings from being (re-)set to match physical key state
         // when screens close and key states are restored (See KeybindManager)
         InputConstants.Key targetKey = ((KeyMappingAccessor) keyMapping).getKey();
-        return KeybindManager.isIgnoredKey( targetKey ) // Allow mappings on ignored keys to be updated
+        boolean result = KeybindManager.isIgnoredKey( targetKey ) // Allow mappings on ignored keys to be updated
                 || !KeybindManager.hasConflicts( targetKey ) // Prevent mappings on conflicted keys from being updated
                 || KeybindManager.clickHoldKeys.containsValue( keyMapping ); // Allow mappings on click-hold keys to be updated (see below)
+
+        KeybindsGalorePlus.LOGGER.info( KeyMappingAccessor.getAll().toString() );
+        KeybindsGalorePlus.LOGGER.info( "KeyMapping {} {} be allowed to be set to match physical state",
+                keyMapping.getName(), result ? "will" : "won't" );
 
         // For click-hold keys, we could technically rely on hardware repeat to call set() and update the desired keymapping
         // but since vanilla doesn't do that (when mouse is grabbed, all keymappings are updated to match
         // physical key state though they could also have waited for hardware repeats), we shan't either
+        return result;
     }
 }

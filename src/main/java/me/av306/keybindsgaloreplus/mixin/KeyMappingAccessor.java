@@ -18,6 +18,12 @@ public interface KeyMappingAccessor
         throw new UnsupportedOperationException();
     }
 
+    @Accessor( "ALL" )
+    static Map<InputConstants.Key, List<KeyMapping>> getAll()
+    {
+        throw new UnsupportedOperationException();
+    }
+
     @Accessor void setClickCount( int timesPressed );
     @Accessor void setIsDown( boolean pressed ); // Sets the internal pressed state -- not to be confused with Keybinding#setPressed
 

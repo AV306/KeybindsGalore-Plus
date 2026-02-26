@@ -66,6 +66,9 @@ public class KeybindManager
         // We could possibly optimise by caching each gamemode context's mapping list when the keybind menu closes
         // or if we're daring, have only one cache and update it when gamemode changes (but that involves more hooks)
         // Neither method is sustainable if we want to add more contexts :/
+        // FIXME: measure
+        // Another caveat is that we must maintain the order of keymappings, in order to get deterministic and consistent
+        // ordering of sectors in the menu. So either we use only sequential streams, or we sort after a parallel stream...
         if ( Minecraft.getInstance().player == null ) return Collections.emptyList();
 
         else return KeyMappingAccessor.getMap().getOrDefault( key, new ArrayList<>() ).stream()
@@ -94,44 +97,48 @@ public class KeybindManager
 
         if ( !isIgnoredKey( key ) )
         {
-            List<KeyMapping> mappings = getMappingsForContext( key );
+            // Not ignored, process it
+            ci.cancel();
 
-            if ( mappings.size() > 1 )
+            if ( isClickHoldKey( key ) )
             {
-                // Has conflicts -- open pie menu and cancel original method
-                ci.cancel();
+                // Skip the expensive stream filter
+                //KeybindsGalorePlus.debugLog( "Is click-hold key" );
+                //if ( Minecraft.getInstance().screen != null ) return;
 
-                if ( isClickHoldKey( key ) )
+                KeyMapping clickHoldMapping = clickHoldKeys.get( key.getValue() );
+
+                if ( clickHoldMapping != null )
                 {
-                    //KeybindsGalorePlus.debugLog( "Is click-hold key" );
-                    //if ( Minecraft.getInstance().screen != null ) return;
+                    // Transfer the pressed state to the mapping (whether pressed or not)
+                    if ( Configurations.DEBUG ) KeybindsGalorePlus.LOGGER.info(
+                            "Setting mapping {} to {} (click-hold)",
+                            clickHoldMapping.getName(), pressed ? "pressed" : "released"
+                    );
 
-                    KeyMapping clickHoldMapping = clickHoldKeys.get( key.getValue() );
-
-                    if ( clickHoldMapping != null )
-                    {
-                        // Transfer the pressed state to the mapping (whether pressed or not)
-                        if ( Configurations.DEBUG ) KeybindsGalorePlus.LOGGER.info(
-                                "Setting mapping {} to {} (click-hold)",
-                                clickHoldMapping.getName(), pressed ? "pressed" : "released"
-                        );
-
-                        ((KeyMappingAccessor) clickHoldMapping).setIsDown( pressed );
-                        ((KeyMappingAccessor) clickHoldMapping).setClickCount( pressed ? 1 : 0 );
-                    }
-
-                    if ( !pressed )
-                    {
-                        // If the click-hold key was released, remove it from the list (after transferring the state)
-                        // For GUIs (without the click-hold bug fix), flow reaches here 
-                        // Ok, I'm not entirely sure why flow goes here (hardware repeat also sends release events?)
-
-                        KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
-                        clickHoldKeys.remove( key.getValue() );
-                    }
+                    ((KeyMappingAccessor) clickHoldMapping).setIsDown( pressed );
+                    ((KeyMappingAccessor) clickHoldMapping).setClickCount( pressed ? 1 : 0 );
                 }
-                else
+
+                if ( !pressed )
                 {
+                    // If the click-hold key was released, remove it from the list (after transferring the state)
+                    // For GUIs (without the click-hold bug fix), flow reaches here
+                    // Ok, I'm not entirely sure why flow goes here (hardware repeat also sends release events?)
+
+                    KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
+                    clickHoldKeys.remove( key.getValue() );
+                }
+            }
+            else
+            {
+                // Not a click-hold key; we need to do the expensive filter
+                List<KeyMapping> mappings = getMappingsForContext( key );
+
+                if ( mappings.size() > 1 )
+                {
+                    // Has conflicts -- open pie menu
+
                     // Key has conflicts, and shouldn't be ignored
                     if ( pressed )
                     {
@@ -155,8 +162,8 @@ public class KeybindManager
                     }
                     // Conflicts to handle, but key was released -- do nothing; the screen handles it
                 }
+                // No conflicts -- proceed as per vanilla
             }
-            // No conflicts -- proceed as per vanilla
         }
         // Ignored key -- proceed as per vanilla
     }

@@ -43,13 +43,14 @@ public class Configurations
     @ConfigComment( "May have a decent impact on performance, because of post-processing" )
     public static boolean DARKENED_BACKGROUND = true;
 
-    // FIXME: currently unused?
-    @IgnoreConfig
+    @ConfigComment( "Whether the background of the pie menu screen should be blurred (boolean)" )
+    @ConfigComment( "May have a decent impact on performance, because of post-processing" )
     public static boolean BLUR_BACKGROUND = true;
 
     @ConfigComment( "Draw label texts with shadow (boolean)" )
     @ConfigComment( "Disabling this can increase performance in some cases" )
     public static boolean LABEL_TEXT_SHADOW = false;
+
 
     // Behaviour
 
@@ -84,8 +85,8 @@ public class Configurations
     @ConfigComment( "Minimum amount of space to leave around the pie menu (int, pixels)" )
     public static int PIE_MENU_MARGIN = 0;
     
-        @ConfigComment( "Offset of the pie menu labels relative to the menu edge (int, scaled screen units)" )
-        public static int LABEL_TEXT_INSET = 6;
+    @ConfigComment( "Offset of the pie menu labels relative to the menu edge (int, scaled screen units)" )
+    public static int LABEL_TEXT_INSET = 6;
 
     @ConfigComment( "Scale of the pie menu relative to the screen (float)" )
     public static float PIE_MENU_SCALE = 0.6f;
