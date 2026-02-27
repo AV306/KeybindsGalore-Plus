@@ -115,10 +115,11 @@ public class KeybindManager
         if ( !isIgnoredKey( key ) )
         {
             // Not ignored, process it
-            ci.cancel();
+            // DON'T CANCEL YET -- may still need vanilla behaviour (not clickhold and no conflicts)
 
             if ( isClickHoldKey( key ) )
             {
+                ci.cancel();
                 // Skip the expensive stream filter
                 KeyMapping clickHoldMapping = clickHoldKeys.get( key );
 
@@ -157,6 +158,7 @@ public class KeybindManager
 
                 if ( mappings.size() > 1 )
                 {
+                    ci.cancel();
                     // Has conflicts -- open pie menu
 
                     // Key has conflicts, and shouldn't be ignored
