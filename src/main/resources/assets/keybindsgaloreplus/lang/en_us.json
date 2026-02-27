@@ -14,5 +14,9 @@
 
   "text.keybindsgaloreplus.keystatereloaded": "[KeybindsGalorePlus] Keybind state reloaded!",
 
+  "text.keybindsgaloreplus.command.main.title": "KeybindsGalore Plus",
+  "text.keybindsgaloreplus.command.main.version": "    Version %s",
+  "text.keybindsgaloreplus.command.main.debug": "    Debug mode: %s",
+
   "keybindsgaloreplus.conflict_selector_title": "Conflict selector for key: %s"
 }

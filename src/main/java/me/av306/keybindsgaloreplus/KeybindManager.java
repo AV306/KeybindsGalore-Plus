@@ -39,14 +39,23 @@ public class KeybindManager
         clickHoldKeysCooldowns.put( key, Configurations.CLICK_HOLD_REPEAT_COOLDOWN );
     }
 
+    public static void registerClickHoldKeyNoCooldown( InputConstants.Key key, @Nullable KeyMapping keyMapping )
+    {
+        clickHoldKeys.put( key, keyMapping );
+        clickHoldKeysCooldowns.put( key, 0 );
+    }
+
     public static void clearClickHoldKey( InputConstants.Key key )
     {
         clickHoldKeys.remove( key );
+        // There is technically no need to remove the cooldown,
+        // since it'll be set back to maximum when the click-hold key is registered again
+        //clickHoldKeysCooldowns.remove( key );
     }
 
     /**
      * Checks if there is a binding conflict on this key, excluding debug keys
-     * @param key: The key to check
+     * @param key The key to check
      */
     public static boolean hasConflicts( InputConstants.Key key )
     {
@@ -127,15 +136,17 @@ public class KeybindManager
                     ((KeyMappingAccessor) clickHoldMapping).setIsDown( pressed );
                     ((KeyMappingAccessor) clickHoldMapping).setClickCount( pressed ? 1 : 0 );
                 }
+                // If the click-hold mapping is null, it means the user closed the pie menu with no selection
+                // else {}
 
                 if ( !pressed )
                 {
                     // If the click-hold key was released, remove it from the list (after transferring the state)
-                    // For GUIs (without the click-hold bug fix), flow reaches here
-                    // Ok, I'm not entirely sure why flow goes here (hardware repeat also sends release events?)
+                    // For GUIs (without the click-hold bug fix), flow reaches here because
+                    // key presses are consumed by the screen and reduced to a set( false ) call
 
                     KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
-                    clickHoldKeys.remove( key );
+                    clearClickHoldKey( key );
                 }
             }
             else

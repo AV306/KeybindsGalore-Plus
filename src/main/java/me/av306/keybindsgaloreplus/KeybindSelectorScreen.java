@@ -24,6 +24,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.Mth;
+
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -311,16 +312,27 @@ public class KeybindSelectorScreen extends Screen
                 // Clicked on a sector; add its binding to the click-hold map
                 //KeybindsGalorePlus.debugLog( "Activated sector {} (key {}) (click-hold) via pie menu", this.selectedSectorIndex, this.conflictedKey.getCategory() );
                 KeybindsGalorePlus.debugLog( "Pie menu closed with click-hold for {}", binding.getName() );
+
+                // This adds the key and mapping to the click-hold map, and also sets the cooldown
                 KeybindManager.registerClickHoldKey( this.conflictedKey, binding );
 
-                // Key events are generated repeatedly for keyboard keys held down, but not for mouse buttons,
-                // so we have to make one manually
-                // Should be unnecessary now that the KeyMapping.setAll() call in when mouse is grabbed after we close
-                // is fixed to set ONLY our desired mapping to match physical key state (pressed),
+                // Hardware repeat events are generated repeatedly for keyboard keys held down, but not for mouse buttons
 
-                // FIXME: still required for mouse mappings, which don't get setAll()
+                // This is technically unnecessary now that the KeyMapping.setAll() call in when mouse is grabbed after we close
+                // is fixed to set ONLY our desired mapping to match physical key state (pressed).
+
+                // HOWEVER, setAll() only applies for mappings with type KEYSYM (see KeyMapping.shouldRestoreState())
+                // This ALSO doesn't work for KEYSYM mappings that are consumed via consumeClick() because setAll()
+                // only does setDown() but consumeClick() needs a click() call
+                
+                // Net result is that we'll just call setDown() and click() for everything here,
+                // even though setDown() will be called again later when the screen closes
+                // and then again when the hardware repeat comes in.
+
                 //if ( this.conflictedKey.getValue() <= GLFW.GLFW_MOUSE_BUTTON_LAST )
-                binding.setDown( true );
+                //binding.setDown( true );
+                ((KeyMappingAccessor) binding).setIsDown( true );
+                ((KeyMappingAccessor) binding).setClickCount( 1 );
             }
             else
             {
@@ -328,6 +340,11 @@ public class KeybindSelectorScreen extends Screen
                 
                 // No sector clicked; add null to the click-hold map to signal a cancel
                 // This prevents the pie menu from opening again till the key is released
+                // No cooldown here since the user should be able to just press again
+                // to open the menu
+
+                // By right, we should also set the cooldown,
+                // but by left, the handler ignores null entries and doesn't check the cooldown
                 KeybindManager.clickHoldKeys.put( this.conflictedKey, null );
             }
         }

@@ -16,11 +16,10 @@ import java.util.Arrays;
 @ConfigComment( "- hexadecimal (color): \"short\" value (0-255) represented by TWO hexadecimal (base-16) numbers., e.g. 0xFF" )
 public class Configurations
 {
-    public static final int CLICK_HOLD_REPEAT_COOLDOWN = 20;
     @ConfigComment( "Debug mode -- enable this when reproducing your bug; disable normally" )
     public static boolean DEBUG = false;
-
-
+    
+    
     // Performance
     
     @ConfigComment( "#######################" )
@@ -35,30 +34,33 @@ public class Configurations
     @ConfigComment( "   Increase if the pie menu looks too jagged, e.g. on large, high-resolution displays" )
     @ConfigComment( "   Can *technically* help performance, but probably not much unless your hardware is VERY slow" )
     public static int CIRCLE_VERTICES = 60;
-
+    
     @ConfigComment( "If transparency should be enabled for the pie menu (boolean)" )
     @ConfigComment( "Can slightly increase performance by avoiding blend calculations" )
     public static boolean PIE_MENU_BLEND = true;
-
+    
     @ConfigComment( "Whether there should be a darkened background on the pie menu screen (boolean)" )
     @ConfigComment( "May have a decent impact on performance, because of post-processing" )
     public static boolean DARKENED_BACKGROUND = true;
-
+    
     @ConfigComment( "Whether the background of the pie menu screen should be blurred (boolean)" )
     @ConfigComment( "May have a decent impact on performance, because of post-processing" )
     public static boolean BLUR_BACKGROUND = true;
-
+    
     @ConfigComment( "Draw label texts with shadow (boolean)" )
     @ConfigComment( "Disabling this can increase performance in some cases" )
     public static boolean LABEL_TEXT_SHADOW = false;
-
-
+    
+    
     // Behaviour
-
+    
     @ConfigComment( "#####################" )
     @ConfigComment( "# Behaviour options #" )
     @ConfigComment( "#####################" )
     @ConfigComment( "" )
+    @ConfigComment( "Cooldown (in ticks) for click-hold keys before they start repeating (int, 20 ticks = ~1 second)" )
+    public static final int CLICK_HOLD_REPEAT_COOLDOWN = 20;
+
     @ConfigComment( "Attack workaround (boolean)" )
     @ConfigComment( "Makes Attack/Break work properly in the pie menu" )
     @ConfigComment( "(messes with the attack cooldown; may cause problems, e.g. with anti-cheat)" )
