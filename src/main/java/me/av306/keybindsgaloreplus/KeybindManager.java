@@ -120,33 +120,34 @@ public class KeybindManager
             if ( isClickHoldKey( key ) )
             {
                 // Skip the expensive stream filter
-                //KeybindsGalorePlus.debugLog( "Is click-hold key" );
-                //if ( Minecraft.getInstance().screen != null ) return;
-
                 KeyMapping clickHoldMapping = clickHoldKeys.get( key );
 
-                if ( clickHoldMapping != null && clickHoldKeysCooldowns.get( key ) == 0 )
-                {
-                    // Transfer the pressed state to the mapping (whether pressed or not)
-                    if ( Configurations.DEBUG ) KeybindsGalorePlus.LOGGER.info(
-                            "Setting mapping {} to {} (click-hold)",
-                            clickHoldMapping.getName(), pressed ? "pressed" : "released"
-                    );
+                if ( Configurations.DEBUG ) KeybindsGalorePlus.LOGGER.info(
+                        "Attempting to set mapping {} to {} (click-hold)",
+                        clickHoldMapping.getName(), pressed ? "pressed" : "released"
+                );
 
-                    ((KeyMappingAccessor) clickHoldMapping).setIsDown( pressed );
-                    ((KeyMappingAccessor) clickHoldMapping).setClickCount( pressed ? 1 : 0 );
+                if ( pressed )
+                {
+                    if ( clickHoldMapping != null && clickHoldKeysCooldowns.get( key ) == 0 )
+                    {
+                        // Has mapping, and cooldown is over -- transfer pressed state
+                        ((KeyMappingAccessor) clickHoldMapping).setIsDown( true );
+                        ((KeyMappingAccessor) clickHoldMapping).setClickCount( 1 );
+                    }
+                    // else -- no mapping or cooldown in progress; do nothing
                 }
-                // If the click-hold mapping is null, it means the user closed the pie menu with no selection
-                // else {}
-
-                if ( !pressed )
+                else
                 {
-                    // If the click-hold key was released, remove it from the list (after transferring the state)
+                    // If the click-hold key was released, remove it from the list and cancel the cooldown
+                    // (after transferring the state) regardless of cooldown.
                     // For GUIs (without the click-hold bug fix), flow reaches here because
                     // key presses are consumed by the screen and reduced to a set( false ) call
-
+                    
                     KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
                     clearClickHoldKey( key );
+                    ((KeyMappingAccessor) clickHoldMapping).setIsDown( false );
+                    ((KeyMappingAccessor) clickHoldMapping).setClickCount( 0 );
                 }
             }
             else
