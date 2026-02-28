@@ -72,9 +72,11 @@ public abstract class KeyMappingMixin
     {
         // FIXME: might be better to wrap shouldSetOnIngameFocus?
         // Only called in MouseHandler.grabMouse() so cost should be fine
+
         // Prevent conflicted keymappings from being (re-)set to match physical key state
         // when screens close and key states are restored (See KeybindManager)
         InputConstants.Key targetKey = ((KeyMappingAccessor) keyMapping).getKey();
+
         // Allow mappings on click-hold keys to be updated (see below)
 
         //KeybindsGalorePlus.LOGGER.info( "KeyMapping {} {} be allowed to be set to match physical state",

@@ -26,6 +26,7 @@ public class KeyboardHandlerMixin
     public boolean wrapScreenKeyPressed( Screen instance, KeyEvent keyEvent, Operation<Boolean> original )
     {
         // We only get key-down events because keyPress handler filters them for us
+
         // Stop hardware repeat events from closing a screen opened by click-hold
         if ( KeybindManager.isClickHoldKey( InputConstants.getKey( keyEvent ) ) )
         {
@@ -54,7 +55,7 @@ public class KeyboardHandlerMixin
                         InputConstants.getKey( keyEvent ).getName(), instance.getTitle().getString() );
             }
 
-            KeybindManager.clickHoldKeys.remove( InputConstants.getKey( keyEvent ) );
+            KeybindManager.clearClickHoldKey( InputConstants.getKey( keyEvent ) );
         }
 
         return original.call( instance, keyEvent );

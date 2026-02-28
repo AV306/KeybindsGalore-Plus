@@ -3,6 +3,7 @@ package me.av306.keybindsgaloreplus;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import me.av306.liteconfig.ConfigManager;
 
@@ -56,8 +57,8 @@ public class KeybindsGalorePlus implements ClientModInitializer
             LOGGER.info( "Found old config file; will migrate it to the new format." );
             try
             {
-                var oldConfigPath = FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus_config.properties" );
-                var newConfigPath = FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus.properties" );
+                Path oldConfigPath = FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus_config.properties" );
+                Path newConfigPath = FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus.properties" );
 
                 var lines = Files.readAllLines( oldConfigPath );
                 
@@ -232,12 +233,12 @@ public class KeybindsGalorePlus implements ClientModInitializer
 
     public static void debugLog( String message )
     {
-        if ( Configurations.DEBUG ) LOGGER.info( "(KBG+ DEBUG) " + message );
+        if ( Configurations.DEBUG ) LOGGER.info( message );
     }
 
     public static void debugLog( String message, Object... objects )
     {
-        if ( Configurations.DEBUG ) LOGGER.info( "(KBG+ DEBUG) " + message, objects );
+        if ( Configurations.DEBUG ) LOGGER.info( message, objects );
     }
 
     public static Component createHyperlinkText( URI url )

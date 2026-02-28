@@ -25,7 +25,7 @@ public interface KeyMappingAccessor
     }
 
     @Accessor void setClickCount( int timesPressed );
-    @Accessor void setIsDown( boolean pressed ); // Sets the internal pressed state -- not to be confused with Keybinding#setPressed
+    @Accessor void setIsDown( boolean isDown); // Sets the internal pressed state -- not to be confused with Keybinding#setPressed
 
     @Accessor InputConstants.Key getKey();
 

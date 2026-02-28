@@ -1,18 +1,17 @@
 package me.av306.keybindsgaloreplus;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import org.jspecify.annotations.Nullable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-
-import org.jspecify.annotations.Nullable;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import com.mojang.blaze3d.platform.InputConstants;
-
-import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
+import java.util.Objects;
 
 
 public class KeybindManager
@@ -50,7 +49,9 @@ public class KeybindManager
         clickHoldKeys.remove( key );
         // There is technically no need to remove the cooldown,
         // since it'll be set back to maximum when the click-hold key is registered again
-        //clickHoldKeysCooldowns.remove( key );
+        // However, iteration over the map when checking the cooldown is O(n)
+        // so we should keep n small
+        clickHoldKeysCooldowns.remove( key );
     }
 
     /**
@@ -115,7 +116,7 @@ public class KeybindManager
         if ( !isIgnoredKey( key ) )
         {
             // Not ignored, process it
-            // DON'T CANCEL YET -- may still need vanilla behaviour (not clickhold and no conflicts)
+            // DON'T CANCEL YET -- may still need vanilla behaviour (not click-hold and no conflicts)
 
             if ( isClickHoldKey( key ) )
             {
@@ -130,7 +131,7 @@ public class KeybindManager
 
                 if ( pressed )
                 {
-                    if ( clickHoldMapping != null && clickHoldKeysCooldowns.get( key ) == 0 )
+                    if ( clickHoldMapping != null && Objects.requireNonNull( clickHoldKeysCooldowns.get( key ) ) == 0 )
                     {
                         // Has mapping, and cooldown is over -- transfer pressed state
                         ((KeyMappingAccessor) clickHoldMapping).setIsDown( true );
