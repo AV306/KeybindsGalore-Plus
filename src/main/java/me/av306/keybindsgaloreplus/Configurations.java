@@ -59,7 +59,7 @@ public class Configurations
     @ConfigComment( "#####################" )
     @ConfigComment( "" )
     @ConfigComment( "Cooldown (in ticks) for click-hold keys before they start repeating (int, 20 ticks = ~1 second)" )
-    public static final int CLICK_HOLD_REPEAT_COOLDOWN = 20;
+    public static int CLICK_HOLD_REPEAT_COOLDOWN = 20;
 
     @ConfigComment( "Attack workaround (boolean)" )
     @ConfigComment( "Makes Attack/Break work properly in the pie menu" )
