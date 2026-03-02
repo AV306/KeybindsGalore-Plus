@@ -39,6 +39,8 @@ public class KeybindsGalorePlus implements ClientModInitializer
     public static final String MODID = "keybindsgaloreplus";
     public static final Logger LOGGER = LoggerFactory.getLogger( MODID );
 
+    public static final Path CONFIG_FILE_PATH = FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus.properties" );
+
     private static KeyMapping CONFIG_RELOAD_KEYBIND;
     // The final translation key will be "key.category.keybindsgaloreplus.keybinds"
     private static final KeyMapping.Category MOD_KEYBIND_CATEGORY
@@ -58,7 +60,6 @@ public class KeybindsGalorePlus implements ClientModInitializer
             try
             {
                 Path oldConfigPath = FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus_config.properties" );
-                Path newConfigPath = FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus.properties" );
 
                 var lines = Files.readAllLines( oldConfigPath );
                 
@@ -82,7 +83,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
                     }
                 }
                 
-                Files.write( newConfigPath, lines );
+                Files.write( CONFIG_FILE_PATH, lines );
                 Files.delete( oldConfigPath );
 
                 LOGGER.info( "Successfully migrated old configuration file!" );
@@ -95,7 +96,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
 
         // Initialise ConfigManager and load config file
         CONFIG_MANAGER = new ConfigManager(
-            FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus.properties" ),
+            CONFIG_FILE_PATH,
             Configurations.class,
             null
         );
@@ -176,6 +177,12 @@ public class KeybindsGalorePlus implements ClientModInitializer
                                 .executes( context ->
                                 {
                                     reloadConfigurations( context.getSource().getClient() );
+                                    return 1;
+                                } )
+                        )
+                        .then( ClientCommandManager.literal( "reload_custom_data" )
+                                .executes( context ->
+                                {
                                     reloadCustomData( context.getSource().getClient() );
                                     return 1;
                                 } )

@@ -11,13 +11,12 @@
 		"Cael"
 	],
 	"contributors": [
-		"PoopooRacoocoo -- Java incompatibility issue",
-		"Mo9713 & customjack -- editable keybind description",
-		"GabanKillasta -- compatibility with zoom mods",
+		"PoopooRacoocoo -- Java class version incompatibility",
+		"Mo9713 & customjack -- customisable keybind description",
+		"GabanKillasta -- zoom mod compatibility",
 		"GhostIsBeHere -- key blacklist",
-		"Alwis2000 -- flagging yet another Java incompatibility mistake",
+		"Alwis2000 -- yet another Java classs version incompatibility mistake",
 		"GuardedHoney53 -- the very funny setPressed issue",
-		"ClutchMasterYT",
 		"BumbleTree -- bad SemVer",
 		"Mideks -- console spam",
 		"UNI717 -- Sinytra Connector compatibility",
@@ -33,11 +32,14 @@
 	"entrypoints": {
 		"client": [ "me.av306.keybindsgaloreplus.KeybindsGalorePlus" ]
 	},
-	"mixins": [
-      "keybindsgaloreplus.mixins.json"
-	],
+	"mixins": [ "keybindsgaloreplus.mixins.json" ],
+	
 	"depends": {
 		"fabricloader": ">=0.14.8",
 		"minecraft": "1.21.11"
+	},
+	"conflicts": {
+		"thorough-keybindings": "*",
+		"amecs-reborn": "*"
 	}
 }
