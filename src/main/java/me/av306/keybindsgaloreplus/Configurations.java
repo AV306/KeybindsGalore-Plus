@@ -73,8 +73,8 @@ public class Configurations
 
     @ConfigComment( "Keys that should not open a pie menu (list of keycode ints)" )
     @ConfigComment( "See https://www.glfw.org/docs/3.4/group__keys.html for keycodes" )
-    @ConfigComment( "Defaults to WASD" )
-    public static ArrayList<Integer> IGNORED_KEYS = new ArrayList<>( Arrays.asList( 87, 65, 83, 68 ) );
+    @ConfigComment( "Defaults to WASD + Left Shift" )
+    public static ArrayList<Integer> IGNORED_KEYS = new ArrayList<>( Arrays.asList( 87, 65, 83, 68, 340 ) );
 
     @ConfigComment( "Makes the mod ignore all keys except those in \"ignored_keys\"")
     public static boolean INVERT_IGNORED_KEYS_LIST = false;
