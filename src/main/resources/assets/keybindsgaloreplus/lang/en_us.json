@@ -17,8 +17,6 @@
   "text.keybindsgaloreplus.command.main.title": "KeybindsGalore Plus",
   "text.keybindsgaloreplus.command.main.version": "    Version %s",
   "text.keybindsgaloreplus.command.main.debug": "    Debug mode: %s",
-  "text.keybindsgaloreplus.command.resetconfigs.success": "[KeybindsGalorePlus] Deleted existing configuration file!",
-  "text.keybindsgaloreplus.command.resetconfigs.failure": "[KeybindsGalorePlus] IOException while deleting existing configuration file: ",
 
   "keybindsgaloreplus.conflict_selector_title": "Conflict selector for key: %s"
 }

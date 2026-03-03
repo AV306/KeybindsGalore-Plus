@@ -69,8 +69,8 @@ public class Configurations
 
     @ConfigComment( "Keys that should not open a pie menu (list of keycode ints)" )
     @ConfigComment( "See https://www.glfw.org/docs/3.4/group__keys.html for keycodes" )
-    @ConfigComment( "Defaults to WASD + Left Shift" )
-    public static ArrayList<Integer> IGNORED_KEYS = new ArrayList<>( Arrays.asList( 87, 65, 83, 68, 340 ) );
+    @ConfigComment( "Defaults to WASD" )
+    public static ArrayList<Integer> IGNORED_KEYS = new ArrayList<>( Arrays.asList( 87, 65, 83, 68 ) );
 
     @ConfigComment( "Makes the mod ignore all keys except those in \"ignored_keys\"")
     public static boolean INVERT_IGNORED_KEYS_LIST = false;
@@ -97,8 +97,8 @@ public class Configurations
     @ConfigComment( "Scale of the pie menu's cancel zone relative to the screen (float)" )
     public static float CANCEL_ZONE_SCALE = 0.25f;
 
-    @ConfigComment( "Color of the pie menu (RGB int)" )
-    public static int PIE_MENU_COLOR = 0x00404040;
+    @ConfigComment( "Color of the pie menu (ARGB int)" )
+    public static int PIE_MENU_COLOR = 0x00404040; // ARGB
     
     @ConfigComment( "Color of the selected sector of the pie menu (RGB int)" )
     public static int PIE_MENU_SELECT_COLOR = 0x00FFFFFF;
