@@ -22,6 +22,8 @@ public class Configurations
     
     // Performance
     
+    @ConfigComment( "" )
+    @ConfigComment( "" )
     @ConfigComment( "#######################" )
     @ConfigComment( "# Performance options #" )
     @ConfigComment( "#######################" )
@@ -54,6 +56,8 @@ public class Configurations
     
     // Behaviour
     
+    @ConfigComment( "" )
+    @ConfigComment( "" )
     @ConfigComment( "#####################" )
     @ConfigComment( "# Behaviour options #" )
     @ConfigComment( "#####################" )
@@ -78,6 +82,8 @@ public class Configurations
 
     // Pie menu customisation
 
+    @ConfigComment( "" )
+    @ConfigComment( "" )
     @ConfigComment( "##########################" )
     @ConfigComment( "# Pie menu customisation #" )
     @ConfigComment( "##########################" )
