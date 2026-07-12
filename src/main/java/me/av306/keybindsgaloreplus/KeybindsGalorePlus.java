@@ -7,8 +7,7 @@ import java.nio.file.Path;
 
 import me.av306.liteconfig.ConfigManager;
 
-//import org.jetbrains.annotations.NonNull;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
