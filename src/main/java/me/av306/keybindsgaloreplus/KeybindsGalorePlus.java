@@ -21,14 +21,12 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 
 public class KeybindsGalorePlus implements ClientModInitializer
 {
@@ -40,8 +38,6 @@ public class KeybindsGalorePlus implements ClientModInitializer
 
     private static KeyMapping CONFIG_RELOAD_KEYBIND;
     // The final translation key will be "key.category.keybindsgaloreplus.keybinds"
-    private static final KeyMapping.Category MOD_KEYBIND_CATEGORY
-            = KeyMapping.Category.register( Identifier.fromNamespaceAndPath( MODID, "keybinds" ) );
 
     public static ChatFormatting ERROR_FORMATTING = ChatFormatting.RED;
 
@@ -51,6 +47,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
         LOGGER.info( "KeybindsGalore Plus initialising..." );
 
         // Check for old configuration file and migrate (?)
+        // TODO: extract to own class
         if ( Files.exists( FabricLoader.getInstance().getConfigDir().resolve( "keybindsgaloreplus_config.properties" ) ) )
         {
             LOGGER.info( "Found old config file; will migrate it to the new format." );
@@ -122,7 +119,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
                     "key.keybindsgaloreplus.reloadconfigs",
                     InputConstants.Type.KEYSYM,
                     GLFW.GLFW_KEY_UNKNOWN,
-                MOD_KEYBIND_CATEGORY
+                    "key.category.keybindsgaloreplus.keybinds"
         ) );
 
         // Bind action to config reload key
@@ -187,7 +184,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
                 ctx -> new KeybindSelectorElementRenderer( ctx.vertexConsumers() ) );
     }
 
-    private void reloadCustomData( @NonNull Minecraft client )
+    private void reloadCustomData( @NotNull Minecraft client )
     {
         customDataManager.readDataFile();
         if ( customDataManager.hasCustomData )
@@ -197,7 +194,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
         }
     }
 
-    private void reloadConfigurations( @NonNull Minecraft client )
+    private void reloadConfigurations( @NotNull Minecraft client )
     {
         try
         {
@@ -244,6 +241,6 @@ public class KeybindsGalorePlus implements ClientModInitializer
     {
         return Component.literal( url.toString() )
                 .withStyle( ChatFormatting.YELLOW )
-                .withStyle( style -> style.withClickEvent( new ClickEvent.OpenUrl( url ) ) );
+                .withStyle( style -> style.withClickEvent( new ClickEvent( ClickEvent.Action.OPEN_URL, url.toString() ) ) );
     }
 }
