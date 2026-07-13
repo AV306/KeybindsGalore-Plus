@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
@@ -89,16 +89,16 @@ public class KeybindManager
         // ordering of sectors in the menu. So either we use only sequential streams, or we sort after a parallel stream...
         if ( Minecraft.getInstance().player == null ) return Collections.emptyList();
 
+        // 1.21.1 doesn't have all the extra keybind categories
         else return KeyMappingAccessor.getMap().getOrDefault( key, new ArrayList<>() ).stream()
-                .filter( keyMapping -> keyMapping.getCategory() != KeyMapping.Category.DEBUG )
                 .filter( keyMapping ->
-                        (Minecraft.getInstance().player.gameMode().isSurvival()
-                                && keyMapping.getCategory() != KeyMapping.Category.CREATIVE
-                                && keyMapping.getCategory() != KeyMapping.Category.SPECTATOR)
-                        || (Minecraft.getInstance().player.gameMode().isCreative()
-                                && keyMapping.getCategory() != KeyMapping.Category.SPECTATOR)
-                        || (Minecraft.getInstance().player.gameMode().isBlockPlacingRestricted()
-                                && keyMapping.getCategory() != KeyMapping.Category.CREATIVE)
+                        // is Survival => filter Creative and Spectator keys
+                        !Minecraft.getInstance().player.isCreative()
+                                && keyMapping.getCategory() != KeyMapping.CATEGORY_CREATIVE
+                        //|| (Minecraft.getInstance().player.isCreative()
+                        //        && keyMapping.getCategory() != KeyMapping.CATEGORY_SPECTATOR)
+                        //|| (Minecraft.getInstance().player.
+                        //        && keyMapping.getCategory() != KeyMapping.CATEGORY_CREATIVE)
                 )
                 .toList();
     }

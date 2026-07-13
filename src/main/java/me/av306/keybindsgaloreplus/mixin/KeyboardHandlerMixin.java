@@ -8,7 +8,7 @@ import me.av306.keybindsgaloreplus.KeybindManager;
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -23,17 +23,18 @@ public class KeyboardHandlerMixin
                     target = "Lnet/minecraft/client/gui/screens/Screen;keyPressed(Lnet/minecraft/client/input/KeyEvent;)Z"
             )
     )
-    public boolean wrapScreenKeyPressed( Screen instance, KeyEvent keyEvent, Operation<Boolean> original )
+    public boolean wrapScreenKeyPressed( Screen instance, int keyCode,
+            int scanCode, int modifiers, Operation<Boolean> original )
     {
         // We only get key-down events because keyPress handler filters them for us
 
         // Stop hardware repeat events from closing a screen opened by click-hold
-        if ( KeybindManager.isClickHoldKey( InputConstants.getKey( keyEvent ) ) )
+        if ( KeybindManager.isClickHoldKey( InputConstants.getKey( keyCode, scanCode ) ) )
         {
             KeybindsGalorePlus.debugLog( "\tBlocking hardware key repeat in screen" );
             return false;
         }
-        else return original.call( instance, keyEvent );
+        else return original.call( instance, keyCode, scanCode, modifiers );
     }
 
     @WrapOperation(
@@ -43,21 +44,22 @@ public class KeyboardHandlerMixin
                     target = "Lnet/minecraft/client/gui/screens/Screen;keyReleased(Lnet/minecraft/client/input/KeyEvent;)Z"
             )
     )
-    public boolean wrapScreenKeyReleased( Screen instance, KeyEvent keyEvent, Operation<Boolean> original )
+    public boolean wrapScreenKeyReleased( Screen instance, int keyCode,
+            int scanCode, int modifiers, Operation<Boolean> original )
     {
         // Clear the click-hold state on (ANY) key release in the screen, because screens
         // consume all the key events while they're open
-        if ( KeybindManager.isClickHoldKey( InputConstants.getKey( keyEvent ) ) )
+        if ( KeybindManager.isClickHoldKey( InputConstants.getKey( keyCode, scanCode ) ) )
         {
             if ( Configurations.DEBUG )
             {
                 KeybindsGalorePlus.LOGGER.info( "\tClearing click-hold state for key {} from Screen {}",
-                        InputConstants.getKey( keyEvent ).getName(), instance.getTitle().getString() );
+                        InputConstants.getKey( keyCode, scanCode ).getName(), instance.getTitle().getString() );
             }
 
-            KeybindManager.clearClickHoldKey( InputConstants.getKey( keyEvent ) );
+            KeybindManager.clearClickHoldKey( InputConstants.getKey( keyCode, scanCode ) );
         }
 
-        return original.call( instance, keyEvent );
+        return original.call( instance, keyCode, scanCode, modifiers );
     }
 }

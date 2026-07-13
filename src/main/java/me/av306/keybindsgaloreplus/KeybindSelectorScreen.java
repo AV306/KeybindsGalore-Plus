@@ -8,30 +8,33 @@
 package me.av306.keybindsgaloreplus;
 
 import static me.av306.keybindsgaloreplus.KeybindsGalorePlus.customDataManager;
-import static me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer.calculateRadius;
 
 import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
 import me.av306.keybindsgaloreplus.mixin.MinecraftAccessor;
-import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderState;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.KeyMapping;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.Mth;
 
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.Objects;
 
-// FIXME: pretty much all of this goes into KeybindSelectorElementRenderer
 public class KeybindSelectorScreen extends Screen
 {
     // Instance variables
@@ -91,7 +94,7 @@ public class KeybindSelectorScreen extends Screen
         this.maxRadius = Math.min( (this.centreX * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN, (this.centreY * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN );
         this.maxExpandedRadius = this.maxRadius * Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
         this.cancelZoneRadius = maxRadius * Configurations.CANCEL_ZONE_SCALE;
-
+        
         //KeybindsGalorePlus.debugLog( "Scaled centre: ({}, {})", this.centreX, this.centreY );
     }
 
@@ -116,25 +119,101 @@ public class KeybindSelectorScreen extends Screen
             this.selectedSectorIndex = -1;
 
         // Need real dimensions of window, not scaled dimensions provided by this.width/height
-        context.guiRenderState.submitPicturesInPictureState( new KeybindSelectorElementRenderState(
-                tickDelta, numberOfSectors, sectorAngle, this.selectedSectorIndex,
-                this.mouseDown, this.ticksInScreen,
-                0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(),
-                null
-        ) ); // FIXME: getWidth() vs getFrameBufferWidth()?
-
+        
+        this.renderPieMenu( context, tickDelta, numberOfSectors, sectorAngle );
         this.renderLabelTexts( context, tickDelta, numberOfSectors, sectorAngle );
+    }
+
+    private void renderPieMenu( GuiGraphics context, float delta, int numberOfSectors, float sectorAngle )
+    {
+        // Setup rendering stuff
+        Tesselator tess = Tesselator.getInstance();
+    
+        RenderSystem.disableCull();
+        // We may not save on the state change itself, but I suppose being able to disable blend might help Sinytra users' performance
+        // https://stackoverflow.com/questions/7505018/repeated-state-changes-in-opengl
+        if ( Configurations.PIE_MENU_BLEND ) RenderSystem.enableBlend();
+
+        // ===== Version dependent =====
+        RenderSystem.setShader( GameRenderer::getPositionColorShader ); //* <1.21.2
+        //RenderSystem.setShader( ShaderProgramKeys.POSITION_COLOR ); //* >=1.21.2
+
+        BufferBuilder buf = tess.begin( VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR );
+
+        float startAngle = 0;
+        int vertices = Configurations.CIRCLE_VERTICES / numberOfSectors; // FP truncation here
+        if ( vertices < 1 ) vertices = 1; // Make sure there's always at least 2 vertices for a visible trapezium
+        for ( var sectorIndex = 0; sectorIndex < numberOfSectors; sectorIndex++ )
+        {
+            float outerRadius = this.calculateRadius( delta, numberOfSectors, sectorIndex );
+            float innerRadius = this.cancelZoneRadius;
+            int innerColor = Configurations.PIE_MENU_COLOR;
+            int outerColor = Configurations.PIE_MENU_COLOR;
+
+            if ( customDataManager.hasCustomData )
+            {
+                try
+                {
+                    outerColor = customDataManager.customData.get( this.conflicts.get( sectorIndex ).getName() ).sectorColor;
+                }
+                catch ( NullPointerException ignored )
+                {
+                    //KeybindsGalorePlus.debugLog( "No custom sector colour for {}", this.conflicts.get( sectorIndex ).getTranslationKey() );
+                }
+            }
+
+            // Lighten every other sector
+            // Hardcoding lightening the inner color for a distinct visual identity or something
+            if ( sectorIndex % 2 == 0 ) innerColor = outerColor += Configurations.PIE_MENU_COLOR_LIGHTEN_FACTOR;
+
+            if ( this.selectedSectorIndex == sectorIndex )
+            {
+                innerRadius *= Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
+                outerColor = this.mouseDown ? Configurations.PIE_MENU_HIGHLIGHT_COLOR : Configurations.PIE_MENU_SELECT_COLOR;
+            }
+
+            if ( !Configurations.SECTOR_GRADATION ) innerColor = outerColor;
+
+            this.drawSector( buf, startAngle, sectorAngle, vertices, innerRadius, outerRadius, innerColor, outerColor );
+
+            startAngle += sectorAngle;
+        }
+
+        // ===== Version dependent =====
+        BufferUploader.draw( buf.build() );
+        RenderSystem.enableCull();
+        if ( Configurations.PIE_MENU_BLEND ) RenderSystem.disableBlend();
+    }
+
+    private void drawSector( BufferBuilder buf, float startAngle, float sectorAngle, int vertices, float innerRadius, float outerRadius,
+                             int innerColor, int outerColor )
+    {
+        for ( var i = 0; i <= vertices; i++ )
+        {
+            float angle = startAngle + ((float) i / vertices) * sectorAngle;
+
+            // ===== Version dependent =====
+            // Inner vertex
+            // FIXME: is the compiler smart enough to optimise the trigo?
+            buf.addVertex( this.centreX + Mth.cos( angle ) * innerRadius, this.centreY + Mth.sin( angle ) * innerRadius, 0 );
+            buf.setColor( innerColor >> 16 & 0xFF, innerColor >> 8 & 0xFF, innerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
+            //buf.next(); //* <1.21
+
+            // Outer vertex
+            buf.addVertex( this.centreX + Mth.cos( angle ) * outerRadius, this.centreY + Mth.sin( angle ) * outerRadius, 0 );
+            buf.setColor( outerColor >> 16 & 0xFF, outerColor >> 8 & 0xFF, outerColor & 0xFF, Configurations.PIE_MENU_ALPHA );
+            //buf.next(); //* <1.21
+        }
     }
 
 
     // ==================== Rendering methods ====================
 
-    // At least this works fine in 1.21.6.
     private void renderLabelTexts( GuiGraphics context, float delta, int numberOfSectors, float sectorAngle )
     {
         for ( var sectorIndex = 0; sectorIndex < numberOfSectors; sectorIndex++ )
         {
-            float radius = calculateRadius( this.ticksInScreen, delta, numberOfSectors, sectorIndex, this.selectedSectorIndex, this.maxRadius );
+            float radius = this.calculateRadius( delta, numberOfSectors, sectorIndex );
             
             float angle = (sectorIndex + 0.5f) * sectorAngle;
 
@@ -149,7 +228,7 @@ public class KeybindSelectorScreen extends Screen
             // TODO: configurable
 
             String id = action.getName();
-            String actionName = Component.translatable( action.getCategory().id().toLanguageKey( "key.category" ) ).getString()
+            String actionName = Component.translatable( action.getCategory() ).getString()
                     + ": " + Component.translatable( action.getName() ).getString();
 
             // Read custom data for this keybind, only if present
@@ -217,6 +296,17 @@ public class KeybindSelectorScreen extends Screen
         return (Mth.atan2(my - y, mx - x) + Math.PI * 2) % (Math.PI * 2);
     }
 
+    private float calculateRadius( float delta, int numberOfSectors, int sectorIndex )
+    {
+        float radius = Configurations.ANIMATE_PIE_MENU ?
+                Math.max( 0f, Math.min( (this.ticksInScreen + delta - sectorIndex * 6f / numberOfSectors) * 40f, this.maxRadius ) ) :
+                this.maxRadius;
+
+        // Expand the sector if selected
+        if ( this.selectedSectorIndex == sectorIndex ) radius *= Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
+
+        return radius;
+    }
 
     // ==================== Overrides ====================
 
@@ -230,7 +320,7 @@ public class KeybindSelectorScreen extends Screen
 
     public void closePieMenu()
     {
-        // Nulling the screen also causes all keymappings to be directly set to match physical keyboard state,
+        // Nulling the screen also causes all keymappings to be synced to physical keyboard state,
         // so this must be done before our overrides
         this.minecraft.setScreen( null );
 
@@ -266,29 +356,28 @@ public class KeybindSelectorScreen extends Screen
 
 
     @Override
-    public boolean keyReleased( @NotNull KeyEvent keyEvent )
+    public boolean keyReleased( int keyCode, int scanCode, int modifiers )
     {
-        if ( InputConstants.getKey( keyEvent ) == this.conflictedKey )
+        if ( InputConstants.getKey( keyCode, scanCode ) == this.conflictedKey )
         {
             this.closePieMenu();
             //return true;
         }
 
-        return super.keyReleased( keyEvent );
+        return super.keyReleased( keyCode, scanCode, modifiers );
     }
 
     @Override
-    public boolean mouseClicked( @NotNull MouseButtonEvent mouseButtonEvent, boolean bl )
+    public boolean mouseClicked( double x, double y, int button )
     {
         this.mouseDown = true;
-
-        return super.mouseClicked( mouseButtonEvent, bl );
+        return super.mouseClicked( x, y, button );
     }
 
     @Override
-    public boolean mouseReleased( @NotNull MouseButtonEvent mouseButtonEvent )
+    public boolean mouseReleased( double x, double y, int button )
     {
-        if ( mouseButtonEvent.button() == this.conflictedKey.getValue() )
+        if ( button == this.conflictedKey.getValue() )
         {
             // Close menu and activate selection normally - click-hold not applicable
             this.closePieMenu();
@@ -349,7 +438,7 @@ public class KeybindSelectorScreen extends Screen
             }
         }
 
-        return super.mouseReleased( mouseButtonEvent );
+        return super.mouseReleased( x, y, button );
     }
 
     @Override
@@ -360,7 +449,7 @@ public class KeybindSelectorScreen extends Screen
     {
         if ( this.minecraft.level == null ) this.renderPanorama( context, deltaTicks );
 
-        if ( Configurations.BLUR_BACKGROUND ) this.renderBlurredBackground( context );
+        if ( Configurations.BLUR_BACKGROUND ) this.renderBlurredBackground( deltaTicks );
         if ( Configurations.DARKENED_BACKGROUND ) this.renderMenuBackground( context );
     }
 }

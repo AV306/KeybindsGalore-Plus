@@ -1,4 +1,7 @@
 plugins {
+	// If you experience "Could not find variant" etc errors
+	// check your Gradle version. Gradle >=9.6.1 is required for
+	// newer Loom versions, around 1.17
 	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 	id 'maven-publish'
 }
@@ -17,32 +20,6 @@ repositories {
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
 	maven { url 'https://jitpack.io' }
-}
-
-loom {
-    runs {
-		// This adds a new gradle task that runs the datagen API: "gradlew runDatagen"
-		datagen {
-			inherit server
-			name "Data Generation"
-			vmArg "-Dfabric-api.datagen"
-			vmArg "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}"
-			vmArg "-Dfabric-api.datagen.modid=keybindsgalore"
- 
-			runDir "build/datagen"
-		}
-	}
-}
-
-// Add the generated resources to the main source set
-sourceSets {
-	main {
-		resources {
-			srcDirs += [
-					'src/main/generated'
-			]
-		}
-	}
 }
 
 dependencies {
@@ -65,24 +42,26 @@ processResources {
 	}
 }
 
-tasks.withType(JavaCompile).configureEach {
-	//it.options.source = 21
-	it.options.release = 17 // Maintain JVM compatibility with 1.20-1.20.4
-}
+// See https://docs.gradle.org/current/userguide/toolchains.html
+// for docs on 
 
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 17
+}
 
 java {
 	withSourcesJar()
 
+	// FIXME: can remove these two lines?
 	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_17 // JVM compat with 1.20-1.20.6
+	targetCompatibility = JavaVersion.VERSION_17
 	
-	toolchain { languageVersion = JavaLanguageVersion.of( 25 ) }
+	toolchain { languageVersion = JavaLanguageVersion.of( 26 ) }
 }
 
 jar {
-	from("LICENSE") {
-		rename { "${it}_${project.base.archivesName.get()}"}
+	from( "LICENSE" ) {
+		rename { "${it}_${project.base.archivesName.get()}" }
 	}
 }
 

@@ -23,7 +23,7 @@
 		"UNI717 -- Sinytra Connector compatibility",
 		"IG114514 -- mouse support and compatibility",
 		"WxAaRoNxW -- click-to-activate and compatibility",
-		"Warp159 -- extensive 1.21.11 testing",
+		"Warp159 -- extensive >=1.21 <=1.21.1 testing",
 		"...and more on GitHub!"
 	],
 	"license": "GNU Lesser General Public License v3.0",
@@ -38,6 +38,6 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.14.8",
-		"minecraft": "1.21.11"
+		"minecraft": ">=1.21 <=1.21.1"
 	}
 }

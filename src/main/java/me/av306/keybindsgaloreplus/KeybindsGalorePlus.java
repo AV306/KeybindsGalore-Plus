@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import me.av306.keybindsgaloreplus.customdata.DataManager;
-import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -178,10 +177,6 @@ public class KeybindsGalorePlus implements ClientModInitializer
                         )
             );
         } );
-
-        // Register our fancy circle renderer
-        SpecialGuiElementRegistry.register(
-                ctx -> new KeybindSelectorElementRenderer( ctx.vertexConsumers() ) );
     }
 
     private void reloadCustomData( @NotNull Minecraft client )

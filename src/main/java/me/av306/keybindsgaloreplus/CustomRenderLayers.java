@@ -1,13 +1,22 @@
 package me.av306.keybindsgaloreplus;
 
-import net.minecraft.client.renderer.rendertype.RenderSetup;
-import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderStateShard.CullStateShard;
+import net.minecraft.client.renderer.RenderType.CompositeState;
+
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 
 public class CustomRenderLayers
 {
     public static final RenderType GUI_TRIANGLE_STRIP = RenderType.create(
             "keybindsgaloreplus:gui_triangle_strip",
-            RenderSetup.builder( CustomRenderPipelines.GUI_TRIANGLE_STRIP )
-                    .createRenderSetup()
+            DefaultVertexFormat.POSITION_COLOR,
+            VertexFormat.Mode.TRIANGLE_STRIP,
+            16777216,
+            CompositeState.builder()
+                    .setCullState( CullStateShard.NO_CULL )
+                    .createCompositeState( false )
+
     );
 }
