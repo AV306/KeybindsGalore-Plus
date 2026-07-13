@@ -20,10 +20,10 @@ public class KeyboardHandlerMixin
             method = "keyPress",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/screens/Screen;keyPressed(Lnet/minecraft/client/input/KeyEvent;)Z"
+                    target = "Lnet/minecraft/client/gui/screens/Screen;keyPressed(III)Z"
             )
     )
-    public boolean wrapScreenKeyPressed( Screen instance, int keyCode,
+    private boolean wrapScreenKeyPressed( Screen instance, int keyCode,
             int scanCode, int modifiers, Operation<Boolean> original )
     {
         // We only get key-down events because keyPress handler filters them for us
@@ -41,10 +41,10 @@ public class KeyboardHandlerMixin
             method = "keyPress",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/screens/Screen;keyReleased(Lnet/minecraft/client/input/KeyEvent;)Z"
+                    target = "Lnet/minecraft/client/gui/screens/Screen;keyReleased(III)Z"
             )
     )
-    public boolean wrapScreenKeyReleased( Screen instance, int keyCode,
+    private boolean wrapScreenKeyReleased( Screen instance, int keyCode,
             int scanCode, int modifiers, Operation<Boolean> original )
     {
         // Clear the click-hold state on (ANY) key release in the screen, because screens

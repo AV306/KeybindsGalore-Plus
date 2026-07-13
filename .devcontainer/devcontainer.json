@@ -11,6 +11,13 @@
     "customizations": {
         "codespaces": {
             "openFiles": []
+        },
+        "vscode": {
+            "extensions": [
+                "vscjava.vscode-java-pack",
+                "redhat.java",
+                "vscjava.vscode-gradle"
+            ]
         }
     }
 }
