@@ -90,6 +90,7 @@ public class KeybindManager
         if ( Minecraft.getInstance().player == null ) return Collections.emptyList();
 
         // 1.21.1 doesn't have all the extra keybind categories
+        // FIXME: it's not a map anymore
         else return KeyMappingAccessor.getMap().getOrDefault( key, new ArrayList<>() ).stream()
                 .filter( keyMapping ->
                         // is Survival => filter Creative and Spectator keys
