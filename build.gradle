@@ -13,18 +13,18 @@ base {
 	archivesName = project.archives_base_name
 }
 
-loom {
-    runs {
-        client {
-            property "mixin.debug.export", "true"
-            property "mixin.debug.verbose", "true"
-            property "mixin.dumpTargetOnFailure", "true"
-        }
-        server {
-            property "mixin.debug.export", "true"
-        }
-    }
-}
+// loom {
+//     runs {
+//         client {
+//             property "mixin.debug.export", "true"
+//             property "mixin.debug.verbose", "true"
+//             property "mixin.dumpTargetOnFailure", "true"
+//         }
+//         server {
+//             property "mixin.debug.export", "true"
+//         }
+//     }
+// }
 
 repositories {
 	// Add repositories to retrieve artifacts from in here.

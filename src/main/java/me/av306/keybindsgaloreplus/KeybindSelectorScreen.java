@@ -180,7 +180,7 @@ public class KeybindSelectorScreen extends Screen
         }
 
         // ===== Version dependent =====
-        BufferUploader.draw( buf.build() );
+        BufferUploader.drawWithShader( buf.build() );
         RenderSystem.enableCull();
         if ( Configurations.PIE_MENU_BLEND ) RenderSystem.disableBlend();
     }

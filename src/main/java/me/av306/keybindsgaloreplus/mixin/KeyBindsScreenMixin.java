@@ -29,21 +29,7 @@ public abstract class KeyBindsScreenMixin extends OptionsSubScreen
     @Override
     public void onClose()
     {
-        // Check for conflicting keybinds on screen close
-        KeybindManager.keysToMappings.clear();
-        for ( KeyMapping mapping : this.options.keyMappings )
-        {
-            KeybindManager.keysToMappings.computeIfAbsent( ((KeyMappingAccessor) mapping).getKey(), (key) -> new ArrayList<>() );
-            KeybindManager.keysToMappings.get( ((KeyMappingAccessor) mapping).getKey() ).add( mapping );
-        }
-
-        // Prune the hashmap using a copy of its keyset (ensures item removal doesn't affect the list we're iterating over)
-        new HashSet<>( KeybindManager.keysToMappings.keySet() ).forEach( ( key) ->
-        {
-            if ( KeybindManager.keysToMappings.get( key ).size() < 2 )
-                KeybindManager.keysToMappings.remove( key );
-        } );
-
+        KeybindManager.findAllConflicts( this.options );
 
         if ( Configurations.DEBUG )
         {

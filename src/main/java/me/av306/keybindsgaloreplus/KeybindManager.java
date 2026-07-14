@@ -4,12 +4,15 @@ import com.mojang.blaze3d.platform.InputConstants;
 import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
+
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,6 +22,24 @@ public class KeybindManager
     public static final HashMap<InputConstants.Key, ArrayList<KeyMapping>> keysToMappings = new HashMap<>();
     public static final HashMap<InputConstants.Key, KeyMapping> clickHoldKeys = new HashMap<>();
     public static final HashMap<InputConstants.Key, Integer> clickHoldKeysCooldowns = new HashMap<>();
+
+    public static void findAllConflicts( Options options )
+    {
+        keysToMappings.clear();
+        for ( KeyMapping mapping : options.keyMappings )
+        {
+            keysToMappings.computeIfAbsent( ((KeyMappingAccessor) mapping).getKey(), (key) -> new ArrayList<>() );
+            keysToMappings.get( ((KeyMappingAccessor) mapping).getKey() ).add( mapping );
+        }
+
+        // Prune the hashmap using a copy of its keyset (ensures item removal doesn't affect the list we're iterating over)
+        new HashSet<>( keysToMappings.keySet() ).forEach( ( key) ->
+        {
+            if ( keysToMappings.get( key ).size() < 2 )
+                keysToMappings.remove( key );
+        } );
+
+    }
 
     /**
      * Does a given key NOT open a pie menu?
