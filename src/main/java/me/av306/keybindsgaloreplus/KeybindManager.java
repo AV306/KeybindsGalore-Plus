@@ -16,6 +16,7 @@ import java.util.Objects;
 
 public class KeybindManager
 {
+    public static final HashMap<InputConstants.Key, ArrayList<KeyMapping>> keysToMappings = new HashMap<>();
     public static final HashMap<InputConstants.Key, KeyMapping> clickHoldKeys = new HashMap<>();
     public static final HashMap<InputConstants.Key, Integer> clickHoldKeysCooldowns = new HashMap<>();
 
@@ -90,17 +91,10 @@ public class KeybindManager
         if ( Minecraft.getInstance().player == null ) return Collections.emptyList();
 
         // 1.21.1 doesn't have all the extra keybind categories
-        // FIXME: it's not a map anymore
-        else return KeyMappingAccessor.getMap().getOrDefault( key, new ArrayList<>() ).stream()
-                .filter( keyMapping ->
-                        // is Survival => filter Creative and Spectator keys
-                        !Minecraft.getInstance().player.isCreative()
-                                && keyMapping.getCategory() != KeyMapping.CATEGORY_CREATIVE
-                        //|| (Minecraft.getInstance().player.isCreative()
-                        //        && keyMapping.getCategory() != KeyMapping.CATEGORY_SPECTATOR)
-                        //|| (Minecraft.getInstance().player.
-                        //        && keyMapping.getCategory() != KeyMapping.CATEGORY_CREATIVE)
-                )
+        else return keysToMappings.getOrDefault( key, new ArrayList<>() ).stream()
+                // .filter( keyMapping ->
+                //         //keyMapping.getCategory() != Minecraft.getInstance().player.isCreative()
+                // )
                 .toList();
     }
 
@@ -125,7 +119,8 @@ public class KeybindManager
                 // Skip the expensive stream filter
                 KeyMapping clickHoldMapping = clickHoldKeys.get( key );
 
-                if ( Configurations.DEBUG ) KeybindsGalorePlus.LOGGER.info(
+                // FIXME: this is BEFORE the null check!!! this bug exists on 1.21.11 too
+                if ( Configurations.DEBUG && clickHoldMapping != null ) KeybindsGalorePlus.LOGGER.info(
                         "Attempting to set mapping {} to {} (click-hold)",
                         clickHoldMapping.getName(), pressed ? "pressed" : "released"
                 );

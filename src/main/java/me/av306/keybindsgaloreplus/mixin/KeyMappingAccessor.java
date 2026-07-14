@@ -12,11 +12,11 @@ import java.util.Map;
 @Mixin( KeyMapping.class )
 public interface KeyMappingAccessor
 {
-    @Accessor( "MAP" )
-    static Map<InputConstants.Key, List<KeyMapping>> getMap()
-    {
-        throw new UnsupportedOperationException();
-    }
+    // @Accessor( "MAP" )
+    // static Map<InputConstants.Key, List<KeyMapping>> getMap()
+    // {
+    //     throw new UnsupportedOperationException();
+    // }
 
     @Accessor( "ALL" )
     static Map<InputConstants.Key, List<KeyMapping>> getAll()
