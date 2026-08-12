@@ -3,6 +3,7 @@ package me.av306.keybindsgaloreplus.mixin;
 import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import net.minecraft.client.Options;
+import net.minecraft.client.main.GameConfig;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,15 +12,16 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin( Minecraft.class )
 public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler
 {
-    @Shadow public @Final Options options;
+    public MinecraftMixin( String name, boolean propagatesCrashes )
+    {
+		super( name, propagatesCrashes );
+	}
+
+	@Shadow public @Final Options options;
     @Shadow public int missTime;
 
     @Shadow public abstract void pauseGame( boolean pauseOnly );
 
-    public MinecraftMixin( String string )
-    {
-        super( string );
-    }
 
 //    @Inject(
 //            method = "handleInputEvents",
@@ -56,7 +58,7 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
 //    }
 
 //    @Inject( method = "setScreen", at = @At( "HEAD" ) )
-//    public void onSetScreen( Screen screen, CallbackInfo ci )
+//    public void onsetScreenAndShow( Screen screen, CallbackInfo ci )
 //    {
 //        KeybindsGalorePlus.LOGGER.info( "screen set to {} by the following stack trace:", screen == null ? "null" : screen.getTitle().getString() );
 //        Thread.dumpStack();

@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -19,50 +19,25 @@ repositories {
 	maven { url 'https://jitpack.io' }
 }
 
-loom {
-    runs {
-		// This adds a new gradle task that runs the datagen API: "gradlew runDatagen"
-		datagen {
-			inherit server
-			name "Data Generation"
-			vmArg "-Dfabric-api.datagen"
-			vmArg "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}"
-			vmArg "-Dfabric-api.datagen.modid=keybindsgalore"
- 
-			runDir "build/datagen"
-		}
-	}
-}
-
-// Add the generated resources to the main source set
-sourceSets {
-	main {
-		resources {
-			srcDirs += [
-					'src/main/generated'
-			]
-		}
-	}
-}
-
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings()
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation include( "com.github.AV306:liteconfig:${project.liteconfig_version}" )
 
-	modImplementation include( "com.github.AV306:liteconfig:${project.liteconfig_version}" )
+	compileOnly "org.jetbrains:annotations:26.1.0"
 }
 
 processResources {
 	inputs.property "version", project.version
 
 	filesMatching("fabric.mod.json") {
-		expand "version": project.version
-	}
+        expand "mod_version": version,
+                "minecraft_version": project.minecraft_version,
+                "loader_version": project.loader_version
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -70,14 +45,15 @@ tasks.withType(JavaCompile).configureEach {
 	it.options.release = 17 // Maintain JVM compatibility with 1.20-1.20.4
 }
 
-
 java {
 	withSourcesJar()
 
 	sourceCompatibility = JavaVersion.VERSION_21
 	targetCompatibility = JavaVersion.VERSION_17 // JVM compat with 1.20-1.20.6
 	
-	toolchain { languageVersion = JavaLanguageVersion.of( 25 ) }
+	toolchain {
+		languageVersion = JavaLanguageVersion.of( 25 )
+	}
 }
 
 jar {

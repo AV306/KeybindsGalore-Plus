@@ -1,91 +1,93 @@
 package me.av306.keybindsgaloreplus.render;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import me.av306.keybindsgaloreplus.Configurations;
-import me.av306.keybindsgaloreplus.CustomRenderLayers;
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.util.Mth;
 
 public class KeybindSelectorElementRenderer extends PictureInPictureRenderer<KeybindSelectorElementRenderState>
 {
-    public KeybindSelectorElementRenderer( MultiBufferSource.BufferSource vertexConsumerProvider )
-    {
-        super( vertexConsumerProvider );
-    }
-
     @Override
-    protected void renderToTexture( KeybindSelectorElementRenderState state, PoseStack matrices )
+    protected void renderToTexture( KeybindSelectorElementRenderState state,
+                                    @NotNull PoseStack matrices,
+                                    @NotNull SubmitNodeCollector nodeCollector )
     {
-        VertexConsumer buffer = this.bufferSource.getBuffer( CustomRenderLayers.GUI_TRIANGLE_STRIP );
+        //VertexConsumer buffer = this.bufferSourcegetBuffer( CustomRenderLayers.GUI_TRIANGLE_STRIP );
 
-        int centreX = (state.x1() - state.x0()) / 2;
-        int centreY = (state.y1() - state.y0()) / 2;
-
-        //KeybindsGalorePlus.debugLog( "Absolute size: ({}, {})", s, centreY );
-        //KeybindsGalorePlus.debugLog( "Absolute centre: ({}, {})", centreX, centreY );
-
-        int numberOfSectors = state.numberOfSectors();
-        float sectorAngle = state.sectorAngle();
-        int selectedSectorIndex = state.selectedSectorIndex();
-        float delta = state.tickDelta();
-
-        // TODO: document the fact that these configs are defined in absolute pixel coords, not scaled coords (like text)
-        // These are computed twice, once in here (ABSOLUTE window coords) and once in the screen (SCALED window coords)
-        float maxRadius = Math.min( (centreX * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN,
-                (centreY * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN );
-        //float maxExpandedRadius = maxRadius * Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
-        float cancelZoneRadius = maxRadius * Configurations.CANCEL_ZONE_SCALE;
-
-        float currentAngle = 0;
-        int numberOfVerticesPerSector = Configurations.CIRCLE_VERTICES / numberOfSectors; // FP truncation here
-        if ( numberOfVerticesPerSector < 1 ) numberOfVerticesPerSector = 1; // Make sure there's always at least 2 vertices for a visible trapezium
-
-        for ( var currentDrawnSectorIndex = 0; currentDrawnSectorIndex < numberOfSectors; currentDrawnSectorIndex++ )
+        nodeCollector.submitCustomGeometry( matrices, CustomRenderLayers.GUI_TRIANGLE_STRIP, (pose, buffer) ->
         {
-            float outerRadius = calculateRadius( state.ticksInScreen(), delta,
-                    numberOfSectors, currentDrawnSectorIndex,
-                    state.selectedSectorIndex(), maxRadius );
+            int centreX = (state.x1() - state.x0()) / 2;
+            int centreY = (state.y1() - state.y0()) / 2;
 
-            float innerRadius = cancelZoneRadius;
-            int innerColor = Configurations.PIE_MENU_COLOR;
-            int outerColor = Configurations.PIE_MENU_COLOR;
+            //KeybindsGalorePlus.debugLog( "Absolute size: ({}, {})", s, centreY );
+            //KeybindsGalorePlus.debugLog( "Absolute centre: ({}, {})", centreX, centreY );
 
-            // TODO: custom data
-            /*if ( customDataManager.hasCustomData )
+            int numberOfSectors = state.numberOfSectors();
+            float sectorAngle = state.sectorAngle();
+            int selectedSectorIndex = state.selectedSectorIndex();
+            float delta = state.tickDelta();
+
+            // TODO: document the fact that these configs are defined in absolute pixel coords, not scaled coords (like text)
+            // These are computed twice, once in here (ABSOLUTE window coords) and once in the screen (SCALED window coords)
+            float maxRadius = Math.min( (centreX * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN,
+                    (centreY * Configurations.PIE_MENU_SCALE) - Configurations.PIE_MENU_MARGIN );
+            //float maxExpandedRadius = maxRadius * Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
+            float cancelZoneRadius = maxRadius * Configurations.CANCEL_ZONE_SCALE;
+
+            float currentAngle = 0;
+            int numberOfVerticesPerSector = Configurations.CIRCLE_VERTICES / numberOfSectors; // FP truncation here
+            if ( numberOfVerticesPerSector < 1 ) numberOfVerticesPerSector = 1; // Make sure there's always at least 2 vertices for a visible trapezium
+
+            // Render each sector in turn
+            for ( var currentDrawnSectorIndex = 0; currentDrawnSectorIndex < numberOfSectors; currentDrawnSectorIndex++ )
             {
-                try
-                {
-                    outerColor = customDataManager.customData.get( this.conflicts.get( sectorIndex ).getTranslationKey() ).sectorColor;
-                }
-                catch ( NullPointerException ignored )
-                {
-                    //KeybindsGalorePlus.debugLog( "No custom sector colour for {}", this.conflicts.get( sectorIndex ).getTranslationKey() );
-                }
-            }*/
+                float outerRadius = calculateRadius( state.ticksInScreen(), delta,
+                        numberOfSectors, currentDrawnSectorIndex,
+                        state.selectedSectorIndex(), maxRadius );
 
-            // Lighten every other sector
-            if ( currentDrawnSectorIndex % 2 == 0 )
-                innerColor = outerColor += Configurations.PIE_MENU_COLOR_LIGHTEN_FACTOR;
+                float innerRadius = cancelZoneRadius;
+                int innerColor = Configurations.PIE_MENU_COLOR;
+                int outerColor = Configurations.PIE_MENU_COLOR;
 
-            if ( selectedSectorIndex == currentDrawnSectorIndex )
-            {
-                innerRadius *= Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
-                outerColor = state.mouseDown()
-                        ? Configurations.PIE_MENU_HIGHLIGHT_COLOR
-                        : Configurations.PIE_MENU_SELECT_COLOR;
+                // TODO: read custom data
+                /*if ( customDataManager.hasCustomData )
+                {
+                    try
+                    {
+                        outerColor = customDataManager.customData.get( this.conflicts.get( sectorIndex ).getTranslationKey() ).sectorColor;
+                    }
+                    catch ( NullPointerException ignored )
+                    {
+                        //KeybindsGalorePlus.debugLog( "No custom sector colour for {}", this.conflicts.get( sectorIndex ).getTranslationKey() );
+                    }
+                }*/
+
+                // Lighten every other sector
+                if ( currentDrawnSectorIndex % 2 == 0 )
+                    innerColor = outerColor += Configurations.PIE_MENU_COLOR_LIGHTEN_FACTOR;
+
+                if ( selectedSectorIndex == currentDrawnSectorIndex )
+                {
+                    innerRadius *= Configurations.EXPANSION_FACTOR_WHEN_SELECTED;
+                    outerColor = state.mouseDown()
+                            ? Configurations.PIE_MENU_HIGHLIGHT_COLOR
+                            : Configurations.PIE_MENU_SELECT_COLOR;
+                }
+
+                if ( !Configurations.SECTOR_GRADATION ) innerColor = outerColor;
+
+                this.writeSectorVertices( buffer, centreX, centreY, currentAngle, sectorAngle,
+                        numberOfVerticesPerSector, innerRadius, outerRadius, innerColor, outerColor );
+
+                currentAngle += sectorAngle;
             }
-
-            if ( !Configurations.SECTOR_GRADATION ) innerColor = outerColor;
-
-            this.writeSectorVertices( buffer, centreX, centreY, currentAngle, sectorAngle,
-                    numberOfVerticesPerSector, innerRadius, outerRadius, innerColor, outerColor );
-
-            currentAngle += sectorAngle;
-        }
+        } );
     }
 
     private void writeSectorVertices( VertexConsumer buf, int centreX, int centreY, float startAngle, float sectorAngle, int vertices, float innerRadius,

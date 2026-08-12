@@ -7,8 +7,8 @@ import java.nio.file.Path;
 
 import me.av306.liteconfig.ConfigManager;
 
-//import org.jetbrains.annotations.NonNull;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
+
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +17,15 @@ import com.mojang.blaze3d.platform.InputConstants;
 
 import me.av306.keybindsgaloreplus.customdata.DataManager;
 import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderer;
+
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.PictureInPictureRendererRegistry;
 import net.fabricmc.loader.api.FabricLoader;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -119,7 +121,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
         );
 
         // Set config reload key
-        CONFIG_RELOAD_KEYBIND = KeyBindingHelper.registerKeyBinding( new KeyMapping(
+        CONFIG_RELOAD_KEYBIND = KeyMappingHelper.registerKeyMapping( new KeyMapping(
                     "key.keybindsgaloreplus.reloadconfigs",
                     InputConstants.Type.KEYSYM,
                     GLFW.GLFW_KEY_UNKNOWN,
@@ -144,7 +146,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
 
                 if ( Configurations.DEBUG )
                 {
-                    client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.debugmode.enabled" ), false );
+                    client.player.sendSystemMessage( Component.translatable( "text.keybindsgaloreplus.debugmode.enabled" ) );
                     // Log all config fields in debug mode
                     CONFIG_MANAGER.printAllConfigs();
                 }
@@ -155,7 +157,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
         ClientCommandRegistrationCallback.EVENT.register( (dispatcher, registryAccess) ->
         {
             dispatcher.register(
-                ClientCommandManager.literal( MODID )
+                ClientCommands.literal( MODID )
                         .executes( context -> 
                         {
                             // Fancy version text :D
@@ -172,7 +174,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
                                     .withStyle( ChatFormatting.GRAY, ChatFormatting.ITALIC ) );
                             return 1;
                         } )
-                        .then( ClientCommandManager.literal( "reload_configs" )
+                        .then( ClientCommands.literal( "reload_configs" )
                                 .executes( context ->
                                 {
                                     reloadConfigurations( context.getSource().getClient() );
@@ -180,25 +182,26 @@ public class KeybindsGalorePlus implements ClientModInitializer
                                     return 1;
                                 } )
                         )
+                        //.build()
             );
         } );
 
         // Register our fancy circle renderer
-        SpecialGuiElementRegistry.register(
-                ctx -> new KeybindSelectorElementRenderer( ctx.vertexConsumers() ) );
+        PictureInPictureRendererRegistry.register(
+                ctx -> new KeybindSelectorElementRenderer() );
     }
 
-    private void reloadCustomData( @NonNull Minecraft client )
+    private void reloadCustomData( @NotNull Minecraft client )
     {
         customDataManager.readDataFile();
         if ( customDataManager.hasCustomData )
         {
             LOGGER.info( "Successfully loaded custom keybind data!" );
-            if ( client.player != null ) client.player.displayClientMessage( Component.translatable( "text.keybindsgaloreplus.customdata.found" ), false );
+            if ( client.player != null ) client.player.sendSystemMessage( Component.translatable( "text.keybindsgaloreplus.customdata.found" ) );
         }
     }
 
-    private void reloadConfigurations( @NonNull Minecraft client )
+    private void reloadConfigurations( @NotNull Minecraft client )
     {
         try
         {
@@ -206,14 +209,14 @@ public class KeybindsGalorePlus implements ClientModInitializer
             if ( CONFIG_MANAGER.deserialiseConfigurationFileOrElseCreateNew() )
             {
                 LOGGER.info( "Created new configuration file with default values." );
-                if ( client.player != null ) client.player.displayClientMessage(
-                        Component.translatable( "text.keybindsgaloreplus.configurations.load.created_new" ), false );
+                if ( client.player != null ) client.player.sendSystemMessage(
+                        Component.translatable( "text.keybindsgaloreplus.configurations.load.created_new" ) );
             }
             else
             {
                 LOGGER.info( "Successfully loaded configuration file!" );
-                if ( client.player != null ) client.player.displayClientMessage(
-                       Component.translatable( "text.keybindsgaloreplus.configurations.load.success" ), false );
+                if ( client.player != null ) client.player.sendSystemMessage(
+                       Component.translatable( "text.keybindsgaloreplus.configurations.load.success" ) );
             }
         }
         catch ( IOException e )
@@ -221,11 +224,10 @@ public class KeybindsGalorePlus implements ClientModInitializer
             LOGGER.error( "IOException while loading configuration file: {}", e.getLocalizedMessage() );
             LOGGER.warn( "Will use default configuration values." );
 
-            if ( client.player != null ) client.player.displayClientMessage(
+            if ( client.player != null ) client.player.sendSystemMessage(
                     Component.translatable( "text.keybindsgaloreplus.configurations.load.fail.ioexception" )
                             .withStyle( ERROR_FORMATTING )
-                            .append( Component.literal( e.getLocalizedMessage() ) ),
-                    false
+                            .append( Component.literal( e.getLocalizedMessage() ) )
             );
         }
     }

@@ -15,7 +15,7 @@ import me.av306.keybindsgaloreplus.mixin.MinecraftAccessor;
 import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderState;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.KeyMapping;
 
@@ -25,7 +25,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.Mth;
 
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -96,7 +96,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
-    public void render( @NonNull GuiGraphics context, int mouseX, int mouseY, float tickDelta )
+    public void extractRenderState( @NotNull GuiGraphicsExtractor context, int mouseX, int mouseY, float tickDelta )
     {
         // Angle of mouse, in radians from +X-axis, centred on the origin
         double mouseAngle = mouseAngle( this.centreX, this.centreY, mouseX, mouseY );
@@ -116,7 +116,7 @@ public class KeybindSelectorScreen extends Screen
             this.selectedSectorIndex = -1;
 
         // Need real dimensions of window, not scaled dimensions provided by this.width/height
-        context.guiRenderState.submitPicturesInPictureState( new KeybindSelectorElementRenderState(
+        context.guiRenderState.addPicturesInPictureState( new KeybindSelectorElementRenderState(
                 tickDelta, numberOfSectors, sectorAngle, this.selectedSectorIndex,
                 this.mouseDown, this.ticksInScreen,
                 0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(),
@@ -124,13 +124,15 @@ public class KeybindSelectorScreen extends Screen
         ) ); // FIXME: getWidth() vs getFrameBufferWidth()?
 
         this.renderLabelTexts( context, tickDelta, numberOfSectors, sectorAngle );
+
+        super.extractRenderState( context, mouseX, mouseY, tickDelta );
     }
 
 
     // ==================== Rendering methods ====================
 
     // At least this works fine in 1.21.6.
-    private void renderLabelTexts( GuiGraphics context, float delta, int numberOfSectors, float sectorAngle )
+    private void renderLabelTexts( GuiGraphicsExtractor context, float delta, int numberOfSectors, float sectorAngle )
     {
         for ( var sectorIndex = 0; sectorIndex < numberOfSectors; sectorIndex++ )
         {
@@ -202,7 +204,7 @@ public class KeybindSelectorScreen extends Screen
 
             actionName = (this.selectedSectorIndex == sectorIndex ? ChatFormatting.UNDERLINE : ChatFormatting.RESET) + actionName;
 
-            context.drawString( this.font, actionName, (int) xPos, (int) yPos, 0xFFFFFFFF,
+            context.text( this.font, actionName, (int) xPos, (int) yPos, 0xFFFFFFFF,
                     Configurations.LABEL_TEXT_SHADOW );
         }
     }
@@ -232,7 +234,8 @@ public class KeybindSelectorScreen extends Screen
     {
         // Nulling the screen also causes all keymappings to be directly set to match physical keyboard state,
         // so this must be done before our overrides
-        this.minecraft.setScreen( null );
+        //this.minecraft.setScreenAndShow( null );
+        this.minecraft.gui.setScreen( null );
 
         // Activate the selected binding
         if ( this.selectedSectorIndex != -1 )
@@ -266,7 +269,7 @@ public class KeybindSelectorScreen extends Screen
 
 
     @Override
-    public boolean keyReleased( @NonNull KeyEvent keyEvent )
+    public boolean keyReleased( @NotNull KeyEvent keyEvent )
     {
         if ( InputConstants.getKey( keyEvent ) == this.conflictedKey )
         {
@@ -278,7 +281,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
-    public boolean mouseClicked( @NonNull MouseButtonEvent mouseButtonEvent, boolean bl )
+    public boolean mouseClicked( @NotNull MouseButtonEvent mouseButtonEvent, boolean bl )
     {
         this.mouseDown = true;
 
@@ -286,7 +289,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
-    public boolean mouseReleased( @NonNull MouseButtonEvent mouseButtonEvent )
+    public boolean mouseReleased( @NotNull MouseButtonEvent mouseButtonEvent )
     {
         if ( mouseButtonEvent.button() == this.conflictedKey.getValue() )
         {
@@ -299,7 +302,7 @@ public class KeybindSelectorScreen extends Screen
 
             // Null the screen (keymappings are updated to match physical state as a side effect,
             // so all conflicts on this key will be set to "down"
-            this.minecraft.setScreen( null );
+            this.minecraft.setScreenAndShow( null );
 
             // This line unsets the conflicts on this key (see above), but isn't needed now that the root cause
             // (call to KeyMapping.setAll() when mouse is grabbed) is fixed to ignore conflicts
@@ -355,12 +358,16 @@ public class KeybindSelectorScreen extends Screen
     @Override
     public boolean isPauseScreen() { return false; }
 
-    @Override
-    public void renderBackground( @NonNull GuiGraphics context, int mouseX, int mouseY, float deltaTicks )
-    {
-        if ( this.minecraft.level == null ) this.renderPanorama( context, deltaTicks );
+    // @Override
+    // public boolean isInGameUi()
+    // {
+    //     return !Configurations.BLUR_BACKGROUND;
+    // }
 
-        if ( Configurations.BLUR_BACKGROUND ) this.renderBlurredBackground( context );
-        if ( Configurations.DARKENED_BACKGROUND ) this.renderMenuBackground( context );
-    }
+    /*@Override
+    protected void extractBlurredBackground( final GuiGraphicsExtractor graphics )
+    {
+        if ( Configurations.BLUR_BACKGROUND )
+            super.extractBlurredBackground( graphics );
+    }*/
 }

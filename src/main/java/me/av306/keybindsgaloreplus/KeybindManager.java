@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class KeybindManager
         clickHoldKeys.remove( key );
         // There is technically no need to remove the cooldown,
         // since it'll be set back to maximum when the click-hold key is registered again
-        // However, iteration over the map when checking the cooldown is O(n)
+        // However, iteration over the map when checking the1 cooldown is O(n)
         // so we should keep n small
         clickHoldKeysCooldowns.remove( key );
     }
@@ -69,7 +69,8 @@ public class KeybindManager
     public static void openConflictMenu( InputConstants.Key key, List<KeyMapping> mappings )
     {
         KeybindSelectorScreen screen = new KeybindSelectorScreen( key, mappings );
-        Minecraft.getInstance().setScreen( screen );
+        //Minecraft.getInstance().setScreenAndShow( screen );
+        Minecraft.getInstance().gui.setScreen( screen );
     }
 
     /**
@@ -124,10 +125,14 @@ public class KeybindManager
                 // Skip the expensive stream filter
                 KeyMapping clickHoldMapping = clickHoldKeys.get( key );
 
-                if ( Configurations.DEBUG ) KeybindsGalorePlus.LOGGER.info(
-                        "Attempting to set mapping {} to {} (click-hold)",
-                        clickHoldMapping.getName(), pressed ? "pressed" : "released"
-                );
+                if ( Configurations.DEBUG )
+                {
+                    String clickHoldMappingName = clickHoldMapping == null ? "null" : clickHoldMapping.getName();
+                    KeybindsGalorePlus.LOGGER.info(
+                            "Attempting to set mapping {} to {} (click-hold)",
+                            clickHoldMappingName, pressed ? "pressed" : "released"
+                    );
+                }
 
                 if ( pressed )
                 {
@@ -145,11 +150,14 @@ public class KeybindManager
                     // (after transferring the state) regardless of cooldown.
                     // For GUIs (without the click-hold bug fix), flow reaches here because
                     // key presses are consumed by the screen and reduced to a set( false ) call
-                    
                     KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
                     clearClickHoldKey( key );
-                    ((KeyMappingAccessor) clickHoldMapping).setIsDown( false );
-                    ((KeyMappingAccessor) clickHoldMapping).setClickCount( 0 );
+
+                    if ( clickHoldMapping != null )
+                    {
+                        ((KeyMappingAccessor) clickHoldMapping).setIsDown( false );
+                        ((KeyMappingAccessor) clickHoldMapping).setClickCount( 0 );
+                    }
                 }
             }
             else
