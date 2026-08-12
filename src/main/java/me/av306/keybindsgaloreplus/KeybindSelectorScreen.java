@@ -26,7 +26,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.util.Mth;
 
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.Objects;
@@ -246,8 +245,7 @@ public class KeybindSelectorScreen extends Screen
 
             // Technically, we could use the public setDown method, but I'd rather not,
             // in case Mojang adds extra stuff to it
-            ((KeyMappingAccessor) selectedKeyBinding).setIsDown( true );
-            ((KeyMappingAccessor) selectedKeyBinding).setClickCount( 1 );
+            KeybindManager.setKeyMapping( selectedKeyBinding, true );
             //((KeyBindingAccessor) bind).invokeSetPressed( true );
 
             // Attack workaround (very hacky)
@@ -302,7 +300,7 @@ public class KeybindSelectorScreen extends Screen
 
             // Null the screen (keymappings are updated to match physical state as a side effect,
             // so all conflicts on this key will be set to "down"
-            this.minecraft.setScreenAndShow( null );
+            this.minecraft.gui.setScreen( null );
 
             // This line unsets the conflicts on this key (see above), but isn't needed now that the root cause
             // (call to KeyMapping.setAll() when mouse is grabbed) is fixed to ignore conflicts
@@ -334,8 +332,7 @@ public class KeybindSelectorScreen extends Screen
 
                 //if ( this.conflictedKey.getValue() <= GLFW.GLFW_MOUSE_BUTTON_LAST )
                 //binding.setDown( true );
-                ((KeyMappingAccessor) binding).setIsDown( true );
-                ((KeyMappingAccessor) binding).setClickCount( 1 );
+                KeybindManager.setKeyMapping( binding, true );
             }
             else
             {

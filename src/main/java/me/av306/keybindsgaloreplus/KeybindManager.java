@@ -69,7 +69,6 @@ public class KeybindManager
     public static void openConflictMenu( InputConstants.Key key, List<KeyMapping> mappings )
     {
         KeybindSelectorScreen screen = new KeybindSelectorScreen( key, mappings );
-        //Minecraft.getInstance().setScreenAndShow( screen );
         Minecraft.getInstance().gui.setScreen( screen );
     }
 
@@ -139,8 +138,7 @@ public class KeybindManager
                     if ( clickHoldMapping != null && Objects.requireNonNull( clickHoldKeysCooldowns.get( key ) ) == 0 )
                     {
                         // Has mapping, and cooldown is over -- transfer pressed state
-                        ((KeyMappingAccessor) clickHoldMapping).setIsDown( true );
-                        ((KeyMappingAccessor) clickHoldMapping).setClickCount( 1 );
+                        setKeyMapping( clickHoldMapping, true );
                     }
                     // else -- no mapping or cooldown in progress; do nothing
                 }
@@ -155,8 +153,7 @@ public class KeybindManager
 
                     if ( clickHoldMapping != null )
                     {
-                        ((KeyMappingAccessor) clickHoldMapping).setIsDown( false );
-                        ((KeyMappingAccessor) clickHoldMapping).setClickCount( 0 );
+                        setKeyMapping( clickHoldMapping, false );
                     }
                 }
             }
@@ -197,5 +194,12 @@ public class KeybindManager
             }
         }
         // Ignored key -- proceed as per vanilla
+    }
+
+    public static void setKeyMapping( KeyMapping keyMapping, boolean state )
+    {
+        KeyMappingAccessor accessor = (KeyMappingAccessor) keyMapping;
+        accessor.setIsDown( state );
+        accessor.setClickCount( state ? 1 : 0 );
     }
 }
