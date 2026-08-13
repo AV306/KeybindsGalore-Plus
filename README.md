@@ -1,7 +1,7 @@
 # KeybindsGalore Plus
 
 > [!WARNING]<br>
-> The 1.21.11 version is still a work-in-progress. Its estimated completion date is in March.
+> Feature parity between versions is a little weird for now. All versions are identical in core functionality but may be missing some minor bugfixes and auxiliaries. It should get all cleared up by the end of the year.
 
 > [!NOTE]<br>
 > This project is a fork of KeybindsGalore, originally by Cael and updated to 1.20 by HVB007.
@@ -69,6 +69,7 @@ Bug reports and feature requests VERY welcome!
 - UNI717
 - IG114514
 - WxAaRoNxW
+- Warp159
 
 (let me know if I missed you!)
 
