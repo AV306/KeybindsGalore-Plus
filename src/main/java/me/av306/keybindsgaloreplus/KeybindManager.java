@@ -156,10 +156,11 @@ public class KeybindManager
                     // (after transferring the state) regardless of cooldown.
                     // For GUIs (without the click-hold bug fix), flow reaches here because
                     // key presses are consumed by the screen and reduced to a set( false ) call
+                    clearClickHoldKey( key );
+                    KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );    
+                    
                     if ( clickHoldMapping != null )
                     {
-                        KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
-                        clearClickHoldKey( key );
                         ((KeyMappingAccessor) clickHoldMapping).setIsDown( false );
                         ((KeyMappingAccessor) clickHoldMapping).setClickCount( 0 );
                     }
