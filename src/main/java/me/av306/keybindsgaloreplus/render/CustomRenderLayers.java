@@ -1,4 +1,4 @@
-package me.av306.keybindsgaloreplus;
+package me.av306.keybindsgaloreplus.render;
 
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;

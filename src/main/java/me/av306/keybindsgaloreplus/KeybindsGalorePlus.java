@@ -7,8 +7,8 @@ import java.nio.file.Path;
 
 import me.av306.liteconfig.ConfigManager;
 
-//import org.jetbrains.annotations.NonNull;
-import org.jspecify.annotations.NonNull;
+//import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,7 +188,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
                 ctx -> new KeybindSelectorElementRenderer( ctx.bufferSource() ) );
     }
 
-    private void reloadCustomData( @NonNull Minecraft client )
+    private void reloadCustomData( @NotNull Minecraft client )
     {
         customDataManager.readDataFile();
         if ( customDataManager.hasCustomData )
@@ -198,7 +198,7 @@ public class KeybindsGalorePlus implements ClientModInitializer
         }
     }
 
-    private void reloadConfigurations( @NonNull Minecraft client )
+    private void reloadConfigurations( @NotNull Minecraft client )
     {
         try
         {

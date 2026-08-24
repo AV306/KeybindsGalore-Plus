@@ -1,4 +1,4 @@
-package me.av306.keybindsgaloreplus;
+package me.av306.keybindsgaloreplus.render;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;

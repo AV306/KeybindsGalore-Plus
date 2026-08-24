@@ -25,7 +25,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.Mth;
 
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -96,7 +96,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
-    public void extractRenderState( @NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float tickDelta )
+    public void extractRenderState( @NotNull GuiGraphicsExtractor context, int mouseX, int mouseY, float tickDelta )
     {
         // Angle of mouse, in radians from +X-axis, centred on the origin
         double mouseAngle = mouseAngle( this.centreX, this.centreY, mouseX, mouseY );
@@ -266,7 +266,7 @@ public class KeybindSelectorScreen extends Screen
 
 
     @Override
-    public boolean keyReleased( @NonNull KeyEvent keyEvent )
+    public boolean keyReleased( @NotNull KeyEvent keyEvent )
     {
         if ( InputConstants.getKey( keyEvent ) == this.conflictedKey )
         {
@@ -278,7 +278,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
-    public boolean mouseClicked( @NonNull MouseButtonEvent mouseButtonEvent, boolean bl )
+    public boolean mouseClicked( @NotNull MouseButtonEvent mouseButtonEvent, boolean bl )
     {
         this.mouseDown = true;
 
@@ -286,7 +286,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
-    public boolean mouseReleased( @NonNull MouseButtonEvent mouseButtonEvent )
+    public boolean mouseReleased( @NotNull MouseButtonEvent mouseButtonEvent )
     {
         if ( mouseButtonEvent.button() == this.conflictedKey.getValue() )
         {
@@ -356,7 +356,7 @@ public class KeybindSelectorScreen extends Screen
     public boolean isPauseScreen() { return false; }
 
     @Override
-    public void extractBackground( @NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks )
+    public void extractBackground( @NotNull GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks )
     {
         if ( this.minecraft.level == null ) this.extractPanorama( context, deltaTicks );
 

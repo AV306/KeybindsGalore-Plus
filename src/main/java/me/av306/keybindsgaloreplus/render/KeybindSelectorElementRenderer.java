@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import me.av306.keybindsgaloreplus.Configurations;
-import me.av306.keybindsgaloreplus.CustomRenderLayers;
 import me.av306.keybindsgaloreplus.KeybindsGalorePlus;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;

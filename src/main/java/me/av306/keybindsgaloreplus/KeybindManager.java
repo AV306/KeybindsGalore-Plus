@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
@@ -120,9 +120,15 @@ public class KeybindManager
 
             if ( isClickHoldKey( key ) )
             {
+                // Note that it is very possible, and likely, that the click-hold mapping
+                // for this key is null. This would happen if the pie menu was closed by
+                // clicking in the centre (no selection).
+
                 ci.cancel();
+
                 // Skip the expensive stream filter
-                KeyMapping clickHoldMapping = clickHoldKeys.get( key );
+                // Nullable
+                @Nullable KeyMapping clickHoldMapping = clickHoldKeys.get( key );
 
                 if ( Configurations.DEBUG )
                 {
@@ -150,11 +156,13 @@ public class KeybindManager
                     // (after transferring the state) regardless of cooldown.
                     // For GUIs (without the click-hold bug fix), flow reaches here because
                     // key presses are consumed by the screen and reduced to a set( false ) call
-                    
-                    KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
-                    clearClickHoldKey( key );
-                    ((KeyMappingAccessor) clickHoldMapping).setIsDown( false );
-                    ((KeyMappingAccessor) clickHoldMapping).setClickCount( 0 );
+                    if ( clickHoldMapping != null )
+                    {
+                        KeybindsGalorePlus.debugLog( "Deactivating key {} (click-hold)", key.getName() );
+                        clearClickHoldKey( key );
+                        ((KeyMappingAccessor) clickHoldMapping).setIsDown( false );
+                        ((KeyMappingAccessor) clickHoldMapping).setClickCount( 0 );
+                    }
                 }
             }
             else
