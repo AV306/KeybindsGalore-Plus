@@ -124,10 +124,15 @@ public class KeybindManager
                 // Skip the expensive stream filter
                 KeyMapping clickHoldMapping = clickHoldKeys.get( key );
 
-                if ( Configurations.DEBUG ) KeybindsGalorePlus.LOGGER.info(
-                        "Attempting to set mapping {} to {} (click-hold)",
-                        clickHoldMapping.getName(), pressed ? "pressed" : "released"
-                );
+                if ( Configurations.DEBUG )
+                {
+                    String clickHoldMappingName = clickHoldMapping == null ? "null" : clickHoldMapping.getName();
+
+                    KeybindsGalorePlus.LOGGER.info(
+                            "Attempting to set mapping {} to {} (click-hold)",
+                            clickHoldMappingName, pressed ? "pressed" : "released"
+                    );
+                }
 
                 if ( pressed )
                 {

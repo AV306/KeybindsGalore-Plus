@@ -15,7 +15,7 @@ import me.av306.keybindsgaloreplus.mixin.MinecraftAccessor;
 import me.av306.keybindsgaloreplus.render.KeybindSelectorElementRenderState;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.KeyMapping;
 
@@ -96,7 +96,7 @@ public class KeybindSelectorScreen extends Screen
     }
 
     @Override
-    public void render( @NonNull GuiGraphics context, int mouseX, int mouseY, float tickDelta )
+    public void extractRenderState( @NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float tickDelta )
     {
         // Angle of mouse, in radians from +X-axis, centred on the origin
         double mouseAngle = mouseAngle( this.centreX, this.centreY, mouseX, mouseY );
@@ -116,7 +116,7 @@ public class KeybindSelectorScreen extends Screen
             this.selectedSectorIndex = -1;
 
         // Need real dimensions of window, not scaled dimensions provided by this.width/height
-        context.guiRenderState.submitPicturesInPictureState( new KeybindSelectorElementRenderState(
+        context.guiRenderState.addPicturesInPictureState( new KeybindSelectorElementRenderState(
                 tickDelta, numberOfSectors, sectorAngle, this.selectedSectorIndex,
                 this.mouseDown, this.ticksInScreen,
                 0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(),
@@ -130,7 +130,7 @@ public class KeybindSelectorScreen extends Screen
     // ==================== Rendering methods ====================
 
     // At least this works fine in 1.21.6.
-    private void renderLabelTexts( GuiGraphics context, float delta, int numberOfSectors, float sectorAngle )
+    private void renderLabelTexts( GuiGraphicsExtractor context, float delta, int numberOfSectors, float sectorAngle )
     {
         for ( var sectorIndex = 0; sectorIndex < numberOfSectors; sectorIndex++ )
         {
@@ -202,7 +202,7 @@ public class KeybindSelectorScreen extends Screen
 
             actionName = (this.selectedSectorIndex == sectorIndex ? ChatFormatting.UNDERLINE : ChatFormatting.RESET) + actionName;
 
-            context.drawString( this.font, actionName, (int) xPos, (int) yPos, 0xFFFFFFFF,
+            context.text( this.font, actionName, (int) xPos, (int) yPos, 0xFFFFFFFF,
                     Configurations.LABEL_TEXT_SHADOW );
         }
     }
@@ -356,11 +356,11 @@ public class KeybindSelectorScreen extends Screen
     public boolean isPauseScreen() { return false; }
 
     @Override
-    public void renderBackground( @NonNull GuiGraphics context, int mouseX, int mouseY, float deltaTicks )
+    public void extractBackground( @NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks )
     {
-        if ( this.minecraft.level == null ) this.renderPanorama( context, deltaTicks );
+        if ( this.minecraft.level == null ) this.extractPanorama( context, deltaTicks );
 
-        if ( Configurations.BLUR_BACKGROUND ) this.renderBlurredBackground( context );
-        if ( Configurations.DARKENED_BACKGROUND ) this.renderMenuBackground( context );
+        if ( Configurations.BLUR_BACKGROUND ) this.extractBlurredBackground( context );
+        if ( Configurations.DARKENED_BACKGROUND ) this.extractMenuBackground( context );
     }
 }

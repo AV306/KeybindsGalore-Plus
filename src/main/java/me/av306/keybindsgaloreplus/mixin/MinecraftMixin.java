@@ -11,15 +11,16 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin( Minecraft.class )
 public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnable> implements WindowEventHandler
 {
+    public MinecraftMixin( String name, boolean propagatesCrashes )
+    {
+        super( name, propagatesCrashes );
+    }
+
     @Shadow public @Final Options options;
     @Shadow public int missTime;
 
     @Shadow public abstract void pauseGame( boolean pauseOnly );
 
-    public MinecraftMixin( String string )
-    {
-        super( string );
-    }
 
 //    @Inject(
 //            method = "handleInputEvents",
