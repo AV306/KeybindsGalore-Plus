@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import me.av306.keybindsgaloreplus.mixin.KeyMappingAccessor;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.GameType;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -89,15 +90,24 @@ public class KeybindManager
         // ordering of sectors in the menu. So either we use only sequential streams, or we sort after a parallel stream...
         if ( Minecraft.getInstance().player == null ) return Collections.emptyList();
 
-        else return KeyMappingAccessor.getMap().getOrDefault( key, new ArrayList<>() ).stream()
+        // player.gameMode() comes from the tab list and can be null (e.g. proxied servers)
+        final GameType gameType;
+        if ( Minecraft.getInstance().player.gameMode() != null )
+            gameType = Minecraft.getInstance().player.gameMode();
+        else if ( Minecraft.getInstance().gameMode != null )
+            gameType = Minecraft.getInstance().gameMode.getPlayerMode();
+        else
+            return Collections.emptyList();
+
+        return KeyMappingAccessor.getMap().getOrDefault( key, new ArrayList<>() ).stream()
                 .filter( keyMapping -> keyMapping.getCategory() != KeyMapping.Category.DEBUG )
                 .filter( keyMapping ->
-                        (Minecraft.getInstance().player.gameMode().isSurvival()
+                        (gameType.isSurvival()
                                 && keyMapping.getCategory() != KeyMapping.Category.CREATIVE
                                 && keyMapping.getCategory() != KeyMapping.Category.SPECTATOR)
-                        || (Minecraft.getInstance().player.gameMode().isCreative()
+                        || (gameType.isCreative()
                                 && keyMapping.getCategory() != KeyMapping.Category.SPECTATOR)
-                        || (Minecraft.getInstance().player.gameMode().isBlockPlacingRestricted()
+                        || (gameType.isBlockPlacingRestricted()
                                 && keyMapping.getCategory() != KeyMapping.Category.CREATIVE)
                 )
                 .toList();
